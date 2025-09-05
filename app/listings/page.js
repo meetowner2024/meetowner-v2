@@ -37,7 +37,9 @@ const Page = () => {
 
   useEffect(() => {
     async function getAllAds() {
-      const res = await fetch(`/api/getAllAds`);
+      const res = await fetch(`/api/getAllAds`, {
+        cache: "force-cache",
+      });
       const data = await res.json();
       setAds(data.results || []);
     }
