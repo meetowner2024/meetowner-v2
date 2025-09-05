@@ -44,15 +44,9 @@ const Page = () => {
           cache: "force-cache",
         }
       );
-
       const data = await res.json();
-      if (!res.ok) {
-        throw new Error("Failed to fetch best meetowner properties");
-      }
-
       setAds(data.results || []);
     }
-
     getAllAds();
   }, []);
 
