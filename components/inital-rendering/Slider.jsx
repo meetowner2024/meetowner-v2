@@ -76,7 +76,7 @@ const PropertyListing = ({ latestProperties, favourites }) => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000);
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/getLatestProperties?property_for=${propertyFor}`,
+        `/api/getLatestProperties?property_for=${propertyFor}`,
         {
           cache: "force-cache",
           signal: controller.signal,

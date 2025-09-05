@@ -17,71 +17,53 @@ export default async function Home() {
   }
 
   async function getLatestProperties() {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/getLatestProperties`,
-      {
-        cache: "force-cache",
-      }
-    );
+    const res = await fetch(`/api/getLatestProperties`, {
+      cache: "force-cache",
+    });
 
     const data = await res.json();
     return { properties: data.properties || [] };
   }
 
   async function getBestDealProperties() {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/getBestDealProperties`,
-      {
-        cache: "force-cache",
-      }
-    );
+    const res = await fetch(`/api/getBestDealProperties`, {
+      cache: "force-cache",
+    });
     const encrypted = await res.json();
 
     return encrypted.results || [];
   }
 
   async function getBestMeetowner() {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/getBestMeet`,
-      {
-        cache: "force-cache",
-      }
-    );
+    const res = await fetch(`/api/getBestMeet`, {
+      cache: "force-cache",
+    });
     const data = await res.json();
     return data.results || [];
   }
 
   async function getHighDemand() {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/getHighDemand`,
-      {
-        cache: "force-cache",
-      }
-    );
+    const res = await fetch(`/api/getHighDemand`, {
+      cache: "force-cache",
+    });
     const data = await res.json();
 
     return data.results || [];
   }
 
   async function getRecommended() {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/getRecommended`,
-      {
-        cache: "force-cache",
-      }
-    );
+    const res = await fetch(`/api/getRecommended`, {
+      cache: "force-cache",
+    });
     const data = await res.json();
 
     return data.sellers || [];
   }
 
   async function getMeetExclusive() {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/getMeetExclusive`,
-      {
-        cache: "force-cache",
-      }
-    );
+    const res = await fetch(`/api/getMeetExclusive`, {
+      cache: "force-cache",
+    });
     const data = await res.json();
 
     return data.results || [];
@@ -92,20 +74,15 @@ export default async function Home() {
       return [];
     }
 
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/getAllFavourites?user_id=${user_id}`
-    );
+    const res = await fetch(`/api/getAllFavourites?user_id=${user_id}`);
 
     const data = await res.json();
     return data.favourites || [];
   }
   async function getAds() {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/getAds?ads_page=main_slider&city=Hyderabad`,
-      {
-        cache: "force-cache",
-      }
-    );
+    const res = await fetch(`/api/getAds?ads_page=main_slider&city=Hyderabad`, {
+      cache: "force-cache",
+    });
     const data = await res.json();
 
     if (data.ads?.length > 0) {

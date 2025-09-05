@@ -27,7 +27,7 @@ const useWhatsappHook = (selectedPropertyId) => {
       const timeoutId = setTimeout(() => controller.abort(), 5000);
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/getSingleProperty?unique_property_id=${property.unique_property_id}`,
+        `/api/getSingleProperty?unique_property_id=${property.unique_property_id}`,
         { signal: controller.signal }
       );
 
