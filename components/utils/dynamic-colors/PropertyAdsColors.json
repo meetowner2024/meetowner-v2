@@ -1,0 +1,41 @@
+{
+  "primary": {
+    "background": "#1E3A8A",
+    "text": "#000000",
+    "hover": "#3B82F6",
+    "value": "#1E3A8A"
+  },
+  "secondary": {
+    "background": "#FFFFFF",
+    "text": "#4B5563",
+    "border": "#9CA3AF"
+  },
+  "accent": {
+    "background": "#10B981",
+    "text": "#008000"
+  },
+  "badge": {
+    "background": "#EFF6FF",
+    "text": "#1E40AF",
+    "border": "#BFDBFE"
+  },
+  "progress": {
+    "background": "#E5E7EB",
+    "fill": "#00baad",
+    "under_construction": "#FBBF24"
+  },
+  "button": {
+    "contact": {
+      "background": "#1E3A8A",
+      "text": "#FFFFFF",
+      "hover": "#3B82F6",
+      "disabled": "#93C5FD"
+    },
+    "chat": {
+      "background": "#FFFFFF",
+      "text": "#1E3A8A",
+      "border": "#1E3A8A",
+      "hover": "#EFF6FF"
+    }
+  }
+}

@@ -1,0 +1,24 @@
+ {
+    "header": {
+      "text": "#000000",
+      "underline": "#FFD700"
+    },
+    "card": {
+      "background": "#FFFFFF",
+      "text": "#000000",
+      "border": "#D3D3D3",
+      "gradientFrom": "#E0FFFF",
+      "gradientTo": "#ADD8E6",
+      "icon": "#0D47A1"
+    },
+    "background": {
+      "from": "#FFFFFF",
+      "to": "#D3D3D3"
+    },
+    "decor": {
+      "background": "#E0FFFF",
+      "opacity": "0.1"
+    }
+}
+
+

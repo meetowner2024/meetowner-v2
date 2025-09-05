@@ -1,0 +1,46 @@
+{
+  "button": {
+    "primary": {
+      "bg": "bg-[#1D3A76]",
+      "text": "text-white",
+      "icon": "text-white",
+      "hover": "hover:from-blue-700 hover:to-[#1D3A76]",
+      "hoverText": "hover:text-white"
+    },
+    "secondary": {
+      "bg": "bg-gradient-to-r from-[#3A59D1] to-[#3D90D7]",
+      "text": "text-white",
+      "icon": "text-white",
+      "hover": "hover:bg-[#3D90D7]",
+      "hoverText": "hover:text-white"
+    },
+    "success": {
+      "bg": "bg-gradient-to-r from-emerald-500 via-green-600 to-teal-600",
+      "text": "text-white",
+      "icon": "text-white"
+    },
+    "warning": {
+      "bg": "bg-gradient-to-r from-amber-400 via-orange-500 to-red-500",
+      "text": "text-white",
+      "icon": "text-white"
+    },
+    "neutral": {
+      "bg": "bg-gradient-to-r from-slate-500 via-gray-600 to-indigo-700",
+      "text": "text-white",
+      "icon": "text-gray-200"
+    }
+  },
+  "text": {
+    "primary": "text-[#1D3A76]",
+    "secondary": "text-gray-600",
+    "muted": "text-gray-400",
+    "highlight": "text-indigo-600"
+  },
+  "icon": {
+    "default": "text-gray-500",
+    "active": "text-[#1D3A76]",
+    "success": "text-green-500",
+    "warning": "text-orange-500",
+    "error": "text-red-500"
+  }
+}

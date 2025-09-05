@@ -1,0 +1,13 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "6743744178.com.meetowner.app",
+        "paths": [
+          "*"
+        ]
+      }
+    ]
+  }
+}

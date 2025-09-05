@@ -1,0 +1,16 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls",
+      "delegate_permission/common.get_login_creds"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.meetowner.app",
+      "sha256_cert_fingerprints": [
+        "9C:B8:8D:CA:19:C3:6A:83:0A:35:45:CF:CB:99:95:F4:53:79:AB:DE:45:DA:B2:4E:3B:D1:8C:B8:69:AD:20:66",
+        "69:CE:0A:CA:DF:6C:FF:D4:4E:3F:92:3B:8C:BE:D2:DA:9F:C2:D5:F1:03:89:FE:44:01:E9:6D:69:BC:37:7C:DE"
+      ]
+    }
+  }
+]

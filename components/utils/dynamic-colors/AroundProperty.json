@@ -1,0 +1,28 @@
+{
+  "header": {
+    "text": "#000000",
+    "underline": "#F0AA00"
+  },
+  "card": {
+    "background": "#FFFFFF",
+    "text": "#808080",
+    "border": "#D3D3D3",
+    "gradientFrom": "#E0FFFF",
+    "gradientTo": "#ADD8E6",
+    "icon": "#0D47A1"
+  },
+  "background": {
+    "from": "#FFFFFF",
+    "to": "#D3D3D3"
+  },
+  "decor": {
+    "background": "#0D47A1",
+    "opacity": "0.1"
+  },
+  "badge": {
+    "text": "#FFFFFF",
+    "background": "#0D47A1",
+    "gradientFrom": "#20B2AA",
+    "gradientTo": "#00CED1"
+  }
+}

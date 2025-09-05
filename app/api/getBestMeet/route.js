@@ -1,0 +1,24 @@
+export async function GET(req) {
+  try {
+    const sql = `SELECT * FROM properties WHERE other_info = 'best meetowner' ORDER BY id DESC`;
+    const { query } = await import("@/lib/server/db");
+    const results = await query(sql, []);
+    if (!results || results.length === 0) {
+      return Response.json({ message: "No properties found" }, { status: 404 });
+    }
+    const shuffled = results.sort(() => 0.5 - Math.random());
+    const selected = shuffled.slice(0, 3);
+    const headers = new Headers();
+    headers.set("Content-Type", "application/json");
+    headers.set("Cache-Control", "public, max-age=60, s-maxage=60");
+
+    headers.set("Vary", "Accept-Encoding");
+    return new Response(JSON.stringify({ results: selected }), {
+      status: 200,
+      headers,
+    });
+  } catch (error) {
+    console.error("Error fetching random properties:", error);
+    return Response.json({ message: "Internal Server Error" }, { status: 500 });
+  }
+}
