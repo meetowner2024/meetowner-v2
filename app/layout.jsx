@@ -99,12 +99,9 @@ export default async function RootLayout({ children }) {
     }
 
     try {
-      const res = await fetch(
-        `/api/getProfile?user_id=${user_id}`,
-        {
-          credentials: "include",
-        }
-      );
+      const res = await fetch(`/api/getProfile?user_id=${user_id}`, {
+        credentials: "include",
+      });
 
       if (!res.ok) {
         return null;
@@ -128,11 +125,11 @@ export default async function RootLayout({ children }) {
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="preload" href="/src/main.jsx" as="script" />
-       
+
         <link rel="canonical" href="https://www.meetowner.in" />
-      
+
         <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
-       
+
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
@@ -141,7 +138,7 @@ export default async function RootLayout({ children }) {
         />
         <link rel="preconnect" href="https://www.googletagmanager.com" />
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
-        
+
         <script type="application/ld+json">
           {JSON.stringify(structuredData)}
         </script>
