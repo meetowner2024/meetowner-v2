@@ -30,7 +30,6 @@ const Page = () => {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [ads, setAds] = useState([]);
   const modalRef = useRef(null);
-  const searchData = useSelector((state) => state.search);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -38,12 +37,7 @@ const Page = () => {
 
   useEffect(() => {
     async function getAllAds() {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/getAllAds`,
-        {
-          cache: "force-cache",
-        }
-      );
+      const res = await fetch(`/api/getAllAds`);
       const data = await res.json();
       setAds(data.results || []);
     }
