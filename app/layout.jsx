@@ -99,9 +99,12 @@ export default async function RootLayout({ children }) {
     }
 
     try {
-      const res = await fetch(`/api/getProfile?user_id=${user_id}`, {
-        credentials: "include",
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/getProfile?user_id=${user_id}`,
+        {
+          credentials: "include",
+        }
+      );
 
       if (!res.ok) {
         return null;
