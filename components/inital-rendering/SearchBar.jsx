@@ -508,7 +508,7 @@ export default function SearchBar() {
             <span className="hidden md:block text-gray-400">
               <div style={{ border: "0.1px solid #ddd", height: 40 }}></div>
             </span>
-            {(activeTab === 2 || activeTab === 3) && (
+            {(activeTab === 3 || activeTab === 4) && (
               <div className="relative inline-block w-32">
                 <button
                   onClick={() => setIsOpen(!isOpen)}
