@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { useRouter } from "next/navigation";
 export default function ProfilePage() {
   const [user, setUser] = useState({
     user_id: "",
@@ -31,6 +32,7 @@ export default function ProfilePage() {
   const [profileImage, setProfileImage] = useState(
     "https://placehold.co/200x200?text=Upload+Image"
   );
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef(null);
   const fetchProfile = async (userId) => {
@@ -66,6 +68,7 @@ export default function ProfilePage() {
     const storedData = localStorage.getItem("user");
     if (!storedData) {
       toast.info("Please login to access your profile.");
+      router.push("/");
       return;
     }
     try {
@@ -161,6 +164,7 @@ export default function ProfilePage() {
                   : profileImage
               }
               alt="Profile"
+              unoptimized
               crossOrigin="anonymous"
               className="w-40 h-40 rounded-full shadow-md object-cover"
             />

@@ -119,6 +119,19 @@ export default async function Home() {
       return formatted || [];
     }
   }
+  async function getUserContacted(userId) {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/getUserContactSellers?user_id=${userId}`
+    );
+    const response = await res.json();
+
+    const contacts = response?.results || [];
+    const contactIds = Array.isArray(contacts)
+      ? contacts.map((contact) => contact.unique_property_id)
+      : [];
+    return contactIds;
+  }
+
   const { properties } = await getLatestProperties();
   const bestDealProperties = await getBestDealProperties();
   const bestMeetownerProperties = await getBestMeetowner();
@@ -127,6 +140,7 @@ export default async function Home() {
   const meetownerExclusive = await getMeetExclusive();
   const favourites = await getAllFavourites(userId);
   const formatted = await getAds();
+  const contacted = await getUserContacted(userId);
 
   return (
     <div>
@@ -139,6 +153,7 @@ export default async function Home() {
         meetownerExclusive={meetownerExclusive}
         favourites={favourites}
         formatted={formatted}
+        contactedIds={contacted}
       />
       <AdVideoPlayer />
     </div>

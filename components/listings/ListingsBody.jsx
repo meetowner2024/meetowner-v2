@@ -161,7 +161,9 @@ function ListingsBody({ setShowLoginModal }) {
           searchData?.occupancy || ""
         }&property_status=${searchData.property_status}&city=${
           searchData.city
-        }&furnished_status=${searchData.furnished_status}`;
+        }&furnished_status=${searchData.furnished_status}${
+          searchData.tab === "New Launch" ? "&extra_filters=new_launches" : ""
+        }`;
         const response = await fetch(`${baseUrl}`);
         const res = await response.json();
         const data = res.data;

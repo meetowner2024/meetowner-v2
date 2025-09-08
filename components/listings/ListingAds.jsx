@@ -2,9 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import axios from "axios";
 import { toast } from "react-toastify";
-import {
-  setPropertyDetails
-} from "../store/slices/propertyDetails";
+import { setPropertyDetails } from "../store/slices/propertyDetails";
 import { useDispatch, useSelector } from "react-redux";
 import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -16,6 +14,7 @@ import config from "../utils/config";
 import Login from "../auth/Login";
 import noPropertiesFound from "../../app/assets/Images/urban-planning_10891692.png";
 import theme from "../utils/theme.json";
+import { clearSearch } from "../store/slices/searchSlice";
 function PropertyCardSkeleton() {
   return (
     <div className="relative rounded-xl shadow-lg overflow-hidden bg-white">
@@ -302,7 +301,7 @@ const ListingAds = () => {
           </Swiper>
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center border border-gray-200 rounded-xl p-6 bg-white shadow-md text-center">
+        <div className="flex flex-col items-center justify-center  text-center">
           <Image
             width={600}
             height={400}
@@ -319,7 +318,7 @@ const ListingAds = () => {
             properties.
           </div>
           <button
-            onClick={() => router.push("/")}
+            onClick={() => dispatch(clearSearch())}
             className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold px-4 py-2 rounded-full hover:from-teal-600 hover:to-cyan-600 transition-all duration-300"
           >
             Reset Filters

@@ -28,7 +28,6 @@
     "cookies-next": "^6.1.0",
     "crypto-js": "^4.2.0",
     "input-otp": "^1.4.2",
-    "javascript-obfuscator": "^4.1.1",
     "lodash": "^4.17.21",
     "lucide-react": "^0.539.0",
     "moment": "^2.30.1",
@@ -50,18 +49,11 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
-    "@next/bundle-analyzer": "^15.5.2",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "compression-webpack-plugin": "^11.1.0",
-    "cross-env": "^10.0.0",
-    "eslint": "^9",
-    "eslint-config-next": "15.4.6",
     "tailwindcss": "^4",
-    "tw-animate-css": "^1.3.7",
-    "typescript": "^5",
-    "webpack-obfuscator": "^3.5.1"
+    "typescript": "^5"
   }
 }

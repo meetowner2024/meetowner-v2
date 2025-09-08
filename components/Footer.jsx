@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React from "react";
 import {
   FaGooglePlay,
@@ -16,8 +16,6 @@ import {
 import { QRCodeSVG } from "qrcode.react";
 import Link from "next/link";
 const Footer = () => {
-
-
   const playStoreUrl =
     "https://play.google.com/store/apps/details?id=com.meetowner.app&pcampaignid=web_share";
   const appStoreUrl = "https://apps.apple.com/us/app/meetowner/id6743744178";
@@ -130,7 +128,10 @@ const Footer = () => {
                   placeholder="Email address"
                   className="w-full p-2 rounded-l-lg text-black focus:outline-none bg-white"
                 />
-                <button aria-label="Next" className="bg-blue-900 h-10 rounded-r-lg text-white w-11 flex items-center justify-center">
+                <button
+                  aria-label="Next"
+                  className="bg-blue-900 h-10 rounded-r-lg text-white w-11 flex items-center justify-center"
+                >
                   <FaArrowRight className="w-5 h-5" />
                 </button>
               </div>
@@ -167,7 +168,7 @@ const Footer = () => {
             href="https://www.linkedin.com/company/meetownerofficial"
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-white text-blue-900 p-2 rounded-full hover:bg-gray-200"
+            className="bg-white text-blue-900 p-2  z-9999 rounded-full hover:bg-gray-200"
           >
             <FaLinkedin className="h-5 w-5" />
           </a>
@@ -175,7 +176,7 @@ const Footer = () => {
             href="https://www.facebook.com/meetownerinofficial/"
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-white text-blue-900 p-2 rounded-full hover:bg-gray-200"
+            className="bg-white text-blue-900 p-2 rounded-full  z-9999 hover:bg-gray-200"
           >
             <FaFacebook className="h-5 w-5" />
           </a>
@@ -183,7 +184,7 @@ const Footer = () => {
             href="https://www.instagram.com/meetownerofficial/#"
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-white text-blue-900 p-2 rounded-full hover:bg-gray-200"
+            className="bg-white text-blue-900 p-2 rounded-full  z-9999 hover:bg-gray-200"
           >
             <FaInstagram className="h-5 w-5 text-red-500" />
           </a>
@@ -191,7 +192,7 @@ const Footer = () => {
             href="https://www.youtube.com/@meetownerofficial"
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-white text-blue-900 p-2 rounded-full hover:bg-gray-200"
+            className="bg-white text-blue-900 p-2 rounded-full  z-9999 hover:bg-gray-200"
           >
             <FaYoutube className="h-5 w-5 text-red-500" />
           </a>

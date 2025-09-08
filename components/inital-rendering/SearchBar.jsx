@@ -1,5 +1,5 @@
 const isVideo = (url) => /\.(mp4|webm|ogg)$/i.test(url);
-const TABS = ["Buy", "Rent", "Plot", "Commercial"];
+const TABS = ["Buy", "Rent", "New Launch", "Plot", "Commercial"];
 const OPTIONS = ["Buy", "Rent"];
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import Slider from "react-slick";
@@ -17,7 +17,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
 import config from "../utils/config";
 import ad1 from "../../app/assets/FAMILY MEETOWNER (1).jpg";
-
 import axios from "axios";
 import Image from "next/image";
 import theme from "../utils/theme.json";
@@ -139,7 +138,7 @@ export default function SearchBar() {
             ? "Plot"
             : selectedTab === "Commercial"
             ? "Others"
-            : "Apartment",
+            : "",
         location: searchInput,
         plot_subType: plotSubType,
         commercial_subType: commercialSubType,

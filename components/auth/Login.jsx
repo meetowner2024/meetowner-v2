@@ -1,3 +1,4 @@
+"use client";
 import axios from "axios";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useDispatch } from "react-redux";
@@ -8,16 +9,18 @@ import CountryCodeSelector from "../utils/CountryCodeSelector";
 import CryptoJS from "crypto-js";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { setCookie } from "cookies-next";
-
 import {
   InputOTP,
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { X } from "lucide-react";
+import { setCookie } from "cookies-next";
+import Image from "next/image";
+import loginimage from "../../app/assets/finalone.png";
+import meetlogo from "../../app/assets/Images/Logo.png";
+import meetownericon from "../../app/assets/Images/Favicon@10x.png";
 const JWT_SECRET = "khsfskhfks983493123!@#JSFKORuiweo232";
 const OTP_LENGTH = 4;
 const RESEND_COOLDOWN = 30;
@@ -38,8 +41,7 @@ function decrypt(encryptedText) {
     return null;
   }
 }
-const Login = ({ onClose }) => {
-  const modalRef = useRef(null);
+const Login = ({ onClose, modalRef }) => {
   const dispatch = useDispatch();
   const [mobile, setMobile] = useState("");
   const [otp, setOtp] = useState("");
@@ -114,7 +116,7 @@ const Login = ({ onClose }) => {
         const decryptedOtp = decrypt(data.otp);
         if (decryptedOtp) {
           setOtp(decryptedOtp);
-          setMessage(`OTP sent successfully to ${selectedCode}${mobile}`);
+          setMessage(`OTP sent to ${selectedCode}${mobile}`);
           setOtpSent(true);
           setResendCooldown(RESEND_COOLDOWN);
         } else {
@@ -199,7 +201,6 @@ const Login = ({ onClose }) => {
           path: "/",
           secure: true,
         });
-
         setCookie("user", JSON.stringify({ user_details }), {
           maxAge: 60 * 60 * 24 * 7,
           path: "/",
@@ -218,7 +219,6 @@ const Login = ({ onClose }) => {
         setError("");
         onClose();
       } else {
-        toast.error("Something went wrong. Try again.");
         setError("User data not found. Try again.");
       }
     } catch {
@@ -229,199 +229,305 @@ const Login = ({ onClose }) => {
     }
   }, [enteredOtp, otp, loginData, dispatch, onClose]);
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-transparent z-50 transition-opacity duration-500">
-      {!otpSent ? (
-        <Card
-          ref={modalRef}
-          className="relative w-full max-w-sm bg-white backdrop-blur-md border border-transparent shadow-[0_0_15px_rgba(29,58,118,0.5)] rounded-xl animate-glow-border"
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div
+        ref={modalRef}
+        className="relative w-full max-w-5xl bg-white/10 backdrop-blur-2xl border border-white/20 rounded-3xl shadow-2xl overflow-hidden animate-modal-enter"
+      >
+        <button
+          onClick={onClose}
+          className="absolute top-6 right-6 z-20 w-10 h-10 rounded-full bg-white/10 backdrop-blur-lg border border-white/20 flex items-center justify-center text-black hover:bg-white/20 transition-all duration-300 hover:scale-110 group"
+          aria-label="Close login modal"
         >
-          <CardHeader className="relative flex items-center justify-center">
-            <CardTitle className="text-black text-2xl font-bold tracking-wider animate-pulse-text">
-              Login
-            </CardTitle>
-            <X
-              size={17}
-              onClick={onClose}
-              className="absolute top-2 right-6 cursor-pointer text-black hover:text-[#1D3A76] transition-colors duration-300"
-            />
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {message && (
-              <p className="text-green-400 text-center text-sm animate-neon-glow">
-                {message}
-              </p>
-            )}
-            {error && (
-              <p className="text-red-400 text-center text-sm animate-neon-glow">
-                {error}
-              </p>
-            )}
-            <div className="space-y-2">
-              <Label htmlFor="mobile">Mobile Number</Label>
-              <div className="relative">
-                <Input
-                  id="mobile"
-                  type="tel"
-                  placeholder="Mobile Number"
-                  value={mobile}
-                  maxLength={15}
-                  onChange={(e) => {
-                    const value = e.target.value.replace(/\D/g, "");
-                    setMobile(value);
-                    setError("");
-                  }}
-                  onKeyDown={(e) => handleKeyPress(e, "sendOtp")}
-                  ref={mobileInputRef}
-                  className="pl-20 bg-white bg-opacity-10 border-black border-opacity-20 text-black placeholder-gray-400 focus:ring-2 focus:ring-gray-300 focus:shadow-[0_0_10px_rgba(29,58,118,0.7)] transition-all duration-300"
-                  disabled={isLoading}
-                />
-                <div className="absolute left-2 top-1/2 transform -translate-y-1/2">
-                  <CountryCodeSelector
-                    selectedCode={selectedCode}
-                    onSelect={setSelectedCode}
-                    setCountry={setCountry}
+          <X
+            size={20}
+            className="group-hover:rotate-90 transition-transform duration-300"
+          />
+        </button>
+        <div className="flex flex-col lg:flex-row">
+          <div className="relative w-full lg:w-1/2 bg-gradient-to-br from-[#3A59D1] to-[#3D90D7] p-8 flex flex-col justify-between overflow-hidden lg:block hidden">
+            <div className="absolute -top-40 -left-40 w-80 h-80 bg-white/10 rounded-full blur-3xl animate-float"></div>
+            <div className="absolute -bottom-40 -right-40 w-80 h-80 bg-purple-400/20 rounded-full blur-3xl animate-float-delay"></div>
+            <div className="relative z-10 h-full flex flex-col justify-between">
+              <div className="flex items-center gap-3 mb-8">
+                <div className="w-12 h-12 bg-white/20 backdrop-blur-lg rounded-2xl flex items-center justify-center">
+                  <Image
+                    src={meetownericon}
+                    width={700}
+                    height={700}
+                    alt="meetowner logo"
+                    className="h-full w-full object-contain"
                   />
                 </div>
+                <span className="text-2xl font-bold text-white">MEETOWNER</span>
+              </div>
+              <div className="w-full flex-1 flex items-center justify-center">
+                <Image
+                  src={loginimage}
+                  width={1000}
+                  height={1000}
+                  alt="login image"
+                  className="w-full h-full object-cover"
+                />
               </div>
             </div>
-            <Button
-              onClick={handleLogin}
-              className="w-full bg-[#1D3A76] hover:bg-[#1D3A76]/90 text-white font-semibold hover:shadow-[0_0_12px_rgba(29,58,118,0.8)] transition-all duration-300"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <div className="flex items-center">
-                  <svg
-                    className="animate-spin h-5 w-5 mr-2 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                    />
-                  </svg>
-                  Processing...
+          </div>
+          <div className="w-full lg:w-1/2 p-8 lg:p-12 bg-white backdrop-blur-xs">
+            <div className="h-auto lg:h-full flex flex-col justify-center max-w-md mx-auto">
+              {!otpSent ? (
+                <div className="space-y-8">
+                  <div className="text-center space-y-3">
+                    <div className="w-50 h-16 flex items-center justify-center mx-auto mb-6 ">
+                      <Image
+                        src={meetlogo}
+                        width={700}
+                        height={700}
+                        alt="meetowner logo"
+                        className="h-full w-full object-contain"
+                      />
+                    </div>
+                    <h2 className="text-3xl lg:text-4xl font-bold text-black">
+                      Welcome Back
+                    </h2>
+                    <p className="text-black/70 text-lg font-semibold">
+                      Enter your mobile number to get started
+                    </p>
+                  </div>
+                  {message && (
+                    <div className="bg-emerald-500/20 backdrop-blur-lg border border-emerald-400/30 text-emerald-100 px-6 py-4 rounded-2xl animate-slide-down">
+                      <div className="flex items-center gap-3">
+                        <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+                        {message}
+                      </div>
+                    </div>
+                  )}
+                  {error && (
+                    <div className="bg-red-500/20 backdrop-blur-lg border border-red-400/30 text-red-100 px-6 py-4 rounded-2xl animate-slide-down">
+                      <div className="flex items-center gap-3">
+                        <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse"></div>
+                        {error}
+                      </div>
+                    </div>
+                  )}
+                  <div className="space-y-6 overflow-auto">
+                    <div className="space-y-3 ">
+                      <Label className="text-black/90 text-sm font-medium">
+                        Mobile Number
+                      </Label>
+                      <div className="flex items-center gap-2 ">
+                        <CountryCodeSelector
+                          selectedCode={selectedCode}
+                          onSelect={setSelectedCode}
+                          setCountry={setCountry}
+                          className="h-14 bg-white/10  backdrop-blur-lg border border-white/20 text-black rounded-xl focus:border-purple-400/50 focus:ring-2 focus:ring-purple-400/25 w-24"
+                        />
+                        <Input
+                          ref={mobileInputRef}
+                          type="tel"
+                          placeholder="Enter your number"
+                          value={mobile}
+                          maxLength={15}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/\D/g, "");
+                            setMobile(value);
+                            setError("");
+                          }}
+                          onKeyDown={(e) => handleKeyPress(e, "sendOtp")}
+                          className="h-14 bg-white/10 backdrop-blur-lg border border-white/20 text-black placeholder:text-black/50 rounded-xl focus:border-indigo-400/50 focus:ring-2 focus:ring-indigo-400/25 transition-all duration-300 flex-1"
+                          disabled={isLoading}
+                        />
+                      </div>
+                    </div>
+                    <Button
+                      onClick={handleLogin}
+                      disabled={isLoading || !validateMobile(mobile, country)}
+                      className="w-full h-14 bg-gradient-to-r from-[#3A59D1] to-[#3D90D7] hover:bg-[#3D90D7] text-white font-semibold rounded-xl shadow-lg shadow-blue-500/25 border-0 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-blue-500/40 disabled:opacity-50 disabled:hover:scale-100 relative overflow-hidden group"
+                    >
+                      {isLoading && (
+                        <div className="absolute inset-0 bg-gradient-to-r from-[#3A59D1]/50 to-[#3D90D7]/50 animate-pulse"></div>
+                      )}
+                      <div className="relative flex items-center justify-center gap-3">
+                        {isLoading ? (
+                          <>
+                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                            <span>Sending OTP...</span>
+                          </>
+                        ) : (
+                          <>
+                            <span>Send OTP</span>
+                            <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center group-hover:rotate-45 transition-transform duration-300">
+                              <div className="w-2 h-2 bg-white rounded-full"></div>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </Button>
+                  </div>
                 </div>
               ) : (
-                "Send OTP"
+                <div className="space-y-6">
+                  <div className="text-center space-y-3">
+                    <h2 className="text-3xl lg:text-4xl font-bold text-black">
+                      Verify OTP
+                    </h2>
+                    <p className="text-black/70 text-lg">
+                      Enter the {OTP_LENGTH}-digit code sent to
+                    </p>
+                    <p className="text-blue-300 font-semibold">
+                      {selectedCode}
+                      {mobile}
+                    </p>
+                  </div>
+                  {message && (
+                    <div className="bg-emerald-500/20 backdrop-blur-lg border border-emerald-400/30 text-black px-6 py-4 rounded-2xl animate-slide-down">
+                      <div className="flex items-center gap-3">
+                        <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+                        {message}
+                      </div>
+                    </div>
+                  )}
+                  {error && (
+                    <div className="bg-red-500/20 backdrop-blur-lg border border-red-400/30 text-black px-6 py-4 rounded-2xl animate-slide-down">
+                      <div className="flex items-center gap-3">
+                        <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse"></div>
+                        {error}
+                      </div>
+                    </div>
+                  )}
+                  <div className="flex justify-center">
+                    <InputOTP
+                      maxLength={OTP_LENGTH}
+                      value={enteredOtp}
+                      onChange={(value) => {
+                        setEnteredOtp(value);
+                        setError("");
+                      }}
+                      onKeyDown={(e) => handleKeyPress(e, "verifyOtp")}
+                      disabled={isLoading}
+                      ref={otpInputRef}
+                    >
+                      <InputOTPGroup className="gap-4">
+                        {Array.from({ length: OTP_LENGTH }).map((_, index) => (
+                          <InputOTPSlot
+                            key={index}
+                            index={index}
+                            className="w-14 h-14 text-xl font-semibold bg-white/10 backdrop-blur-lg border-2 border-gray-400 text-black rounded-xl focus:border-indigo-400/50 focus:ring-2 focus:ring-indigo-400/25 transition-all duration-300"
+                          />
+                        ))}
+                      </InputOTPGroup>
+                    </InputOTP>
+                  </div>
+                  <div className="space-y-4">
+                    <Button
+                      onClick={verifyOTP}
+                      disabled={isLoading || enteredOtp.length !== OTP_LENGTH}
+                      className="w-full h-12 bg-gradient-to-r from-[#3A59D1] to-[#3D90D7] hover:bg-[#3D90D7] text-white font-semibold rounded-xl shadow-lg shadow-blue-500/25 border-0 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-blue-500/40 disabled:opacity-50 disabled:hover:scale-100 relative overflow-hidden group"
+                    >
+                      {isLoading && (
+                        <div className="absolute inset-0 bg-gradient-to-r from-[#3A59D1]/50 to-[#3D90D7]/50 animate-pulse"></div>
+                      )}
+                      <div className="relative flex items-center justify-center gap-3">
+                        {isLoading ? (
+                          <>
+                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                            <span>Verifying...</span>
+                          </>
+                        ) : (
+                          <>
+                            <span>Verify Code</span>
+                            <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                              <div className="w-2 h-2 bg-white rounded-full"></div>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </Button>
+                    <Button
+                      onClick={handleResendOtp}
+                      disabled={isLoading || resendCooldown > 0}
+                      className="w-full h-14 bg-white/10 backdrop-blur-lg border border-white/20 text-black font-semibold rounded-xl hover:bg-white/20 transition-all duration-300 hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100"
+                    >
+                      {resendCooldown > 0 ? (
+                        <div className="flex items-center gap-3">
+                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                          <span>Resend in {resendCooldown}s</span>
+                        </div>
+                      ) : (
+                        "Resend Code"
+                      )}
+                    </Button>
+                  </div>
+                </div>
               )}
-            </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <Card
-          ref={modalRef}
-          className="relative w-full max-w-sm bg-white rounded-lg shadow-md p-6"
-        >
-          <CardHeader className="relative">
-            <CardTitle className="text-center text-lg font-semibold">
-              One-Time Password
-            </CardTitle>
-            <X
-              size={17}
-              onClick={onClose}
-              className="absolute top-1.5 right-6 cursor-pointer text-black hover:text-[#1D3A76] transition-colors duration-300"
-            />
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <div className="space-y-2">
-              <div className="flex justify-center">
-                <InputOTP
-                  maxLength={OTP_LENGTH}
-                  value={enteredOtp}
-                  onChange={(value) => {
-                    setEnteredOtp(value);
-                    setError("");
-                  }}
-                  onKeyDown={(e) => handleKeyPress(e, "verifyOtp")}
-                  disabled={isLoading}
-                  ref={otpInputRef}
-                  autoFocus
-                  className="justify-center"
-                >
-                  <InputOTPGroup>
-                    <InputOTPSlot
-                      index={0}
-                      className="border border-gray-300 focus:border-gray-300 focus:ring-1 focus:ring-gray-300"
-                    />
-                    <InputOTPSlot
-                      index={1}
-                      className="border border-gray-300 focus:border-gray-300 focus:ring-1 focus:ring-gray-300"
-                    />
-                    <InputOTPSlot
-                      index={2}
-                      className="border border-gray-300 focus:border-gray-300 focus:ring-1 focus:ring-gray-300"
-                    />
-                    <InputOTPSlot
-                      index={3}
-                      className="border border-gray-300 focus:border-gray-300 focus:ring-1 focus:ring-gray-300"
-                    />
-                  </InputOTPGroup>
-                </InputOTP>
-              </div>
             </div>
-            {message && (
-              <p className="text-center text-sm text-gray-600">{message}</p>
-            )}
-            {error && (
-              <p className="text-center text-sm text-red-500">{error}</p>
-            )}
-            <Button
-              onClick={verifyOTP}
-              className="w-full bg-[#1D3A76] text-white py-2 rounded-md hover:bg-blue-700 transition-colors"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <div className="flex items-center justify-center">
-                  <svg
-                    className="animate-spin h-5 w-5 mr-2 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                    />
-                  </svg>
-                  Processing...
-                </div>
-              ) : (
-                "Submit OTP"
-              )}
-            </Button>
-            <Button
-              onClick={handleResendOtp}
-              className="w-full bg-white text-[#1D3A76] py-2 rounded-md border border-[#1D3A76] hover:bg-gray-100 transition-colors"
-              disabled={isLoading || resendCooldown > 0}
-            >
-              {resendCooldown > 0
-                ? `Resend in ${resendCooldown}s`
-                : "Resend OTP"}
-            </Button>
-          </CardContent>
-        </Card>
-      )}
+          </div>
+        </div>
+      </div>
+      <style jsx>{`
+        @keyframes gradient-shift {
+          0%,
+          100% {
+            background: linear-gradient(45deg, #3a59d1, #3d90d7, #3a59d1);
+          }
+          50% {
+            background: linear-gradient(45deg, #3d90d7, #3a59d1, #3d90d7);
+          }
+        }
+        @keyframes modal-enter {
+          0% {
+            opacity: 0;
+            transform: scale(0.95) translateY(20px);
+          }
+          100% {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+          }
+        }
+        @keyframes slide-down {
+          0% {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        @keyframes float {
+          0%,
+          100% {
+            transform: translateY(0px) rotate(0deg);
+          }
+          50% {
+            transform: translateY(-20px) rotate(180deg);
+          }
+        }
+        @keyframes float-delay {
+          0%,
+          100% {
+            transform: translateY(0px) rotate(0deg);
+          }
+          50% {
+            transform: translateY(20px) rotate(-180deg);
+          }
+        }
+        .animate-gradient-shift {
+          animation: gradient-shift 6s ease-in-out infinite;
+        }
+        .animate-modal-enter {
+          animation: modal-enter 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .animate-slide-down {
+          animation: slide-down 0.3s ease-out;
+        }
+        .animate-float {
+          animation: float 6s ease-in-out infinite;
+        }
+        .animate-float-delay {
+          animation: float-delay 6s ease-in-out infinite;
+          animation-delay: 2s;
+        }
+      `}</style>
     </div>
   );
 };

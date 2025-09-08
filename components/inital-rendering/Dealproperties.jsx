@@ -22,8 +22,10 @@ const formatPrice = (price) => {
   }
   return price.toLocaleString();
 };
-const DealProperties = ({ bestDealProperties }) => {
+const DealProperties = ({ bestDealProperties, contacted, setContacted }) => {
   const [property] = useState(bestDealProperties || []);
+  const [selectedProperty, setSelectedProperty] = useState(null);
+  const [submittedStates, setSubmittedStates] = useState({});
   const ref = useRef(null);
   const [visible, setVisible] = useState(false);
   useEffect(() => {
@@ -39,45 +41,77 @@ const DealProperties = ({ bestDealProperties }) => {
     return () => observer.disconnect();
   }, []);
   const { handleAPI, error } = useWhatsappHook();
-  const handleEnquireNow = async (property) => {
-    try {
-      const data = localStorage.getItem("user");
-      if (!data) {
-        toast.info("Please Login to Enquire Property!", {
+  const handleEnquireNow = useCallback(
+    async (property) => {
+      try {
+        const data = localStorage.getItem("user");
+        if (!data) {
+          toast.info("Please Login to Contact Seller!", {
+            position: "top-right",
+            autoClose: 3000,
+          });
+          setShowLoginModal(true);
+          return;
+        }
+        const userDetails = JSON.parse(data);
+        if (!userDetails?.user_id) {
+          toast.error("User details not found!", {
+            position: "top-right",
+            autoClose: 3000,
+          });
+          return;
+        }
+        setSelectedProperty(property); // Set selected property for WhatsApp hook
+        const payload = {
+          property_id: property.unique_property_id,
+          user_id: userDetails.user_id,
+          name: userDetails.name || "N/A",
+          mobile: userDetails.mobile || "N/A",
+          email: userDetails.email || "N/A",
+          interested_status: 4,
+          property_user_id: property.user_id,
+        };
+        const payload1 = {
+          unique_property_id: property.unique_property_id,
+          user_id: userDetails.user_id,
+          fullname: userDetails.name || "N/A",
+          mobile: userDetails.mobile || "N/A",
+          email: userDetails.email || "N/A",
+        };
+        // Make API calls concurrently
+        await Promise.all([
+          axios.post(`${config.awsApiUrl}/enquiry/v1/contactSeller`, payload1),
+          axios.post(`${config.awsApiUrl}/enquiry/v1/postEnquiry`, payload),
+          handleAPI(property),
+        ]);
+        // Update state after successful API calls
+        setSubmittedStates((prev) => ({
+          ...prev,
+          [property.unique_property_id]: {
+            ...prev[property.unique_property_id],
+            contact: true,
+          },
+        }));
+        setContacted((prev) =>
+          prev.includes(property.unique_property_id)
+            ? prev
+            : [...prev, property.unique_property_id]
+        );
+        localStorage.setItem("visit_submitted", "true");
+        toast.success("Enquiry submitted successfully!", {
           position: "top-right",
           autoClose: 3000,
         });
-        setShowLoginModal(true);
-        return;
+      } catch (err) {
+        console.error("Enquiry Failed:", err);
+        toast.error("Something went wrong while submitting enquiry", {
+          position: "top-right",
+          autoClose: 3000,
+        });
       }
-      const userDetails = JSON.parse(data);
-      const payload = {
-        property_id: property.unique_property_id,
-        user_id: userDetails.user_id,
-        name: userDetails.name,
-        mobile: userDetails.mobile,
-        email: userDetails.email,
-        interested_status: 4,
-        property_user_id: property.user_id,
-      };
-      const payload1 = {
-        unique_property_id: property.unique_property_id,
-        user_id: userDetails.user_id,
-        fullname: userDetails.name,
-        mobile: userDetails.mobile,
-        email: userDetails.email,
-      };
-      await axios.post(
-        `${config.awsApiUrl}/enquiry/v1/contactSeller`,
-        payload1
-      );
-      await axios.post(`${config.awsApiUrl}/enquiry/v1/postEnquiry`, payload);
-      await handleAPI(property);
-    } catch (err) {
-      console.error("Enquiry Failed:", err);
-      alert("Something went wrong while submitting enquiry");
-    }
-  };
+    },
+    [handleAPI, setContacted]
+  );
   const [showLoginModal, setShowLoginModal] = useState(false);
   const modalRef = useRef(null);
   const handleClose = () => {
@@ -348,10 +382,26 @@ const DealProperties = ({ bestDealProperties }) => {
                     ₹ {formatPrice(property.property_cost)}
                   </div>
                   <button
-                    className={`${theme.button.secondary.bg} ${theme.button.secondary.text} px-6 py-2 rounded-full ${theme.button.secondary.hover} ${theme.button.secondary.hoverText}`}
                     onClick={() => handleEnquireNow(property)}
+                    disabled={
+                      submittedStates[property.unique_property_id]?.contact ||
+                      contacted.includes(property.unique_property_id)
+                    }
+                    className={`
+                        px-6 py-2 rounded-full text-sm font-semibold shadow-md transition-all duration-300
+                        ${
+                          submittedStates[property.unique_property_id]
+                            ?.contact ||
+                          contacted.includes(property.unique_property_id)
+                            ? "bg-gray-400 text-white cursor-not-allowed"
+                            : `${theme.button.secondary.bg} ${theme.button.secondary.text} hover:opacity-90`
+                        }
+                      `}
                   >
-                    Enquire Now
+                    {submittedStates[property.unique_property_id]?.contact ||
+                    contacted.includes(property.unique_property_id)
+                      ? "Submitted"
+                      : "Enquire Now"}
                   </button>
                 </div>
               </div>

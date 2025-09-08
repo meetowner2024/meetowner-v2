@@ -1,10 +1,12 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import countries from "./countryCodes.json";
 const CountryCodeSelector = ({ selectedCode, onSelect, setCountry }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const wrapperRef = useRef(null);
+
   const filteredCountries = countries.filter(
     (c) =>
       c.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -18,8 +20,21 @@ const CountryCodeSelector = ({ selectedCode, onSelect, setCountry }) => {
     setIsOpen(false);
     setSearch("");
   };
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen]);
   return (
-    <div className="relative inline-block z-9999">
+    <div className="relative inline-block z-9999" ref={wrapperRef}>
       <div
         className="flex items-center p-1 cursor-pointer text-sm"
         onClick={(e) => {

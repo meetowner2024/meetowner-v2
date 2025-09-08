@@ -1,5 +1,5 @@
 "use client";
-import { use, useEffect, useState } from "react";
+import {  useEffect, useState } from "react";
 import { ToastContainer } from "react-toastify";
 import Footer from "../../components/Footer";
 import { usePathname, useSearchParams } from "next/navigation";

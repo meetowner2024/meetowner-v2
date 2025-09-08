@@ -9,7 +9,8 @@ import {
   Landmark,
   Filter,
   X,
-  TrendingUp, Calendar
+  TrendingUp,
+  Calendar,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import logoImage from "../../app/assets/Images/Untitled-22.png";
@@ -45,9 +46,7 @@ import config from "../utils/config";
 import { toast } from "react-toastify";
 import { IoIosHeartEmpty } from "react-icons/io";
 import PromotionalBanner from "./PromotionalBanner";
-import {
-  setPropertyDetails
-} from "../store/slices/propertyDetails";
+import { setPropertyDetails } from "../store/slices/propertyDetails";
 import theme from "../utils/theme.json";
 const commercialSubTypes = [
   { id: "Office", label: "Office", icon: Building },
@@ -98,7 +97,7 @@ const promotionalProperties = [
   },
 ];
 
-const ListingHeader = ({  setShowLoginModal, ads }) => {
+const ListingHeader = ({ setShowLoginModal, ads }) => {
   const dispatch = useDispatch();
   const router = useRouter();
   const pathname = usePathname();
@@ -194,6 +193,9 @@ const ListingHeader = ({  setShowLoginModal, ads }) => {
       return () => clearInterval(interval);
     }
   }, [showPromoBanner]);
+  useEffect(() => {
+    setCity(searchData.city);
+  }, [searchData.city]);
   useEffect(() => {
     if (searchData.sub_type === "Plot" && searchData.plot_subType) {
       dispatch(setTab(searchData.plot_subType));

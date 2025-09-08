@@ -11,10 +11,12 @@ import FooterLinks from "./FooterLinks";
 import Footer from "./Footer";
 import store from "./store/store";
 import { Provider, useDispatch } from "react-redux";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ChevronUp } from "lucide-react";
 import { setAuthData } from "./store/slices/authSlice";
 import { ToastContainer } from "react-toastify";
+import config from "./utils/config";
+import axios from "axios";
 
 const Dashboard = ({
   latestProperties,
@@ -25,6 +27,7 @@ const Dashboard = ({
   meetownerExclusive,
   favourites = [],
   formatted = [],
+  contactedIds = [],
 }) => {
   const [showScrollTop, setShowScrollTop] = useState(false);
   useEffect(() => {
@@ -37,7 +40,13 @@ const Dashboard = ({
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+  const [contacted, setContacted] = useState([]);
 
+  useEffect(() => {
+    if (contactedIds) {
+      setContacted(contactedIds);
+    }
+  }, [contactedIds]);
   const footerLinks = {
     "Properties for Buy": [
       {
@@ -115,8 +124,17 @@ const Dashboard = ({
         />
         <Header favourites={favourites} />
         <SearchBar formatted={formatted} />
-        <Slider latestProperties={latestProperties} favourites={favourites} />
-        <Dealproperties bestDealProperties={bestDealProperties} />
+        <Slider
+          latestProperties={latestProperties}
+          favourites={favourites}
+          contacted={contacted}
+          setContacted={setContacted}
+        />
+        <Dealproperties
+          bestDealProperties={bestDealProperties}
+          contacted={contacted}
+          setContacted={setContacted}
+        />
         <HousingPicks bestMeetownerProperties={bestMeetownerProperties} />
         <HighDemandProjects highDemandProperties={highDemandProperties} />
         <RecommendedSellers recommendedSellers={recommendedSellers} />

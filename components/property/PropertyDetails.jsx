@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
 import { setPropertyDetails } from "../store/slices/propertyDetails";
@@ -104,14 +104,12 @@ const PropertyDeatils = () => {
   const dispatch = useDispatch();
   const searchData = useSelector((state) => state.search);
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const [submittedStates, setSubmittedStates] = useState({});
+  const [submittedStates, setSubmittedStates] = useState([]);
   const [contacted, setContacted] = useState([]);
   const propertyData = useSelector((state) => state.property.propertyDetails);
   const [property, setProperty] = useState(propertyData);
-  const [loading, setLoading] = useState(true);
+
   const [error, setError] = useState(null);
-  const [videos, setVideos] = useState([]);
-  const [images, setImages] = useState([]);
   const getPropertyDetails = async (propertyData) => {
     try {
       const response = await fetch(
@@ -131,6 +129,28 @@ const PropertyDeatils = () => {
       console.error("err: ", err);
     }
   };
+  const fetchContactedProperties = async () => {
+    const data = localStorage.getItem("user");
+    if (!data) {
+      return null;
+    }
+    const userDetails = JSON.parse(data);
+    try {
+      const response = await axios.get(
+        `${config.awsApiUrl}/enquiry/v1/getUserContactSellers?user_id=${userDetails?.user_id}`
+      );
+      const contacts = response?.data?.results || response?.data || [];
+      const contactIds = Array.isArray(contacts)
+        ? contacts.map((contact) => contact.unique_property_id)
+        : [];
+      setContacted(contactIds);
+    } catch (error) {
+      console.error("Failed to fetch contacted properties:", error);
+    }
+  };
+  useEffect(() => {
+    fetchContactedProperties();
+  }, []);
   const handleClose = () => {
     setShowLoginModal(false);
   };
@@ -452,15 +472,13 @@ const PropertyDeatils = () => {
                   submittedStates[property?.unique_property_id]?.contact ||
                   contacted?.includes(property.unique_property_id)
                 }
-                className={`w-full cursor-pointer h-11 rounded-lg text-sm font-semibold ${
-                  theme.button.secondary.bg
-                }              ${theme.button.secondary.text} 
-                 transition ${
-                   submittedStates[property?.unique_property_id]?.contact ||
-                   contacted.includes(property.unique_property_id)
-                     ? "cursor-not-allowed"
-                     : `hover:bg-[${PropertyAdsColors.button.contact.hover}]`
-                 }`}
+                className={`w-full  h-11 rounded-lg text-sm font-semibold   ${
+                  submittedStates[property.unique_property_id]?.contact ||
+                  contacted.includes(property.unique_property_id)
+                    ? "bg-gray-400 text-white border-1 border-cyan-700 cursor-not-allowed"
+                    : `${theme.button.secondary.bg} ${theme.button.secondary.text} cursor-pointer hover:opacity-90`
+                }
+  `}
               >
                 {submittedStates[property?.unique_property_id]?.contact ||
                 contacted.includes(property.unique_property_id)
