@@ -318,24 +318,26 @@ export default function SearchBar() {
       </Slider>
 
       <div className="relative bottom-15 sm:bottom-20 left-1/2 transform -translate-x-1/2 w-11/12 sm:w-10/12 md:w-3/4 lg:w-2/3">
-        <div className="bg-white/30 flex justify-center rounded-t-2xl shadow-lg  p-3 sm:p-4 border border-white/20">
-          <div className="inline-flex flex-wrap justify-center bg-white  rounded-full p-1 sm:p-2">
+        <div className="hidden sm:flex bg-white/30 justify-center rounded-t-2xl shadow-lg p-3 sm:p-4 border border-white/20">
+          <div className="flex flex-nowrap overflow-x-auto bg-white rounded-full p-1 sm:p-2 scrollbar-hide">
             {TABS.map((item, index) => (
               <button
                 key={index}
                 onClick={() => setActiveTab(index)}
-                className={`relative z-10 w-auto px-4 py-1 cursor-pointer rounded-full text-xs sm:text-sm duration-300 ${
-                  activeTab === index
-                    ? `${theme.button.secondary.bg}  ${theme.button.secondary.text} `
-                    : "text-gray-600"
-                }`}
+                className={`relative z-10 w-auto px-4 py-1 cursor-pointer rounded-full text-xs sm:text-sm duration-300 whitespace-nowrap
+          ${
+            activeTab === index
+              ? `${theme.button.secondary.bg} ${theme.button.secondary.text}`
+              : "text-gray-600"
+          }`}
               >
                 {item}
               </button>
             ))}
           </div>
         </div>
-        <div className="flex items-center backdrop-blur-none justify-between space-x-1 bg-white p-2 sm:p-3 rounded-b-lg shadow-sm border border-white">
+
+        <div className="flex items-center backdrop-blur-none justify-between space-x-1 bg-white p-2 sm:p-3 rounded-lg sm:rounded-b-lg shadow-sm border border-white">
           <div className="flex items-center space-x-1 sm:space-x-2 w-full">
             <div className="relative w-auto inline-block">
               <div

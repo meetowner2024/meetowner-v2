@@ -50,6 +50,7 @@ import axios from "axios";
 import config from "../utils/config";
 import { toast } from "react-toastify";
 import theme from "../utils/theme.json";
+
 const commercialSubTypes = [
   { id: "Office", label: "Office", icon: Building },
   { id: "Retail Shop", label: "Retail Shop", icon: Home },
@@ -58,11 +59,13 @@ const commercialSubTypes = [
   { id: "Plot", label: "Plot", icon: MapPin },
   { id: "Others", label: "Others", icon: MapPin },
 ];
+
 const furnishingOptions = [
   { label: "Unfurnished", value: "Unfurnished" },
   { label: "Semi Furnished", value: "Semi" },
   { label: "Fully Furnished", value: "Fully" },
 ];
+
 const PropertyHeader = () => {
   const dispatch = useDispatch();
   const router = useRouter();
@@ -76,7 +79,7 @@ const PropertyHeader = () => {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const searchRef = useRef(null);
-  const commandRef = useRef(null); 
+  const commandRef = useRef(null);
   const selectedFilters = useMemo(
     () => ({
       tab: searchData.tab || "Buy",
@@ -89,6 +92,7 @@ const PropertyHeader = () => {
     }),
     [searchData]
   );
+
   const fetchCities = useCallback(async () => {
     try {
       const response = await axios.get(
@@ -103,29 +107,28 @@ const PropertyHeader = () => {
       console.error("Error fetching cities:", error);
     }
   }, []);
+
   useEffect(() => {
     fetchCities();
   }, [fetchCities]);
 
-  const fetchLocalities = useCallback(
-    async (city, query) => {
-      try {
-        const response = await fetch(
-          `${config.awsApiUrl}/api/v1/search?city=${city}&query=${query}`
-        );
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        const data = await response.json();
-        setLocalities(data);
-      } catch (err) {
-        console.error("Failed to fetch localities:", err);
-        setLocalities([]);
-        toast.error("Failed to fetch localities. Please try again.");
+  const fetchLocalities = useCallback(async (city, query) => {
+    try {
+      const response = await fetch(
+        `${config.awsApiUrl}/api/v1/search?city=${city}&query=${query}`
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
       }
-    },
-    []
-  );
+      const data = await response.json();
+      setLocalities(data);
+    } catch (err) {
+      console.error("Failed to fetch localities:", err);
+      setLocalities([]);
+      toast.error("Failed to fetch localities. Please try again.");
+    }
+  }, []);
+
   const debouncedFetchLocalities = useCallback(
     debounce((city, query) => {
       if (!city || !query) {
@@ -141,9 +144,6 @@ const PropertyHeader = () => {
     debouncedFetchLocalities(city, searchInput);
   }, [searchInput, city, debouncedFetchLocalities]);
 
-
- 
-  
   const updateUrlWithSearchData = useCallback(() => {
     if (pathname !== "/listings") return;
     const queryParts = Object.entries(searchData)
@@ -164,9 +164,11 @@ const PropertyHeader = () => {
     const queryString = queryParts.join("&");
     router.replace(`/listings?${queryString}`, { scroll: false });
   }, [router, searchData, pathname]);
+
   useEffect(() => {
     updateUrlWithSearchData();
   }, [searchData, updateUrlWithSearchData]);
+
   useEffect(() => {
     if (
       ["Plot", "Land"].includes(selectedFilters.subType) &&
@@ -208,6 +210,7 @@ const PropertyHeader = () => {
       dispatch(setOccupancy(""));
     }
   }, [selectedFilters, dispatch]);
+
   const dropdownOptions = useMemo(
     () => ({
       Buy: ["Buy", "Rent"],
@@ -222,13 +225,13 @@ const PropertyHeader = () => {
         selectedFilters.propertyIn === "Commercial"
           ? commercialSubTypes.map((subtype) => subtype.id)
           : [
-            "Apartment",
-            "Independent House",
-            "Independent Villa",
-            "Plot",
-            "Land",
-            "Others",
-          ],
+              "Apartment",
+              "Independent House",
+              "Independent Villa",
+              "Plot",
+              "Land",
+              "Others",
+            ],
       Status: ["Plot", "Land"].includes(selectedFilters.subType)
         ? ["Immediate", "Future"]
         : ["Ready to Move", "Under Construction"],
@@ -236,6 +239,7 @@ const PropertyHeader = () => {
     }),
     [selectedFilters.propertyIn, selectedFilters.subType]
   );
+
   const activeFilters = useMemo(() => {
     const filters = [];
     if (selectedFilters.bhk) filters.push(`${selectedFilters.bhk} BHK`);
@@ -260,6 +264,7 @@ const PropertyHeader = () => {
     if (selectedFilters.occupancy) filters.push(selectedFilters.occupancy);
     return filters;
   }, [selectedFilters, dropdownOptions]);
+
   const handleUserSearched = useCallback(
     async (searchValue) => {
       let userDetails = null;
@@ -295,10 +300,12 @@ const PropertyHeader = () => {
     },
     [city, selectedFilters]
   );
+
   const debouncedUserActivity = useCallback(
     debounce(handleUserSearched, 1000),
     [handleUserSearched]
   );
+
   const handleValueChange = useCallback(
     (value) => {
       setSearchInput(value);
@@ -307,6 +314,7 @@ const PropertyHeader = () => {
     },
     [dispatch, debouncedUserActivity]
   );
+
   const handleClear = useCallback(() => {
     setSearchInput("");
     dispatch(setSearchData({ location: "" }));
@@ -315,7 +323,8 @@ const PropertyHeader = () => {
     if (pathname === "/listings") {
       router.replace("/listings", { scroll: false });
     }
-  }, [dispatch, debouncedUserActivity, pathname, router, debouncedFetchLocalities]);
+  }, [dispatch, debouncedUserActivity, pathname, router]);
+
   const clearFilter = useCallback(
     (filterText) => {
       if (filterText.includes("BHK")) {
@@ -341,9 +350,11 @@ const PropertyHeader = () => {
     },
     [dispatch, dropdownOptions]
   );
+
   const handleRouteListings = useCallback(() => {
     router.push("/listings");
   }, [router]);
+
   const clearAllFilters = useCallback(() => {
     dispatch(clearSearch());
     setSearchInput("");
@@ -355,7 +366,7 @@ const PropertyHeader = () => {
     }
   }, [dispatch, debouncedUserActivity, pathname, router]);
 
- useEffect(() => {
+  useEffect(() => {
     const handleClickOutside = (event) => {
       if (
         searchRef.current &&
@@ -369,6 +380,7 @@ const PropertyHeader = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
   const handleRouteHome = useCallback(() => {
     router.push("/");
   }, [router]);
@@ -377,39 +389,27 @@ const PropertyHeader = () => {
     selectedFilters.subType
   );
 
-  const handleClose =()=>{
+  const handleClose = () => {
     setIsCommandOpen(false);
     setIsFilterModalOpen(false);
-  }
-  
+  };
+
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b-2 border-[#F0AA00]  bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+      <header className="sticky top-0 z-50 w-full border-b-2 border-[#F0AA00] bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
         <div className="container mx-auto px-4 py-3 sm:py-4">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-4">
-            { }
             <div className="flex items-center gap-2 flex-shrink-0">
               <div
                 className="flex items-center cursor-pointer"
                 onClick={handleRouteHome}
               >
                 <Image
-
                   width={100}
                   height={100}
                   src={logoImage.src}
                   alt="Meet Owner Logo"
                   className="h-8 sm:h-10 w-auto max-w-[120px] hidden sm:block"
-
-                />
-                <Image
-
-                  width={32}
-                  height={32}
-                  src={favicon.src}
-                  alt="Meet Owner"
-                  className="w-8 h-8 sm:hidden"
-
                 />
               </div>
             </div>
@@ -426,9 +426,10 @@ const PropertyHeader = () => {
                         }
                         size="sm"
                         className={`rounded-lg px-3 py-1 text-sm font-medium transition-all 
-                          ${selectedFilters.tab === tab
-                          ?  `${theme.button.secondary.bg}  text-white shadow-sm`
-                          : "text-gray-600 hover:text-gray-900"
+                          ${
+                            selectedFilters.tab === tab
+                              ? `${theme.button.secondary.bg} text-white shadow-sm`
+                              : "text-gray-600 hover:text-gray-900"
                           }`}
                         onClick={() => dispatch(setTab(tab))}
                       >
@@ -441,7 +442,7 @@ const PropertyHeader = () => {
                     className="hidden sm:block h-8 mx-2"
                   />
 
-                  <div className="flex-1 flex items-center px-2 sm:px-0  ">
+                  <div className="flex-1 flex items-center px-2 sm:px-0">
                     <Search className="w-4 h-4 text-gray-400 ml-2 sm:ml-4" />
                     <Input
                       placeholder="Search localities, landmarks, projects..."
@@ -507,125 +508,130 @@ const PropertyHeader = () => {
                   </div>
                 </div>
 
-                <div className=" flex md:hidden   space-y-2" ref={searchRef}>
-                  { }
-                  <div className="hidden md:flex bg-gray-100 rounded-lg p-1 w-fit  ">
-                    {dropdownOptions.Buy.map((tab) => (
-                      <Button
-                        key={tab}
-                        variant={selectedFilters.tab === tab ? "default" : "ghost"}
-                        size="sm"
-                        className={`rounded-lg px-4 py-1.5 text-sm font-medium transition-all ${selectedFilters.tab === tab
-                          ? `${theme.button.secondary.bg} text-white shadow-sm`
-                          : "text-gray-600"
-                          }`}
-                        onClick={() => dispatch(setTab(tab))}
+                {/* Mobile Responsive Layout */}
+                <div
+                  className="flex md:hidden items-center space-x-2"
+                  ref={searchRef}
+                >
+                  <div className="flex-shrink-0">
+                    <div
+                      className="flex items-center cursor-pointer"
+                      onClick={handleRouteHome}
+                    >
+                      <Image
+                        width={32}
+                        height={32}
+                        src={favicon.src}
+                        alt="Meet Owner"
+                        className="w-8 h-8"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex-1 flex items-center bg-white rounded-lg border border-gray-200 focus-within:border-blue-500 shadow-sm">
+                    <Search className="w-4 h-4 text-gray-400 ml-3" />
+                    <Input
+                      placeholder="Search localities..."
+                      value={searchInput}
+                      onChange={(e) => handleValueChange(e.target.value)}
+                      onFocus={() => setShowMobileSearch(true)}
+                      className="border-0 bg-transparent focus-visible:ring-0 text-sm placeholder:text-gray-500 px-2"
+                    />
+                    {searchInput && (
+                      <>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleClear}
+                          className="h-6 w-6 p-0"
+                          aria-label="Clear search"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className={`h-8 w-18 p-1 rounded-full text-white ${theme.button.secondary.bg}`}
+                          onClick={handleRouteListings}
+                        >
+                          Search
+                        </Button>
+                      </>
+                    )}
+                  </div>
+
+                  <div className="flex items-center bg-white rounded-lg border border-gray-200 px-3">
+                    <MapPin className="w-3 h-3 text-red-500 mr-1" />
+                    <Select
+                      value={city}
+                      onValueChange={(value) => {
+                        setCity(value);
+                        dispatch(setSearchData({ city: value, location: "" }));
+                        setSearchInput("");
+                      }}
+                    >
+                      <SelectTrigger className="border-0 bg-transparent w-[80px] text-xs p-0">
+                        <SelectValue placeholder="City" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white max-h-[200px] overflow-y-auto">
+                        {citiesList.map((city) => (
+                          <SelectItem
+                            key={city}
+                            value={city}
+                            className="text-xs"
+                          >
+                            {city}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsFilterModalOpen(true)}
+                    className="px-3 py-2 border-gray-200 hover:bg-gray-50 relative"
+                  >
+                    <Filter className="w-4 h-4" />
+                    {activeFilters.length > 0 && (
+                      <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                        {activeFilters.length}
+                      </div>
+                    )}
+                  </Button>
+                </div>
+
+                {showMobileSearch && localities.length > 0 && (
+                  <div className="bg-white absolute w-full mt-2 rounded-lg border border-gray-200 shadow-lg max-h-[200px] overflow-y-auto">
+                    {localities.slice(0, 4).map((locality) => (
+                      <button
+                        key={locality.locality}
+                        onClick={() => {
+                          setSearchInput(locality.locality);
+                          dispatch(
+                            setSearchData({ location: locality.locality })
+                          );
+                          setShowMobileSearch(false);
+                          debouncedUserActivity(locality.locality);
+                        }}
+                        className="w-full flex items-center p-3 hover:bg-gray-50 border-b last:border-b-0 text-left"
                       >
-                        {tab}
-                      </Button>
+                        <MapPin className="w-4 h-4 mr-3 text-red-500" />
+                        <span className="text-sm flex-1">
+                          {locality.locality}
+                        </span>
+                      </button>
                     ))}
                   </div>
-
-                  <div className="flex  w-full gap-2">
-                    <div className="flex-1 flex items-center bg-white rounded-lg border border-gray-200 focus-within:border-blue-500 shadow-sm">
-                      <Search className="w-4 h-4 text-gray-400 ml-3" />
-                      <Input
-                        placeholder="Search localities..."
-                        value={searchInput}
-                        onChange={(e) => handleValueChange(e.target.value)}
-                        onFocus={() => setShowMobileSearch(true)}
-                        className="border-0 bg-transparent focus-visible:ring-0 text-sm placeholder:text-gray-500 px-2"
-                      />
-                      {searchInput && (
-                        <>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={handleClear}
-                            className="h-6 w-6 p-0"
-                            aria-label="Clear search"
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className={`h-8 w-18 p-1 rounded-full text-white ${theme.button.secondary.bg}`}
-                            onClick={handleRouteListings}
-                          >
-                            Search
-                          </Button>
-                        </>
-                      )}
-                    </div>
-                    <div className="flex items-center bg-white rounded-lg border border-gray-200 px-3">
-                      <MapPin className="w-3 h-3 text-red-500 mr-1" />
-                      <Select
-                        value={city}
-                        onValueChange={(value) => {
-                          setCity(value);
-                          dispatch(setSearchData({ city: value, location: "" }));
-                          setSearchInput("");
-                        }}
-                      >
-                        <SelectTrigger className="border-0 bg-transparent w-[80px] text-xs p-0">
-                          <SelectValue placeholder="City" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-white max-h-[200px] overflow-y-auto">
-                          {citiesList.map((city) => (
-                            <SelectItem key={city} value={city} className="text-xs">
-                              {city}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setIsFilterModalOpen(true)}
-                      className="px-3 py-2 border-gray-200 hover:bg-gray-50 relative"
-                    >
-                      <Filter className="w-4 h-4" />
-                      {activeFilters.length > 0 && (
-                        <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
-                          {activeFilters.length}
-                        </div>
-                      )}
-                    </Button>
-                  </div>
-
-                  {showMobileSearch && localities.length > 0 && (
-                    <div className="bg-white absolute w-full mt-10 rounded-lg border border-gray-200 shadow-lg max-h-[200px] overflow-y-auto">
-                      {localities.slice(0, 4).map((locality) => (
-                        <button
-                          key={locality.locality}
-                          onClick={() => {
-                            setSearchInput(locality.locality);
-                            dispatch(
-                              setSearchData({ location: locality.locality })
-                            );
-                            setShowMobileSearch(false);
-                            debouncedUserActivity(locality.locality);
-                          }}
-                          className="w-full flex items-center p-3 hover:bg-gray-50 border-b last:border-b-0 text-left"
-                        >
-                          <MapPin className="w-4 h-4 mr-3 text-red-500" />
-                          <span className="text-sm flex-1">
-                            {locality.locality}
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                )}
                 {activeFilters.length > 0 && (
-                  <div className="flex md:hidden items-center gap-1.5 mt-2  overflow-x-auto ">
+                  <div className="flex md:hidden items-center gap-1.5 mt-2 overflow-x-auto">
                     {activeFilters.slice(0, 2).map((filter) => (
                       <Badge
                         key={filter}
                         variant="secondary"
-                        className={` text-white rounded-full px-2 py-0.5 text-xs cursor-pointer flex-shrink-0 ${theme.button.secondary.bg}`}
+                        className={`text-white rounded-full px-2 py-0.5 text-xs cursor-pointer flex-shrink-0 ${theme.button.secondary.bg}`}
                         onClick={() => clearFilter(filter)}
                       >
                         {filter}
@@ -645,23 +651,20 @@ const PropertyHeader = () => {
                 )}
                 {(isCommandOpen || isFilterModalOpen) && (
                   <div
-                   
-                    className={`absolute top-full left-0 right-0 mt-2 z-50 bg-white rounded-xl shadow-2xl max-h-[70vh] sm:max-h-[400px] overflow-y-auto sm:overflow-y-visible ${isFilterModalOpen ? "fixed inset-0 m-4" : ""
-                      }`}
+                    className={`absolute top-full left-0 right-0 mt-2 z-50 bg-white rounded-xl shadow-2xl max-h-[70vh] sm:max-h-[400px] overflow-y-auto sm:overflow-y-visible ${
+                      isFilterModalOpen ? "fixed inset-0 m-4" : ""
+                    }`}
                   >
-                    <Command ref={commandRef}  className="rounded-xl">
+                    <Command ref={commandRef} className="rounded-xl">
                       <div className="border-b-2 border-[#F0AA00] p-3 sm:p-4 pb-2">
-                        <div className="flex items-center justify-between mb-2" >
+                        <div className="flex items-center justify-between mb-2">
                           <h3 className="font-semibold text-gray-900 text-sm sm:text-base">
                             Filters
                           </h3>
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => {
-                              setIsCommandOpen(false);
-                              setIsFilterModalOpen(false);
-                            }}
+                            onClick={handleClose}
                             className="h-6 w-6 p-0"
                             aria-label="Close filters"
                           >
@@ -669,12 +672,12 @@ const PropertyHeader = () => {
                           </Button>
                         </div>
                         {activeFilters.length > 0 && (
-                          <div className="hidden md:flex items-center gap-1.5 mt-2 overflow-x-auto ">
+                          <div className="hidden md:flex items-center gap-1.5 mt-2 overflow-x-auto">
                             {activeFilters.slice(0, 2).map((filter) => (
                               <Badge
                                 key={filter}
                                 variant="secondary"
-                                className={` text-white rounded-full px-2 py-0.5 text-xs cursor-pointer flex-shrink-0 ${theme.button.secondary.bg}`}
+                                className={`text-white rounded-full px-2 py-0.5 text-xs cursor-pointer flex-shrink-0 ${theme.button.secondary.bg}`}
                                 onClick={() => clearFilter(filter)}
                               >
                                 {filter}
@@ -711,10 +714,11 @@ const PropertyHeader = () => {
                               <button
                                 key={tab}
                                 onClick={() => dispatch(setTab(tab))}
-                                className={`flex items-center rounded-lg px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium transition-colors duration-200 ${selectedFilters.tab === tab
-                                  ? `${theme.button.secondary.bg} text-white`
-                                  : "bg-gray-100 text-gray-700 hover:bg-blue-100"
-                                  }`}
+                                className={`flex items-center rounded-lg px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium transition-colors duration-200 ${
+                                  selectedFilters.tab === tab
+                                    ? `${theme.button.secondary.bg} text-white`
+                                    : "bg-gray-100 text-gray-700 hover:bg-blue-100"
+                                }`}
                               >
                                 <Home className="w-3 sm:w-4 h-3 sm:h-4 mr-1 sm:mr-2" />
                                 {tab}
@@ -757,16 +761,20 @@ const PropertyHeader = () => {
                             </div>
                           </CommandGroup>
                         )}
-                        <CommandGroup heading="BHK" className="px-3 sm:px-4 py-2">
+                        <CommandGroup
+                          heading="BHK"
+                          className="px-3 sm:px-4 py-2"
+                        >
                           <div className="flex flex-wrap gap-2">
                             {dropdownOptions.BHK.map((option) => (
                               <button
                                 key={option}
                                 onClick={() => dispatch(setBHK(option))}
-                                className={`flex items-center rounded-lg px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium transition-colors duration-200 ${selectedFilters.bhk === option
-                                  ? `${theme.button.secondary.bg} text-white`
-                                  : "bg-gray-100 text-gray-700 hover:bg-blue-100"
-                                  }`}
+                                className={`flex items-center rounded-lg px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium transition-colors duration-200 ${
+                                  selectedFilters.bhk === option
+                                    ? `${theme.button.secondary.bg} text-white`
+                                    : "bg-gray-100 text-gray-700 hover:bg-blue-100"
+                                }`}
                               >
                                 <Home className="w-3 sm:w-4 h-3 sm:h-4 mr-1 sm:mr-2" />
                                 {option} BHK
@@ -782,11 +790,14 @@ const PropertyHeader = () => {
                             {dropdownOptions.Budget.map((option) => (
                               <button
                                 key={option.value}
-                                onClick={() => dispatch(setBudget(option.value))}
-                                className={`flex items-center rounded-lg px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium transition-colors duration-200 ${selectedFilters.budget === option.value
-                                  ? `${theme.button.secondary.bg} text-white`
-                                  : "bg-gray-100 text-gray-700 hover:bg-blue-100"
-                                  }`}
+                                onClick={() =>
+                                  dispatch(setBudget(option.value))
+                                }
+                                className={`flex items-center rounded-lg px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium transition-colors duration-200 ${
+                                  selectedFilters.budget === option.value
+                                    ? `${theme.button.secondary.bg} text-white`
+                                    : "bg-gray-100 text-gray-700 hover:bg-blue-100"
+                                }`}
                               >
                                 <span className="text-gray-600 mr-1 sm:mr-2">
                                   ₹
@@ -805,10 +816,11 @@ const PropertyHeader = () => {
                               <button
                                 key={option}
                                 onClick={() => dispatch(setPropertyIn(option))}
-                                className={`flex items-center rounded-lg px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium transition-colors duration-200 ${selectedFilters.propertyIn === option
-                                  ? `${theme.button.secondary.bg} text-white`
-                                  : "bg-gray-100 text-gray-700 hover:bg-blue-100"
-                                  }`}
+                                className={`flex items-center rounded-lg px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium transition-colors duration-200 ${
+                                  selectedFilters.propertyIn === option
+                                    ? `${theme.button.secondary.bg} text-white`
+                                    : "bg-gray-100 text-gray-700 hover:bg-blue-100"
+                                }`}
                               >
                                 <Building2 className="w-3 sm:w-4 h-3 sm:h-4 mr-1 sm:mr-2" />
                                 {option}
@@ -818,19 +830,22 @@ const PropertyHeader = () => {
                           <div className="flex flex-wrap gap-2 mt-2">
                             {dropdownOptions.Type.map((option) => {
                               const subtypeLabel =
-                                commercialSubTypes.find((st) => st.id === option)
-                                  ?.label || option;
+                                commercialSubTypes.find(
+                                  (st) => st.id === option
+                                )?.label || option;
                               const IconComponent =
-                                commercialSubTypes.find((st) => st.id === option)
-                                  ?.icon || Building2;
+                                commercialSubTypes.find(
+                                  (st) => st.id === option
+                                )?.icon || Building2;
                               return (
                                 <button
                                   key={option}
                                   onClick={() => dispatch(setSubType(option))}
-                                  className={`flex items-center rounded-lg px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium transition-colors duration-200 ${selectedFilters.subType === option
-                                    ? `${theme.button.secondary.bg} text-white`
-                                    : "bg-gray-100 text-gray-700 hover:bg-blue-100"
-                                    }`}
+                                  className={`flex items-center rounded-lg px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium transition-colors duration-200 ${
+                                    selectedFilters.subType === option
+                                      ? `${theme.button.secondary.bg} text-white`
+                                      : "bg-gray-100 text-gray-700 hover:bg-blue-100"
+                                  }`}
                                 >
                                   <IconComponent className="w-3 sm:w-4 h-3 sm:h-4 mr-1 sm:mr-2" />
                                   {subtypeLabel}
@@ -856,10 +871,11 @@ const PropertyHeader = () => {
                                     onClick={() =>
                                       dispatch(setFurnishedStatus(option))
                                     }
-                                    className={`flex items-center rounded-lg px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium transition-colors duration-200 ${selectedFilters.furnishedStatus === option
-                                      ? `${theme.button.secondary.bg} text-white`
-                                      : "bg-gray-100 text-gray-700 hover:bg-blue-100"
-                                      }`}
+                                    className={`flex items-center rounded-lg px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium transition-colors duration-200 ${
+                                      selectedFilters.furnishedStatus === option
+                                        ? `${theme.button.secondary.bg} text-white`
+                                        : "bg-gray-100 text-gray-700 hover:bg-blue-100"
+                                    }`}
                                   >
                                     <Filter className="w-3 sm:w-4 h-3 sm:h-4 mr-1 sm:mr-2" />
                                     {furnishingLabel}
@@ -878,10 +894,11 @@ const PropertyHeader = () => {
                               <button
                                 key={option}
                                 onClick={() => dispatch(setOccupancy(option))}
-                                className={`flex items-center rounded-lg px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium transition-colors duration-200 ${selectedFilters.occupancy === option
-                                  ? `${theme.button.secondary.bg} text-white`
-                                  : "bg-gray-100 text-gray-700 hover:bg-blue-100"
-                                  }`}
+                                className={`flex items-center rounded-lg px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium transition-colors duration-200 ${
+                                  selectedFilters.occupancy === option
+                                    ? `${theme.button.secondary.bg} text-white`
+                                    : "bg-gray-100 text-gray-700 hover:bg-blue-100"
+                                }`}
                               >
                                 <Filter className="w-3 sm:w-4 h-3 sm:h-4 mr-1 sm:mr-2" />
                                 {option}
@@ -896,8 +913,6 @@ const PropertyHeader = () => {
               </div>
             </div>
           </div>
-
-
         </div>
       </header>
       {isFilterModalOpen && (
@@ -917,16 +932,17 @@ const PropertyHeader = () => {
                 <X className="h-5 w-5" />
               </Button>
             </div>
-            <div className="flex bg-gray-100 gap-4 mt-6 ml-6 rounded-lg p-1 w-fit   ">
+            <div className="flex bg-gray-100 gap-4 mt-6 ml-6 rounded-lg p-1 w-fit">
               {dropdownOptions.Buy.map((tab) => (
                 <Button
                   key={tab}
                   variant={selectedFilters.tab === tab ? "default" : "ghost"}
                   size="sm"
-                  className={`rounded-lg px-4 py-1.5 text-sm font-medium transition-all ${selectedFilters.tab === tab
-                    ? `${theme.button.secondary.bg} text-white shadow-sm`
-                    : "text-gray-600"
-                    }`}
+                  className={`rounded-lg px-4 py-1.5 text-sm font-medium transition-all ${
+                    selectedFilters.tab === tab
+                      ? `${theme.button.secondary.bg} text-white shadow-sm`
+                      : "text-gray-600"
+                  }`}
                   onClick={() => dispatch(setTab(tab))}
                 >
                   {tab}
@@ -934,7 +950,6 @@ const PropertyHeader = () => {
               ))}
             </div>
             <div className="overflow-y-auto max-h-[calc(85vh-80px)] p-4 space-y-6">
-
               <div>
                 <h4 className="font-semibold mb-3 text-gray-800 flex items-center gap-2">
                   <Home className="w-4 h-4" />
@@ -945,10 +960,11 @@ const PropertyHeader = () => {
                     <button
                       key={option}
                       onClick={() => dispatch(setBHK(option))}
-                      className={`rounded-xl py-3 text-sm font-semibold transition-all duration-200 ${selectedFilters.bhk === option
-                        ? `${theme.button.secondary.bg} text-white shadow-lg scale-105`
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                        }`}
+                      className={`rounded-xl py-3 text-sm font-semibold transition-all duration-200 ${
+                        selectedFilters.bhk === option
+                          ? `${theme.button.secondary.bg} text-white shadow-lg scale-105`
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
                     >
                       {option}
                     </button>
@@ -965,10 +981,11 @@ const PropertyHeader = () => {
                     <button
                       key={option.value}
                       onClick={() => dispatch(setBudget(option.value))}
-                      className={`w-full text-left rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 flex items-center justify-between ${selectedFilters.budget === option.value
-                        ? `${theme.button.secondary.bg} text-white shadow-lg`
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                        }`}
+                      className={`w-full text-left rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 flex items-center justify-between ${
+                        selectedFilters.budget === option.value
+                          ? `${theme.button.secondary.bg} text-white shadow-lg`
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
                     >
                       <span>₹ {option.label}</span>
                       {selectedFilters.budget === option.value && (
@@ -988,10 +1005,11 @@ const PropertyHeader = () => {
                     <button
                       key={option}
                       onClick={() => dispatch(setPropertyIn(option))}
-                      className={`rounded-xl px-3 py-3 text-sm font-semibold transition-all duration-200 ${selectedFilters.propertyIn === option
-                        ? `${theme.button.secondary.bg} text-white shadow-lg`
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                        }`}
+                      className={`rounded-xl px-3 py-3 text-sm font-semibold transition-all duration-200 ${
+                        selectedFilters.propertyIn === option
+                          ? `${theme.button.secondary.bg} text-white shadow-lg`
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
                     >
                       {option}
                     </button>
@@ -1006,10 +1024,11 @@ const PropertyHeader = () => {
                       <button
                         key={option}
                         onClick={() => dispatch(setSubType(option))}
-                        className={`rounded-xl px-2 py-2 text-xs font-medium transition-all duration-200 ${selectedFilters.subType === option
-                          ? `${theme.button.secondary.bg} text-white shadow-lg`
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                          }`}
+                        className={`rounded-xl px-2 py-2 text-xs font-medium transition-all duration-200 ${
+                          selectedFilters.subType === option
+                            ? `${theme.button.secondary.bg} text-white shadow-lg`
+                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        }`}
                       >
                         <span className="truncate">{subtypeLabel}</span>
                       </button>
@@ -1027,17 +1046,17 @@ const PropertyHeader = () => {
                     <button
                       key={option}
                       onClick={() => dispatch(setOccupancy(option))}
-                      className={`rounded-xl px-3 py-3 text-sm font-semibold transition-all duration-200 ${selectedFilters.occupancy === option
-                        ? `${theme.button.secondary.bg} text-white shadow-lg`
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                        }`}
+                      className={`rounded-xl px-3 py-3 text-sm font-semibold transition-all duration-200 ${
+                        selectedFilters.occupancy === option
+                          ? `${theme.button.secondary.bg} text-white shadow-lg`
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
                     >
                       {option}
                     </button>
                   ))}
                 </div>
               </div>
-
             </div>
           </div>
         </div>
@@ -1045,4 +1064,5 @@ const PropertyHeader = () => {
     </>
   );
 };
+
 export default PropertyHeader;

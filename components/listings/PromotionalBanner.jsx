@@ -533,6 +533,7 @@ const PromotionalBanner = ({
                           alt="No Images"
                           className="object-cover"
                           loading="lazy"
+                          unoptimized
                           placeholder="blur"
                           blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mN8/OhfPQAJ/wP/6vR4QQAAAABJRU5ErkJggg=="
                           quality={80}

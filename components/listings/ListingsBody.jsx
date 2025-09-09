@@ -38,12 +38,11 @@ const formatToIndianCurrency = (value) => {
 const cache = new CellMeasurerCache({
   fixedWidth: true,
   defaultHeight: 350,
-  minHeight: 300, // Set a reasonable minimum height to avoid excessive recalculations
+  minHeight: 300,
 });
 function ListingsBody({ setShowLoginModal }) {
   const JWT_SECRET = process.env.NEXT_PUBLIC_ENCRYPTION_SECRET;
   const ENCRYPTION_KEY = CryptoJS.SHA256(JWT_SECRET);
-
   function decrypt(encryptedText) {
     const [ivHex, encryptedHex] = encryptedText.split(":");
     const iv = CryptoJS.enc.Hex.parse(ivHex);
@@ -139,6 +138,10 @@ function ListingsBody({ setShowLoginModal }) {
         setLoading(true);
         await new Promise((resolve) => setTimeout(resolve, 1000));
         handleUserSearched();
+        const isPlot = searchData?.sub_type === "Plot";
+        const statusParam = isPlot
+          ? `possession_status=${searchData?.occupancy || ""}`
+          : `occupancy=${searchData?.occupancy || ""}`;
         const baseUrl = `${
           config.awsApiUrl
         }/listings/v1/gapbType?page=${currentPage}&limit=70&property_for=${
@@ -157,38 +160,52 @@ function ListingsBody({ setShowLoginModal }) {
           searchData?.bhk || ""
         }&property_cost=${
           searchData?.budget || ""
-        }&priceFilter=${encodeURIComponent(selected)}&occupancy=${
-          searchData?.occupancy || ""
-        }&property_status=${searchData.property_status}&city=${
+        }&priceFilter=${encodeURIComponent(
+          selected
+        )}&${statusParam}&property_status=${searchData.property_status}&city=${
           searchData.city
         }&furnished_status=${searchData.furnished_status}${
           searchData.tab === "New Launch" ? "&extra_filters=new_launches" : ""
         }`;
         const response = await fetch(`${baseUrl}`);
+        if (!response.ok) {
+          throw new Error(`API request failed with status ${response.status}`);
+        }
         const res = await response.json();
-        const data = res.data;
-        const decrypted = decrypt(data);
+        if (!res.data) {
+          throw new Error("No data returned from API");
+        }
+        const decrypted = decrypt(res.data);
         const parsed = JSON.parse(decrypted);
         const newData = parsed.properties || [];
         setData((prevData) => {
-          const combined = reset ? newData : [...prevData, ...newData];
+          if (reset) {
+            return newData.slice(0, maxLimit);
+          }
+          const combined = [
+            ...prevData,
+            ...newData.filter(
+              (newItem) =>
+                !prevData.some(
+                  (prevItem) =>
+                    prevItem.unique_property_id === newItem.unique_property_id
+                )
+            ),
+          ];
           return combined.slice(0, maxLimit);
         });
-        setHasMore(
-          newData.length > 0 &&
-            (reset
-              ? newData.length < maxLimit
-              : data.length + newData.length < maxLimit)
-        );
+        setHasMore(newData.length > 0 && currentPage * 70 < maxLimit);
       } catch (error) {
         console.error("Failed to fetch properties:", error);
-        setData([]);
+        if (reset) {
+          setData([]);
+        }
         setHasMore(false);
       } finally {
         setLoading(false);
       }
     },
-    [searchData, selected, loading]
+    [searchData, selected]
   );
   const fetchContactedProperties = async () => {
     const data = localStorage.getItem("user");
@@ -225,7 +242,9 @@ function ListingsBody({ setShowLoginModal }) {
     searchData?.sub_type,
     searchData?.budget,
     searchData?.furnished_status,
-    searchData.property_status,
+    searchData?.property_status,
+    searchData?.occupancy,
+    searchData?.possession_status,
     selected,
   ]);
   useEffect(() => {
@@ -501,7 +520,6 @@ function ListingsBody({ setShowLoginModal }) {
     }
     return baseCards;
   }, [data, loading, hasMore]);
-
   const rowRenderer = useCallback(
     ({ index, key, style, parent }) => {
       const item = cards[index];
@@ -786,13 +804,14 @@ function ListingsBody({ setShowLoginModal }) {
           No more properties to load.
         </div>
       )}
-      {hasMore && data.length < maxLimit && !loading && (
+      {hasMore && data.length > 0 && !loading && (
         <div className="w-full py-4 flex justify-center">
           <button
             onClick={() => setPage((prev) => prev + 1)}
             className="px-4 py-2 bg-[#1D3A76] text-white rounded hover:bg-[#162f5c] transition"
+            disabled={loading}
           >
-            Load More properties
+            Load More Properties
           </button>
         </div>
       )}
