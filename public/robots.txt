@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://meetowner.in
+
+# Sitemaps
+Sitemap: https://meetowner.in/sitemap.xml

@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "build:analyze": "cross-env ANALYZE=true next build"
+    "build:analyze": "cross-env ANALYZE=true next build",
+    "postbuild": "next-sitemap"
   },
   "dependencies": {
     "@radix-ui/react-alert-dialog": "^1.1.15",
@@ -33,6 +34,7 @@
     "moment": "^2.30.1",
     "mysql2": "^3.14.3",
     "next": "15.4.6",
+    "next-sitemap": "^4.2.3",
     "qrcode.react": "^4.2.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
