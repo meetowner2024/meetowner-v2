@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 export default async function SitemapPage() {
   const response = await fetch(
-    "http://localhost:5000/listings/v1/getSitemapData",
+    "https://api.meetowner.in/listings/v1/getSitemapData",
     {
       next: { revalidate: 86400 },
     }

@@ -62,7 +62,7 @@ module.exports = {
     ];
     try {
       const response = await fetch(
-        "http://localhost:5000/listings/v1/getSitemapData"
+        "https://api.meetowner.in/listings/v1/getSitemapData"
       );
       if (!response.ok) {
         console.error("Failed to fetch sitemap data:", response.status);

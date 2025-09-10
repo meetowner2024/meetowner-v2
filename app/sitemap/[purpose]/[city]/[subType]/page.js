@@ -8,7 +8,7 @@ export default async function SubTypeSitemap({ params }) {
     .replace(/\b\w/g, (c) => c.toUpperCase());
   const formattedPropertyFor = purpose === "Sell" ? "Sell" : "Rent";
   const response = await fetch(
-    `http://localhost:5000/listings/v1/getPropertiesByCityAndSubType?city=${city}&sub_type=${encodeURIComponent(
+    `https://api.meetowner.in/listings/v1/getPropertiesByCityAndSubType?city=${city}&sub_type=${encodeURIComponent(
       formattedSubType
     )}&property_for=${formattedPropertyFor}`,
     { next: { revalidate: 86400 } }
@@ -59,7 +59,7 @@ export default async function SubTypeSitemap({ params }) {
 }
 export async function generateStaticParams() {
   const response = await fetch(
-    "http://localhost:5000/listings/v1/getSitemapData"
+    "https://api.meetowner.in/listings/v1/getSitemapData"
   );
   if (!response.ok) {
     console.error("Failed to fetch sitemap data:", response.status);

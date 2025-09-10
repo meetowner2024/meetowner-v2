@@ -5,7 +5,7 @@ export default async function CitySitemap({ params }) {
   const { purpose, city } = params;
 
   const response = await fetch(
-    "http://localhost:5000/listings/v1/getSitemapData",
+    "https://api.meetowner.in/listings/v1/getSitemapData",
     {
       next: { revalidate: 86400 },
     }
@@ -44,7 +44,7 @@ export default async function CitySitemap({ params }) {
 
 export async function generateStaticParams() {
   const response = await fetch(
-    "http://localhost:5000/listings/v1/getSitemapData"
+    "https://api.meetowner.in/listings/v1/getSitemapData"
   );
   if (!response.ok) {
     console.error("Failed to fetch sitemap data:", response.status);
