@@ -223,50 +223,7 @@ export default function SearchBar() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [location, fetchMedia, fetchCities]);
-    const handleNavigation = useCallback(() => {
-    const params = new URLSearchParams();
-    const cityToUse = location || "Hyderabad"; // Default to Hyderabad if location is empty
-    params.set("city", cityToUse);
-    params.set("location", searchInput);
-    params.set("tab", TABS[activeTab]);
-    params.set("property_for", selected === "Rent" ? "Rent" : "Sell");
-    params.set(
-      "property_in",
-      TABS[activeTab] === "Commercial" ? "Commercial" : "Residential"
-    );
-    params.set(
-      "sub_type",
-      TABS[activeTab] === "Plot"
-        ? "Plot"
-        : TABS[activeTab] === "Commercial"
-        ? "Others"
-        : ""
-    );
-    params.set("property_status", "1"); // Add property_status
-    if (TABS[activeTab] === "Plot") params.set("plot_subType", plotSubType);
-    if (TABS[activeTab] === "Commercial") params.set("commercial_subType", commercialSubType);
-
-    // Update Redux store
-    dispatch(
-      setSearchData({
-        city: cityToUse,
-        location: searchInput,
-        tab: TABS[activeTab],
-        property_for: selected === "Rent" ? "Rent" : "Sell",
-        property_in: TABS[activeTab] === "Commercial" ? "Commercial" : "Residential",
-        sub_type:
-          TABS[activeTab] === "Plot"
-            ? "Plot"
-            : TABS[activeTab] === "Commercial"
-            ? "Others"
-            : "",
-        plot_subType: plotSubType,
-        commercial_subType: commercialSubType,
-        property_status: "1",
-      })
-    );
-
-    // Construct SEO-friendly URL
+  const handleNavigation = useCallback(() => {
     const propertyFor = TABS[activeTab] === "Rent" ? "rent" : "sale";
     const propertyType = (() => {
       switch (TABS[activeTab]) {
@@ -280,7 +237,7 @@ export default function SearchBar() {
           return "apartments";
       }
     })();
-    const citySlug = cityToUse
+    const citySlug = location
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "_")
       .replace(/(^_|_$)/g, "");
@@ -290,17 +247,22 @@ export default function SearchBar() {
           .replace(/[^a-z0-9]+/g, "_")
           .replace(/(^_|_$)/g, "")
       : "";
-    const seoUrl = `/${propertyType}_for_${propertyFor}_in_${citySlug}${
+    const seoUrl = `?${propertyType}_for_${propertyFor}_in_${citySlug}${
       locationSlug ? `_${locationSlug}` : ""
     }`;
-
-    router.push(`/listings?${params.toString()}`, { state: params });
-    handleUserSearched();
-  }, [activeTab, location, searchInput, selected, plotSubType, commercialSubType, dispatch, router, handleUserSearched]);
-
-  
-
-
+    const params = {
+      city: location,
+      property_for: selected === "Rent" ? "Rent" : "Sell",
+      property_type:
+        TABS[activeTab] === "Plot"
+          ? "Plot"
+          : TABS[activeTab] === "Commercial"
+          ? "Commercial"
+          : "Apartment",
+      location: searchInput,
+    };
+    router.push(`/listings${seoUrl}`, { state: params });
+  }, [activeTab, location, searchInput, selected, handleUserSearched, router]);
   const getCurrentLocation = useCallback(() => {
     if (!navigator.geolocation) {
       alert("Geolocation is not supported by your browser.");
