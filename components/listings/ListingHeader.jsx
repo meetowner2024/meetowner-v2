@@ -28,18 +28,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  setBHK,
-  setBudget,
-  setFurnishedStatus,
-  setOccupancy,
-  setPropertyIn,
-  setSubType,
-  setTab,
-  setSearchData,
-  clearSearch,
-} from "../store/slices/searchSlice";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter,useSearchParams } from "next/navigation";
 import { debounce } from "lodash";
 import axios from "axios";
 import config from "../utils/config";
@@ -48,6 +37,17 @@ import { IoIosHeartEmpty } from "react-icons/io";
 import PromotionalBanner from "./PromotionalBanner";
 import { setPropertyDetails } from "../store/slices/propertyDetails";
 import theme from "../utils/theme.json";
+import {
+  setSearchData,
+  setTab,
+  setBHK,
+  setBudget,
+  setPropertyIn,
+  setSubType,
+  setOccupancy,
+  setFurnishedStatus,
+  clearSearch
+} from "../store/slices/searchSlice";
 const commercialSubTypes = [
   { id: "Office", label: "Office", icon: Building },
   { id: "Retail Shop", label: "Retail Shop", icon: Home },
@@ -64,6 +64,7 @@ const furnishingOptions = [
 
 const ListingHeader = ({ setShowLoginModal, ads }) => {
   const dispatch = useDispatch();
+  const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
   const searchData = useSelector((state) => state.search);
@@ -150,10 +151,41 @@ const ListingHeader = ({ setShowLoginModal, ads }) => {
     },
     [router, dispatch, searchData]
   );
+useEffect(() => {
+  const params = new URLSearchParams(searchParams);
+  const cityParam = params.get("city") || "";
+  const locationParam = params.get("location") || "";
+  const tabParam = params.get("tab") || "Buy";
 
+
+  setCity(cityParam);
+  setSearchInput(locationParam);
+
+  dispatch(
+    setSearchData({
+      city: cityParam,
+      location: locationParam,
+      tab: tabParam,
+      property_for: params.get("property_for") || "Sell",
+      property_in: params.get("property_in") || "Residential",
+      bhk: params.get("bhk") && !isNaN(parseInt(params.get("bhk")))
+        ? parseInt(params.get("bhk"))
+        : null,
+      budget: params.get("budget") || "",
+      sub_type: params.get("sub_type") || "",
+      occupancy: params.get("occupancy") || "",
+      furnished_status: params.get("furnished_status") || "",
+      property_status: params.get("property_status") || "",
+    })
+  );
+  if (["Buy", "Rent", "Latest", "Plot", "New Launch"].includes(tabParam)) {
+    dispatch(setTab(tabParam));
+  }
+}, [searchParams, dispatch]);
   useEffect(() => {
     setCity(searchData.city);
   }, [searchData.city]);
+
   useEffect(() => {
     if (searchData.sub_type === "Plot" && searchData.plot_subType) {
       dispatch(setTab(searchData.plot_subType));
@@ -223,26 +255,35 @@ const ListingHeader = ({ setShowLoginModal, ads }) => {
   useEffect(() => {
     fetchLocalities(city, searchInput);
   }, [searchInput, city, fetchLocalities]);
-  const updateUrlWithSearchData = useCallback(() => {
-    if (pathname !== "/listings") return;
-    const queryParts = Object.entries(searchData)
-      .filter(
-        ([key, value]) =>
-          ![
-            "loading",
-            "error",
-            "userCity",
-            "plot_subType",
-            "commercial_subType",
-          ].includes(key) &&
-          value !== null &&
-          value !== "" &&
-          value !== undefined
-      )
-      .map(([key, value]) => `${key}-${encodeURIComponent(value)}`);
-    const queryString = queryParts.join("&");
-    router.replace(`/listings?${queryString}`, { scroll: false });
-  }, [router, searchData, pathname]);
+  
+  const updateUrlWithSearchData = useCallback(
+    debounce(() => {
+      if (pathname !== "/listings") return;
+
+      const queryParts = [];
+      if (searchData.city) queryParts.push(`city=${encodeURIComponent(searchData.city)}`);
+      if (searchData.location) queryParts.push(`location=${encodeURIComponent(searchData.location)}`);
+      if (searchData.tab) queryParts.push(`tab=${encodeURIComponent(searchData.tab)}`);
+      if (searchData.property_for) queryParts.push(`property_for=${encodeURIComponent(searchData.property_for)}`);
+      if (searchData.property_in) queryParts.push(`property_in=${encodeURIComponent(searchData.property_in)}`);
+      if (searchData.bhk) queryParts.push(`bhk=${encodeURIComponent(searchData.bhk)}`);
+      if (searchData.budget) queryParts.push(`budget=${encodeURIComponent(searchData.budget)}`);
+      if (searchData.sub_type) queryParts.push(`sub_type=${encodeURIComponent(searchData.sub_type)}`);
+      if (searchData.occupancy) queryParts.push(`occupancy=${encodeURIComponent(searchData.occupancy)}`);
+      if (searchData.furnished_status) queryParts.push(`furnished_status=${encodeURIComponent(searchData.furnished_status)}`);
+      if (searchData.property_status) queryParts.push(`property_status=${encodeURIComponent(searchData.property_status)}`);
+
+      const queryString = queryParts.join("&");
+      const newUrl = queryString ? `/listings?${queryString}` : "/listings";
+      router.replace(newUrl, { scroll: false });
+    }, 300),
+    [router, pathname, searchData]
+  );
+
+ 
+  useEffect(() => {
+    updateUrlWithSearchData();
+  }, [searchData, updateUrlWithSearchData]);
   useEffect(() => {
     updateUrlWithSearchData();
   }, [searchData, updateUrlWithSearchData]);
@@ -391,10 +432,11 @@ const ListingHeader = ({ setShowLoginModal, ads }) => {
     dispatch(setSearchData({ location: "" }));
     setLocalities([]);
     debouncedUserActivity("");
-    if (pathname === "/listings") {
-      router.replace("/listings", { scroll: false });
-    }
+    // if (pathname === "/listings") {
+    //   router.replace("/listings", { scroll: false });
+    // }
   }, [dispatch, debouncedUserActivity, pathname, router]);
+
   const clearFilter = useCallback(
     (filterText) => {
       if (filterText.includes("BHK")) {

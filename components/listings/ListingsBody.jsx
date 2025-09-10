@@ -5,7 +5,7 @@ import noPropertiesFound from "../../app/assets/Images/14099.jpg";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import {
   List,
@@ -26,7 +26,17 @@ import Image from "next/image";
 import { setPropertyDetails } from "../store/slices/propertyDetails";
 import ScheduleFormModal from "../utils/ScheduleForm";
 import CryptoJS from "crypto-js";
-import { clearSearch } from "../store/slices/searchSlice";
+import {
+  setSearchData,
+  setTab,
+  setBHK,
+  setBudget,
+  setPropertyIn,
+  setSubType,
+  setOccupancy,
+  setFurnishedStatus,
+  clearSearch,
+} from "../store/slices/searchSlice";
 const formatToIndianCurrency = (value) => {
   if (!value || isNaN(value)) return "N/A";
   const numValue = parseFloat(value);
@@ -43,6 +53,7 @@ const cache = new CellMeasurerCache({
 function ListingsBody({ setShowLoginModal }) {
   const JWT_SECRET = process.env.NEXT_PUBLIC_ENCRYPTION_SECRET;
   const ENCRYPTION_KEY = CryptoJS.SHA256(JWT_SECRET);
+  const searchParams = useSearchParams();
   function decrypt(encryptedText) {
     const [ivHex, encryptedHex] = encryptedText.split(":");
     const iv = CryptoJS.enc.Hex.parse(ivHex);
@@ -54,6 +65,7 @@ function ListingsBody({ setShowLoginModal }) {
     );
     return decrypted.toString(CryptoJS.enc.Utf8);
   }
+  const dispatch = useDispatch();
   const [modalOpen, setModalOpen] = useState(false);
   const searchData = useSelector((state) => state.search);
   const [page, setPage] = useState(1);
@@ -74,6 +86,31 @@ function ListingsBody({ setShowLoginModal }) {
     "Price: High to Low",
     "Newest First",
   ];
+
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams);
+    const queryData = {
+      city: params.get("city") || "",
+      location: params.get("location") || "",
+      tab: params.get("tab") || "Buy",
+      property_for: params.get("property_for") || "Sell",
+      property_in: params.get("property_in") || "Residential",
+      bhk: params.get("bhk") ? parseInt(params.get("bhk")) : null,
+      budget: params.get("budget") || "",
+      sub_type: params.get("sub_type") || "",
+      occupancy: params.get("occupancy") || "",
+      furnished_status: params.get("furnished_status") || "",
+      property_status: params.get("property_status") || "",
+    };
+    dispatch(setSearchData(queryData));
+    if (queryData.tab) dispatch(setTab(queryData.tab));
+    if (queryData.bhk) dispatch(setBHK(queryData.bhk));
+    if (queryData.budget) dispatch(setBudget(queryData.budget));
+    if (queryData.property_in) dispatch(setPropertyIn(queryData.property_in));
+    if (queryData.sub_type) dispatch(setSubType(queryData.sub_type));
+    if (queryData.occupancy) dispatch(setOccupancy(queryData.occupancy));
+    if (queryData.furnished_status) dispatch(setFurnishedStatus(queryData.furnished_status));
+  }, [searchParams, dispatch]);
   const handleUserSearched = async () => {
     let userDetails = null;
     try {
@@ -142,31 +179,24 @@ function ListingsBody({ setShowLoginModal }) {
         const statusParam = isPlot
           ? `possession_status=${searchData?.occupancy || ""}`
           : `occupancy=${searchData?.occupancy || ""}`;
-        const baseUrl = `${
-          config.awsApiUrl
-        }/listings/v1/gapbType?page=${currentPage}&limit=70&property_for=${
-          searchData?.tab === "Latest"
+        const baseUrl = `${config.awsApiUrl
+          }/listings/v1/gapbType?page=${currentPage}&limit=70&property_for=${searchData?.tab === "Latest"
             ? "Sell"
             : searchData.tab === "Buy"
-            ? "Sell"
-            : searchData?.tab === "Rent"
-            ? "Rent"
-            : searchData?.tab === "Plot"
-            ? "Sell"
-            : "Sell"
-        }&property_in=${searchData?.property_in || ""}&sub_type=${
-          searchData?.sub_type === "Others" ? "" : searchData?.sub_type
-        }&search=${searchData.location || ""}&bedrooms=${
-          searchData?.bhk || ""
-        }&property_cost=${
-          searchData?.budget || ""
-        }&priceFilter=${encodeURIComponent(
-          selected
-        )}&${statusParam}&property_status=${searchData.property_status}&city=${
-          searchData.city
-        }&furnished_status=${searchData.furnished_status}${
-          searchData.tab === "New Launch" ? "&extra_filters=new_launches" : ""
-        }`;
+              ? "Sell"
+              : searchData?.tab === "Rent"
+                ? "Rent"
+                : searchData?.tab === "Plot"
+                  ? "Sell"
+                  : "Sell"
+          }&property_in=${searchData?.property_in || ""}&sub_type=${searchData?.sub_type === "Others" ? "" : searchData?.sub_type
+          }&search=${searchData.location || ""}&bedrooms=${searchData?.bhk || ""
+          }&property_cost=${searchData?.budget || ""
+          }&priceFilter=${encodeURIComponent(
+            selected
+          )}&${statusParam}&property_status=${searchData.property_status}&city=${searchData.city
+          }&furnished_status=${searchData.furnished_status}${searchData.tab === "New Launch" ? "&extra_filters=new_launches" : ""
+          }`;
         const response = await fetch(`${baseUrl}`);
         if (!response.ok) {
           throw new Error(`API request failed with status ${response.status}`);
@@ -256,7 +286,7 @@ function ListingsBody({ setShowLoginModal }) {
   const toggleFacilities = useCallback((index) => {
     setExpandedCards((prev) => ({ ...prev, [index]: !prev[index] }));
   }, []);
-  const dispatch = useDispatch();
+
   const handleNavigation = useCallback(
     async (property) => {
       let userDetails = null;
@@ -313,9 +343,8 @@ function ListingsBody({ setShowLoginModal }) {
           property?.sub_type === "Apartment"
             ? `${bedrooms}_BHK_${property.sub_type}`
             : property?.sub_type || "";
-        const seoUrl = `${propertyFor}_${typeSegment}_${propertyNameSlug}_in_${locationSlug}_${
-          searchData?.city || "unknown"
-        }_Id_${propertyId}`;
+        const seoUrl = `${propertyFor}_${typeSegment}_${propertyNameSlug}_in_${locationSlug}_${searchData?.city || "unknown"
+          }_Id_${propertyId}`;
         router.push(`/property?${seoUrl}`, { state: property });
       } catch (navError) {
         console.error("Navigation error:", navError);
@@ -598,6 +627,7 @@ function ListingsBody({ setShowLoginModal }) {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
   return (
     <div className="min-h-screen relative z-0 overflow-visible">
       <div className="flex justify-between flex-wrap gap-2 mb-1 mt-0 px-2 ">
@@ -607,14 +637,14 @@ function ListingsBody({ setShowLoginModal }) {
             {searchData?.property_in === "Commercial"
               ? "Commercial"
               : searchData?.property_in === "Plot"
-              ? "Plot"
-              : "Residential"}{" "}
+                ? "Plot"
+                : "Residential"}{" "}
             {searchData?.sub_type || ""} For{" "}
             {searchData?.tab === "Buy"
               ? "Sell"
               : searchData?.tab === "Rent"
-              ? "Rent"
-              : "Sell"}{" "}
+                ? "Rent"
+                : "Sell"}{" "}
             In {searchData?.city || ""}
           </p>
         </div>
@@ -643,9 +673,8 @@ function ListingsBody({ setShowLoginModal }) {
                     setSelected(option);
                     setIsOpen(false);
                   }}
-                  className={`px-4 py-2 cursor-pointer hover:bg-gray-100 text-sm ${
-                    selected === option ? "bg-gray-100 font-medium" : ""
-                  }`}
+                  className={`px-4 py-2 cursor-pointer hover:bg-gray-100 text-sm ${selected === option ? "bg-gray-100 font-medium" : ""
+                    }`}
                 >
                   {option}
                 </div>
@@ -737,9 +766,8 @@ function ListingsBody({ setShowLoginModal }) {
                     return (
                       <span
                         key={key}
-                        className={`text-sm font-semibold px-3 py-1 rounded-full ${
-                          colors[key] || "bg-gray-100 text-gray-800"
-                        }`}
+                        className={`text-sm font-semibold px-3 py-1 rounded-full ${colors[key] || "bg-gray-100 text-gray-800"
+                          }`}
                       >
                         {labels[key]}: {value}
                       </span>
