@@ -62,46 +62,34 @@ module.exports = {
     ];
     try {
       const response = await fetch(
-        "https://api.meetowner.in/listings/v1/getAllListings"
+        "http://localhost:5000/listings/v1/getSitemapData"
       );
       if (!response.ok) {
-        console.error("Failed to fetch properties:", response.status);
+        console.error("Failed to fetch sitemap data:", response.status);
         return staticRoutes;
       }
-      const data = await response.json();
-      console.log("API Response:", data);
-      const dynamicRoutes = data.properties
-        .filter(
-          (property) =>
-            property.sub_type && property.property_for && property.city_id
-        )
-        .map((property) => {
-          const citySlug = property.city_id
-            ? property.city_id
-                .toLowerCase()
-                .replace(/[^a-z0-9]+/g, "_")
-                .replace(/(^_|_$)/g, "")
-            : "unknown";
-          const locationSlug = property.location_id
-            ? property.location_id
-                .toLowerCase()
-                .replace(/[^a-z0-9]+/g, "_")
-                .replace(/(^_|_$)/g, "")
-            : "";
-          const loc = `/listings?${property.sub_type}_for_${
-            property.property_for
-          }_in_city-${citySlug}_location-${
-            locationSlug ? `${locationSlug}` : ""
-          }`;
-          return {
-            loc: `${config.siteUrl}${loc}`,
-            lastmod: property.updated_date
-              ? new Date(property.updated_date).toISOString()
-              : new Date().toISOString(),
-            changefreq: "weekly",
-            priority: 0.5,
-          };
+      const { sitemap } = await response.json();
+      const dynamicRoutes = [];
+      sitemap.forEach((cityData) => {
+        const citySlug = cityData.city[("Rent", "Sell")].forEach((purpose) => {
+          if (cityData[purpose].subTypes.length > 0) {
+            dynamicRoutes.push({
+              loc: `${config.siteUrl}/sitemap/${purpose}/${citySlug}`,
+              lastmod: new Date().toISOString(),
+              changefreq: "daily",
+              priority: 0.8,
+            });
+            cityData[purpose].subTypes.forEach((subType) => {
+              dynamicRoutes.push({
+                loc: `${config.siteUrl}/sitemap/${purpose}/${citySlug}/${subType}`,
+                lastmod: new Date().toISOString(),
+                changefreq: "weekly",
+                priority: 0.7,
+              });
+            });
+          }
         });
+      });
       return [...staticRoutes, ...dynamicRoutes];
     } catch (error) {
       console.error("Error generating sitemap paths:", error);
