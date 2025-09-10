@@ -61,41 +61,6 @@ const furnishingOptions = [
   { label: "Semi Furnished", value: "Semi" },
   { label: "Fully Furnished", value: "Fully" },
 ];
-const promotionalProperties = [
-  {
-    id: 1,
-    title: "Luxury Villa in Whitefield",
-    price: "₹2.5 Cr",
-    location: "Whitefield, Bangalore",
-    image:
-      "https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg?auto=compress&cs=tinysrgb&w=400",
-    badge: "Premium",
-    views: "1.2k",
-    likes: "89",
-  },
-  {
-    id: 2,
-    title: "Modern Apartment in Koramangala",
-    price: "₹1.8 Cr",
-    location: "Koramangala, Bangalore",
-    image:
-      "https://images.pexels.com/photos/1396122/pexels-photo-1396122.jpeg?auto=compress&cs=tinysrgb&w=400",
-    badge: "Hot Deal",
-    views: "856",
-    likes: "67",
-  },
-  {
-    id: 3,
-    title: "Commercial Space in HSR Layout",
-    price: "₹95 L",
-    location: "HSR Layout, Bangalore",
-    image:
-      "https://images.pexels.com/photos/323780/pexels-photo-323780.jpeg?auto=compress&cs=tinysrgb&w=400",
-    badge: "New Launch",
-    views: "432",
-    likes: "34",
-  },
-];
 
 const ListingHeader = ({ setShowLoginModal, ads }) => {
   const dispatch = useDispatch();
@@ -185,14 +150,7 @@ const ListingHeader = ({ setShowLoginModal, ads }) => {
     },
     [router, dispatch, searchData]
   );
-  useEffect(() => {
-    if (showPromoBanner) {
-      const interval = setInterval(() => {
-        setCurrentPromo((prev) => (prev + 1) % promotionalProperties.length);
-      }, 4000);
-      return () => clearInterval(interval);
-    }
-  }, [showPromoBanner]);
+
   useEffect(() => {
     setCity(searchData.city);
   }, [searchData.city]);
@@ -504,7 +462,7 @@ const ListingHeader = ({ setShowLoginModal, ads }) => {
   const shouldShowFurnishing = !["Plot", "Land"].includes(
     selectedFilters.subType
   );
-  const currentProperty = promotionalProperties[currentPromo];
+
   return (
     <>
       <PromotionalBanner
