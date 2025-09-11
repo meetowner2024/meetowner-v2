@@ -26,12 +26,12 @@ const Page = () => {
   const [ads, setAds] = useState([]);
   const modalRef = useRef(null);
 
-  // Parse URL query parameters and update Redux store
+  
   useEffect(() => {
     const queryParams = Object.fromEntries(searchParams.entries());
     console.log("Raw Query Parameters:", queryParams);
 
-    // Define valid keys from searchSlice
+    
     const validKeys = [
       "city",
       "location",
@@ -48,7 +48,7 @@ const Page = () => {
       "commercial_subType",
     ];
 
-    // Parse hyphenated query parameters (e.g., city-Chennai -> city: Chennai)
+    
     const parsedParams = {};
     Object.keys(queryParams).forEach((key) => {
       const [paramKey, paramValue] = key.split("-");
@@ -59,18 +59,18 @@ const Page = () => {
 
     console.log("Parsed Query Parameters:", parsedParams);
 
-    // Dispatch only if there are valid parameters
+    
     if (Object.keys(parsedParams).length > 0) {
       dispatch(setSearchData(parsedParams));
     }
   }, [searchParams, dispatch]);
 
-  // Scroll to top on mount
+  
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  // Fetch ads
+  
   useEffect(() => {
     async function getAllAds() {
       try {

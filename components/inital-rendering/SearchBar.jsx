@@ -354,7 +354,6 @@ export default function SearchBar() {
 
         <div className="flex items-center backdrop-blur-none justify-between space-x-1 bg-white p-2 sm:p-3 rounded-b-lg shadow-sm border border-white">
           <div className="flex items-center space-x-1 sm:space-x-2 w-full">
-            {/* City selector */}
             <div className="relative w-auto inline-block">
               <div className="flex items-center gap-1 px-2 sm:px-3 py-1 rounded bg-white text-[#1D3A76]">
                 <div className="flex items-center mr-1 sm:mr-2">
@@ -392,7 +391,7 @@ export default function SearchBar() {
                   )}
                 </div>
 
-                {/* explicit chevron toggle */}
+               
                 <button
                   type="button"
                   onClick={(e) => {
@@ -405,7 +404,6 @@ export default function SearchBar() {
                 </button>
               </div>
 
-              {/* City dropdown */}
               {isLocationOpen && (
                 <ul
                   className="absolute left-0 top-10 sm:top-12 mt-1 w-full z-50 bg-white rounded-md shadow-md border border-gray-300 max-h-48 sm:max-h-60 overflow-y-auto hide-scrollbar text-sm sm:text-base"
@@ -418,7 +416,7 @@ export default function SearchBar() {
                       <li
                         key={option}
                         onPointerDown={(e) => {
-                          // pointer down before blur -> prevents race
+                      
                           e.preventDefault();
                           e.stopPropagation();
                           setLocation(option);
@@ -442,7 +440,6 @@ export default function SearchBar() {
               <div style={{ border: "0.5px solid #ddd", height: 40 }}></div>
             </span>
 
-            {/* Locality / Search input */}
             <div className="relative flex-1 items-start text-left">
               <input
                 type="text"
@@ -473,7 +470,6 @@ export default function SearchBar() {
                           <li
                             key={item.locality}
                             onPointerDown={(e) => {
-                              // prevent focus blur race; if disabled, ignore
                               e.preventDefault();
                               e.stopPropagation();
                               if (isDisabled) return;
