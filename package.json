@@ -47,7 +47,8 @@
     "redux-persist": "^6.0.0",
     "slick-carousel": "^1.8.1",
     "swiper": "^11.2.10",
-    "tailwind-merge": "^3.3.1"
+    "tailwind-merge": "^3.3.1",
+    "use-detect-keyboard-open": "^0.4.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
