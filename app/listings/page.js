@@ -6,15 +6,24 @@ import { useDispatch } from "react-redux";
 import { useSearchParams } from "next/navigation";
 import { setSearchData } from "../../components/store/slices/searchSlice";
 
-const ListingHeader = dynamic(() => import("../../components/listings/ListingHeader"), {
-  ssr: true,
-});
-const ListingsBody = dynamic(() => import("../../components/listings/ListingsBody"), {
-  ssr: true,
-});
-const ListingAds = dynamic(() => import("../../components/listings/ListingAds"), {
-  ssr: true,
-});
+const ListingHeader = dynamic(
+  () => import("../../components/listings/ListingHeader"),
+  {
+    ssr: true,
+  }
+);
+const ListingsBody = dynamic(
+  () => import("../../components/listings/ListingsBody"),
+  {
+    ssr: true,
+  }
+);
+const ListingAds = dynamic(
+  () => import("../../components/listings/ListingAds"),
+  {
+    ssr: true,
+  }
+);
 const LoginModal = dynamic(() => import("../../components/utils/LoginModal"), {
   ssr: false,
 });
@@ -26,12 +35,9 @@ const Page = () => {
   const [ads, setAds] = useState([]);
   const modalRef = useRef(null);
 
-  
   useEffect(() => {
     const queryParams = Object.fromEntries(searchParams.entries());
-    console.log("Raw Query Parameters:", queryParams);
 
-    
     const validKeys = [
       "city",
       "location",
@@ -48,7 +54,6 @@ const Page = () => {
       "commercial_subType",
     ];
 
-    
     const parsedParams = {};
     Object.keys(queryParams).forEach((key) => {
       const [paramKey, paramValue] = key.split("-");
@@ -57,20 +62,20 @@ const Page = () => {
       }
     });
 
-    console.log("Parsed Query Parameters:", parsedParams);
-
-    
     if (Object.keys(parsedParams).length > 0) {
+      dispatch(
+        setSearchData({
+          location: parsedParams.location,
+        })
+      );
       dispatch(setSearchData(parsedParams));
     }
   }, [searchParams, dispatch]);
 
-  
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  
   useEffect(() => {
     async function getAllAds() {
       try {

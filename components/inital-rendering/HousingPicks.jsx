@@ -8,13 +8,12 @@ import config from "../utils/config";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { toast } from "react-toastify";
-import {
-  setPropertyDetails
-} from "../store/slices/propertyDetails";
+import { setPropertyDetails } from "../store/slices/propertyDetails";
 import { useDispatch, useSelector } from "react-redux";
 import Login from "../auth/Login";
 import Image from "next/image";
 import CryptoJS from "crypto-js";
+import Link from "next/link";
 
 const HousingPicks = ({ bestMeetownerProperties }) => {
   const JWT_SECRET = process.env.NEXT_PUBLIC_ENCRYPTION_SECRET;
@@ -355,12 +354,13 @@ const HousingPicks = ({ bestMeetownerProperties }) => {
                         }`;
                       }}
                     />
-                    <a
+                    <Link
+                      href={`/property?${property.property_for}_${property.sub_type}_${property.property_name}_in_${property?.location_id}_${searchData?.city}_Id_${property.unique_property_id}`}
                       onClick={() => handleNavigation(property)}
                       className={`absolute top-4 right-4 cursor-pointer text-white font-bold transition-colors`}
                     >
                       View Project
-                    </a>
+                    </Link>
                   </div>
                 </div>
               </SwiperSlide>
