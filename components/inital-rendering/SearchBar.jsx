@@ -1,6 +1,3 @@
-const isVideo = (url) => /\.(mp4|webm|ogg)$/i.test(url);
-const TABS = ["Buy", "Rent", "New Launch", "Plot", "Commercial"];
-const OPTIONS = ["Buy", "Rent"];
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
@@ -17,9 +14,15 @@ import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
 import config from "../utils/config";
 import ad1 from "../../app/assets/FAMILY MEETOWNER (1).jpg";
+
 import axios from "axios";
 import Image from "next/image";
 import theme from "../utils/theme.json";
+
+const isVideo = (url) => /\.(mp4|webm|ogg)$/i.test(url);
+const TABS = ["Buy", "Rent", "Plot", "Commercial"];
+const OPTIONS = ["Buy", "Rent"];
+
 const PrevArrow = (props) => {
   const { currentSlide, slideCount, ...rest } = props;
   return <FaAngleLeft {...rest} />;
@@ -28,7 +31,9 @@ const NextArrow = (props) => {
   const { currentSlide, slideCount, ...rest } = props;
   return <FaAngleRight {...rest} />;
 };
+
 export default function SearchBar() {
+  const Data = useSelector((state) => state.search.tab);
   const searchData = useSelector((state) => state.search);
   const [activeTab, setActiveTab] = useState(0);
   const [searchInput, setSearchInput] = useState("");
@@ -89,6 +94,7 @@ export default function SearchBar() {
     }),
     []
   );
+
   const handleUserSearched = useCallback(async () => {
     let userDetails = null;
     try {
@@ -124,6 +130,7 @@ export default function SearchBar() {
       }
     }
   }, [searchInput, selected, location, searchData]);
+
   useEffect(() => {
     const selectedTab = TABS[activeTab];
     dispatch(
@@ -138,7 +145,7 @@ export default function SearchBar() {
             ? "Plot"
             : selectedTab === "Commercial"
             ? "Others"
-            : "",
+            : "Apartment",
         location: searchInput,
         plot_subType: plotSubType,
         commercial_subType: commercialSubType,
@@ -153,6 +160,7 @@ export default function SearchBar() {
     commercialSubType,
     dispatch,
   ]);
+
   const fetchMedia = useCallback(async () => {
     try {
       const response = await fetch(
@@ -175,6 +183,7 @@ export default function SearchBar() {
       setIsError(true);
     }
   }, [location]);
+
   const fetchCities = useCallback(async () => {
     setIsLoadingCities(true);
     try {
@@ -193,6 +202,7 @@ export default function SearchBar() {
       setIsLoadingCities(false);
     }
   }, []);
+
   useEffect(() => {
     if (!location) return;
     const fetchLocalities = async () => {
@@ -209,6 +219,7 @@ export default function SearchBar() {
     };
     fetchLocalities();
   }, [searchInput, location]);
+
   useEffect(() => {
     fetchMedia();
     fetchCities();
@@ -218,11 +229,14 @@ export default function SearchBar() {
         !containerRef.current.contains(event.target)
       ) {
         setIsLocationOpen(false);
+        setIsSearchDropdownOpen(false);
+        setIsOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [location, fetchMedia, fetchCities]);
+
   const handleNavigation = useCallback(() => {
     const propertyFor = TABS[activeTab] === "Rent" ? "rent" : "sale";
     const propertyType = (() => {
@@ -261,8 +275,9 @@ export default function SearchBar() {
           : "Apartment",
       location: searchInput,
     };
-    router.push(`/listings${seoUrl}`, { state: params });
+    router.push(`/listings`);
   }, [activeTab, location, searchInput, selected, handleUserSearched, router]);
+
   const getCurrentLocation = useCallback(() => {
     if (!navigator.geolocation) {
       alert("Geolocation is not supported by your browser.");
@@ -280,6 +295,7 @@ export default function SearchBar() {
       }
     );
   }, []);
+
   return (
     <div
       className="w-full relative z-50 lg:h-[510px] md:h-[500px] sm:h-[200px]"
@@ -318,18 +334,17 @@ export default function SearchBar() {
       </Slider>
 
       <div className="relative bottom-15 sm:bottom-20 left-1/2 transform -translate-x-1/2 w-11/12 sm:w-10/12 md:w-3/4 lg:w-2/3">
-        <div className="hidden sm:flex bg-white/30 justify-center rounded-t-2xl shadow-lg p-3 sm:p-4 border border-white/20">
-          <div className="flex flex-nowrap overflow-x-auto bg-white rounded-full p-1 sm:p-2 scrollbar-hide">
+        <div className="bg-white/30 flex justify-center rounded-t-2xl shadow-lg  p-3 sm:p-4 border border-white/20">
+          <div className="inline-flex flex-wrap justify-center bg-white  rounded-full p-1 sm:p-2">
             {TABS.map((item, index) => (
               <button
                 key={index}
                 onClick={() => setActiveTab(index)}
-                className={`relative z-10 w-auto px-4 py-1 cursor-pointer rounded-full text-xs sm:text-sm duration-300 whitespace-nowrap
-          ${
-            activeTab === index
-              ? `${theme.button.secondary.bg} ${theme.button.secondary.text}`
-              : "text-gray-600"
-          }`}
+                className={`relative z-10 w-auto px-4 py-1 cursor-pointer rounded-full text-xs sm:text-sm duration-300 ${
+                  activeTab === index
+                    ? `${theme.button.secondary.bg}  ${theme.button.secondary.text} `
+                    : "text-gray-600"
+                }`}
               >
                 {item}
               </button>
@@ -337,13 +352,11 @@ export default function SearchBar() {
           </div>
         </div>
 
-        <div className="flex items-center backdrop-blur-none justify-between space-x-1 bg-white p-2 sm:p-3 rounded-lg sm:rounded-b-lg shadow-sm border border-white">
+        <div className="flex items-center backdrop-blur-none justify-between space-x-1 bg-white p-2 sm:p-3 rounded-b-lg shadow-sm border border-white">
           <div className="flex items-center space-x-1 sm:space-x-2 w-full">
+            {/* City selector */}
             <div className="relative w-auto inline-block">
-              <div
-                className="flex items-center gap-1 px-2 sm:px-3 py-1 rounded bg-white text-[#1D3A76] cursor-pointer"
-                onClick={() => setIsLocationOpen((prev) => !prev)}
-              >
+              <div className="flex items-center gap-1 px-2 sm:px-3 py-1 rounded bg-white text-[#1D3A76]">
                 <div className="flex items-center mr-1 sm:mr-2">
                   <input
                     type="text"
@@ -378,22 +391,36 @@ export default function SearchBar() {
                     />
                   )}
                 </div>
-                <IoChevronDownOutline className="w-3 h-3 sm:w-4 sm:h-4 text-[#1D3A76]" />
+
+                {/* explicit chevron toggle */}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsLocationOpen((prev) => !prev);
+                  }}
+                  className="flex items-center"
+                >
+                  <IoChevronDownOutline className="w-3 h-3 sm:w-4 sm:h-4 text-[#1D3A76]" />
+                </button>
               </div>
+
+              {/* City dropdown */}
               {isLocationOpen && (
                 <ul
                   className="absolute left-0 top-10 sm:top-12 mt-1 w-full z-50 bg-white rounded-md shadow-md border border-gray-300 max-h-48 sm:max-h-60 overflow-y-auto hide-scrollbar text-sm sm:text-base"
                   onWheel={(e) => e.stopPropagation()}
                 >
                   {isLoadingCities ? (
-                    <li className="px-3 py-2 text-gray-400 text-sm">
-                      Loading...
-                    </li>
+                    <li className="px-3 py-2 text-gray-400 text-sm">Loading...</li>
                   ) : filteredLocations.length > 0 ? (
                     filteredLocations.map((option) => (
                       <li
                         key={option}
-                        onClick={() => {
+                        onPointerDown={(e) => {
+                          // pointer down before blur -> prevents race
+                          e.preventDefault();
+                          e.stopPropagation();
                           setLocation(option);
                           setCity(option);
                           setIsLocationOpen(false);
@@ -405,16 +432,17 @@ export default function SearchBar() {
                       </li>
                     ))
                   ) : (
-                    <li className="px-3 py-2 text-gray-400 text-sm">
-                      No results found
-                    </li>
+                    <li className="px-3 py-2 text-gray-400 text-sm">No results found</li>
                   )}
                 </ul>
               )}
             </div>
+
             <span className="hidden md:block text-gray-400">
               <div style={{ border: "0.5px solid #ddd", height: 40 }}></div>
             </span>
+
+            {/* Locality / Search input */}
             <div className="relative flex-1 items-start text-left">
               <input
                 type="text"
@@ -422,9 +450,7 @@ export default function SearchBar() {
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 onFocus={() => setIsSearchDropdownOpen(true)}
-                onBlur={() =>
-                  setTimeout(() => setIsSearchDropdownOpen(false), 200)
-                }
+                onBlur={() => setIsSearchDropdownOpen(false)}
                 className="w-full outline-none bg-transparent text-gray-800 placeholder-gray-500 text-sm sm:text-base px-2 py-1"
               />
               {searchInput && (
@@ -436,6 +462,7 @@ export default function SearchBar() {
                   }}
                 />
               )}
+
               {isSearchDropdownOpen && (
                 <ul className="absolute z-1000 left-0 top-11 sm:top-13 w-full bg-white rounded-md shadow-md border border-gray-300 max-h-48 sm:max-h-60 overflow-y-auto text-sm sm:text-base">
                   {searchInput.trim() === "" ? (
@@ -445,11 +472,13 @@ export default function SearchBar() {
                         return (
                           <li
                             key={item.locality}
-                            onClick={() => {
-                              if (!isDisabled) {
-                                setSearchInput(item.locality);
-                                setIsSearchDropdownOpen(false);
-                              }
+                            onPointerDown={(e) => {
+                              // prevent focus blur race; if disabled, ignore
+                              e.preventDefault();
+                              e.stopPropagation();
+                              if (isDisabled) return;
+                              setSearchInput(item.locality);
+                              setIsSearchDropdownOpen(false);
                             }}
                             className={`px-3 py-1 text-left rounded-md transition-all duration-200 ${
                               isDisabled
@@ -475,42 +504,42 @@ export default function SearchBar() {
                         );
                       })
                     ) : (
-                      <li className="px-3 py-1 text-gray-500">
-                        No matching localities
-                      </li>
+                      <li className="px-3 py-1 text-gray-500">No matching localities</li>
                     )
                   ) : localites.length > 0 ? (
                     localites.map((item) => (
                       <li
                         key={item.locality}
-                        onClick={() => {
+                        onPointerDown={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
                           setSearchInput(item.locality);
                           setIsSearchDropdownOpen(false);
                         }}
-                        className={`px-3 flex flex-row justify-between py-1 text-left ${theme.button.secondary.hover} ${theme.button.secondary.hoverText} rounded-md cursor-pointer transition-all duration-200`}
+                        className="px-3 flex flex-row justify-between py-1 text-left hover:bg-[#1D3A76] hover:text-white rounded-md cursor-pointer transition-all duration-200"
                       >
-                        {item.locality}{" "}
-                        <p className="text-sm text-gray-300">Locality</p>
+                        {item.locality} <p className="text-sm text-gray-300">Locality</p>
                       </li>
                     ))
                   ) : (
-                    <li className="px-3 py-1 text-gray-500">
-                      No matching localities
-                    </li>
+                    <li className="px-3 py-1 text-gray-500">No matching localities</li>
                   )}
                 </ul>
               )}
             </div>
+
             <IoSearch
               className="w-5 h-5 text-gray-600 cursor-pointer md:hidden"
               onClick={handleNavigation}
             />
           </div>
+
           <div className="hidden md:flex space-x-1 sm:space-x-2 items-center flex-shrink-0">
             <span className="hidden md:block text-gray-400">
               <div style={{ border: "0.1px solid #ddd", height: 40 }}></div>
             </span>
-            {(activeTab === 3 || activeTab === 4) && (
+
+            {(activeTab === 2 || activeTab === 3) && (
               <div className="relative inline-block w-32">
                 <button
                   onClick={() => setIsOpen(!isOpen)}
@@ -526,12 +555,11 @@ export default function SearchBar() {
                         key={option}
                         onClick={() => {
                           if (activeTab === 2) setPlotSubType(option);
-                          else if (activeTab === 3)
-                            setCommercialSubType(option);
+                          else if (activeTab === 3) setCommercialSubType(option);
                           setSelected(option);
                           setIsOpen(false);
                         }}
-                        className={`px-3 py-1 text-left ${theme.button.secondary.hover} ${theme.button.secondary.hoverText}  cursor-pointer rounded-md transition-all duration-200`}
+                        className="px-3 py-1 text-left hover:bg-[#1D3A76] hover:text-white cursor-pointer rounded-md transition-all duration-200"
                       >
                         {option}
                       </li>
@@ -540,10 +568,12 @@ export default function SearchBar() {
                 )}
               </div>
             )}
+
             <FaLocationCrosshairs
               onClick={getCurrentLocation}
               className="hidden md:block p-1 sm:p-2 w-7 h-7 sm:w-8 sm:h-8 bg-white rounded-full hover:bg-gray-300 transition-all duration-300 cursor-pointer"
             />
+
             <button
               className={`hidden md:block ${theme.button.secondary.bg}  ${theme.button.secondary.text} px-3 sm:px-4 py-1 rounded-full shadow-lg ${theme.button.secondary.hover}  hover:border-1 hover:border-black transition-all duration-300 cursor-pointer text-sm sm:text-base whitespace-nowrap`}
               onClick={handleNavigation}

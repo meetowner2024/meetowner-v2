@@ -1,47 +1,87 @@
 "use client";
 import dynamic from "next/dynamic";
 import { ToastContainer } from "react-toastify";
-import { use, useEffect, useRef, useState } from "react";
-import { useSelector } from "react-redux";
+import { useEffect, useRef, useState } from "react";
+import { useDispatch } from "react-redux";
+import { useSearchParams } from "next/navigation";
+import { setSearchData } from "../../components/store/slices/searchSlice";
 
-const ListingHeader = dynamic(
-  () => import("../../components/listings/ListingHeader"),
-  {
-    ssr: true,
-  }
-);
-const ListingsBody = dynamic(
-  () => import("../../components/listings/ListingsBody"),
-  {
-    ssr: true,
-  }
-);
-const ListingAds = dynamic(
-  () => import("../../components/listings/ListingAds"),
-  {
-    ssr: true,
-  }
-);
+const ListingHeader = dynamic(() => import("../../components/listings/ListingHeader"), {
+  ssr: true,
+});
+const ListingsBody = dynamic(() => import("../../components/listings/ListingsBody"), {
+  ssr: true,
+});
+const ListingAds = dynamic(() => import("../../components/listings/ListingAds"), {
+  ssr: true,
+});
 const LoginModal = dynamic(() => import("../../components/utils/LoginModal"), {
   ssr: false,
 });
 
 const Page = () => {
+  const dispatch = useDispatch();
+  const searchParams = useSearchParams();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [ads, setAds] = useState([]);
   const modalRef = useRef(null);
 
+  // Parse URL query parameters and update Redux store
+  useEffect(() => {
+    const queryParams = Object.fromEntries(searchParams.entries());
+    console.log("Raw Query Parameters:", queryParams);
+
+    // Define valid keys from searchSlice
+    const validKeys = [
+      "city",
+      "location",
+      "tab",
+      "property_for",
+      "property_in",
+      "bhk",
+      "budget",
+      "sub_type",
+      "occupancy",
+      "furnished_status",
+      "property_status",
+      "plot_subType",
+      "commercial_subType",
+    ];
+
+    // Parse hyphenated query parameters (e.g., city-Chennai -> city: Chennai)
+    const parsedParams = {};
+    Object.keys(queryParams).forEach((key) => {
+      const [paramKey, paramValue] = key.split("-");
+      if (validKeys.includes(paramKey) && paramValue) {
+        parsedParams[paramKey] = decodeURIComponent(paramValue);
+      }
+    });
+
+    console.log("Parsed Query Parameters:", parsedParams);
+
+    // Dispatch only if there are valid parameters
+    if (Object.keys(parsedParams).length > 0) {
+      dispatch(setSearchData(parsedParams));
+    }
+  }, [searchParams, dispatch]);
+
+  // Scroll to top on mount
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
+  // Fetch ads
   useEffect(() => {
     async function getAllAds() {
-      const res = await fetch(`/api/getAllAds`, {
-        cache: "force-cache",
-      });
-      const data = await res.json();
-      setAds(data.results || []);
+      try {
+        const res = await fetch(`/api/getAllAds`, {
+          cache: "force-cache",
+        });
+        const data = await res.json();
+        setAds(data.results || []);
+      } catch (error) {
+        console.error("Failed to fetch ads:", error);
+      }
     }
     getAllAds();
   }, []);
@@ -63,7 +103,7 @@ const Page = () => {
               setShowLoginModal={setShowLoginModal}
             />
           </div>
-          <div className="hidden md:block z-0  w-full md:w-[30%]">
+          <div className="hidden md:block z-0 w-full md:w-[30%]">
             <ListingAds ads={ads} />
           </div>
         </div>
