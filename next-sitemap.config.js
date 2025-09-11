@@ -104,7 +104,29 @@ module.exports = {
         changefreq: "daily",
         priority: 0.65,
       }));
-      return [...staticRoutes, ...listingRoutes, ...dynamicRoutes];
+      const propertyResponse = await fetch(
+        "https://api.meetowner.in/listings/v1/getAllPropertiesLinks"
+      );
+      if (!propertyResponse.ok) {
+        console.error(
+          "Failed to fetch property links:",
+          propertyResponse.status
+        );
+      } else {
+        const data = await propertyResponse.json();
+        propertyRoutes = data.map((item) => ({
+          loc: item.url,
+          lastmod: new Date().toISOString(),
+          changefreq: "daily",
+          priority: 0.65,
+        }));
+      }
+      return [
+        ...staticRoutes,
+        ...listingRoutes,
+        ...dynamicRoutes,
+        ...propertyRoutes,
+      ];
     } catch (error) {
       console.error("Error generating sitemap paths:", error);
       return staticRoutes;
