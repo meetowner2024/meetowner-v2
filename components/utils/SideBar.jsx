@@ -16,6 +16,7 @@ import { setPropertyDetails } from "../store/slices/propertyDetails";
 import config from "./config";
 import Image from "next/image";
 import { Button } from "../ui/button";
+import theme from "./theme.json";
 const Sidebar = ({
   menuOpen,
   setMenuOpen,
@@ -327,7 +328,7 @@ const Sidebar = ({
         <Button
           aria-label="Upcoming Projects"
           onClick={handleListings}
-          className="w-full mt-6 bg-[#1D3A76] text-white font-medium py-2 rounded-lg hover:shadow-[0_0_12px_rgba(29,58,118,0.7)] transition-all duration-300 flex items-center justify-center"
+          className={`w-full mt-6 ${theme.button.secondary.bg}  ${theme.button.secondary.text} text-white font-medium py-2 rounded-lg hover:shadow-[0_0_12px_rgba(29,58,118,0.7)] transition-all duration-300 flex items-center justify-center`}
         >
           <ArrowDownRight className="w-5 h-5 mr-2" />
           Upcoming Projects
@@ -335,7 +336,7 @@ const Sidebar = ({
         <Button
           aria-label="Profile"
           onClick={handleRoute}
-          className="w-full mt-4 bg-[#1D3A76]  text-white font-medium py-2 rounded-lg hover:bg-opacity-30 hover:shadow-[0_0_12px_rgba(29,58,118,0.7)] transition-all duration-300 flex items-center justify-center"
+          className={`w-full ${theme.button.secondary.bg}  ${theme.button.secondary.text} mt-4  text-white font-medium py-2 rounded-lg hover:bg-opacity-30 hover:shadow-[0_0_12px_rgba(29,58,118,0.7)] transition-all duration-300 flex items-center justify-center`}
         >
           <User2Icon className="w-5 h-5 mr-2" />
           Profile

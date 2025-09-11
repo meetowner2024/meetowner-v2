@@ -1,4 +1,6 @@
+// components/Login.jsx
 "use client";
+
 import axios from "axios";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useDispatch } from "react-redux";
@@ -10,20 +12,18 @@ import CryptoJS from "crypto-js";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSlot,
-} from "@/components/ui/input-otp";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { X } from "lucide-react";
 import { setCookie } from "cookies-next";
 import Image from "next/image";
 import loginimage from "../../app/assets/finalone.png";
 import meetlogo from "../../app/assets/Images/Logo.png";
 import meetownericon from "../../app/assets/Images/Favicon@10x.png";
+
 const JWT_SECRET = "khsfskhfks983493123!@#JSFKORuiweo232";
 const OTP_LENGTH = 4;
 const RESEND_COOLDOWN = 30;
+
 function decrypt(encryptedText) {
   try {
     const [ivHex, encryptedHex] = encryptedText.split(":");
@@ -41,6 +41,7 @@ function decrypt(encryptedText) {
     return null;
   }
 }
+
 const Login = ({ onClose, modalRef }) => {
   const dispatch = useDispatch();
   const [mobile, setMobile] = useState("");
@@ -56,10 +57,13 @@ const Login = ({ onClose, modalRef }) => {
   const [resendCooldown, setResendCooldown] = useState(0);
   const mobileInputRef = useRef(null);
   const otpInputRef = useRef(null);
+  const [isKeyboardOpen, setKeyboardOpen] = useState(false);
+
   const validateMobile = (mobile, country) =>
     country === "India"
       ? /^[6-9]\d{9}$/.test(mobile)
       : /^\d+$/.test(mobile) && mobile.length > 0;
+
   const handleKeyPress = (e, action) => {
     if (e.key === "Enter" && !isLoading) {
       e.preventDefault();
@@ -70,6 +74,22 @@ const Login = ({ onClose, modalRef }) => {
       }
     }
   };
+
+  // Keyboard detection
+  useEffect(() => {
+    let initialHeight = window.innerHeight;
+    const handleResize = () => {
+      if (window.innerHeight < initialHeight * 0.8) {
+        setKeyboardOpen(true);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } else {
+        setKeyboardOpen(false);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   useEffect(() => {
     let timer;
     if (resendCooldown > 0) {
@@ -79,6 +99,7 @@ const Login = ({ onClose, modalRef }) => {
     }
     return () => clearInterval(timer);
   }, [resendCooldown]);
+
   useEffect(() => {
     if (!otpSent && mobileInputRef.current) {
       mobileInputRef.current.focus();
@@ -87,6 +108,7 @@ const Login = ({ onClose, modalRef }) => {
       otpInputRef.current.focus();
     }
   }, [otpSent]);
+
   const checkUserExists = useCallback(async () => {
     try {
       const { data } = await axios.post(
@@ -99,6 +121,7 @@ const Login = ({ onClose, modalRef }) => {
       return null;
     }
   }, [mobile]);
+
   const sendUnifiedOtp = useCallback(async () => {
     setIsLoading(true);
     setError("");
@@ -131,6 +154,7 @@ const Login = ({ onClose, modalRef }) => {
       setIsLoading(false);
     }
   }, [mobile, selectedCode]);
+
   const handleResendOtp = useCallback(async () => {
     if (resendCooldown > 0) {
       setError(`Please wait ${resendCooldown}s before resending.`);
@@ -138,6 +162,7 @@ const Login = ({ onClose, modalRef }) => {
     }
     await sendUnifiedOtp();
   }, [resendCooldown, sendUnifiedOtp]);
+
   const registerUser = useCallback(async () => {
     try {
       const { data } = await axios.post(
@@ -164,6 +189,7 @@ const Login = ({ onClose, modalRef }) => {
       return false;
     }
   }, [mobile, selectedCode, country, checkUserExists, sendUnifiedOtp]);
+
   const handleLogin = useCallback(async () => {
     if (!validateMobile(mobile, country)) {
       setError(
@@ -183,6 +209,7 @@ const Login = ({ onClose, modalRef }) => {
     }
     setIsLoading(false);
   }, [mobile, country, checkUserExists, sendUnifiedOtp, registerUser]);
+
   const verifyOTP = useCallback(() => {
     const trimmedEnteredOtp = enteredOtp.trim();
     if (trimmedEnteredOtp.length !== OTP_LENGTH || trimmedEnteredOtp !== otp) {
@@ -228,15 +255,22 @@ const Login = ({ onClose, modalRef }) => {
       setIsLoading(false);
     }
   }, [enteredOtp, otp, loginData, dispatch, onClose]);
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div
+      className={`fixed inset-0 z-[1000] flex p-4 ${
+        isKeyboardOpen
+          ? "h-fit items-start sm:items-center sm:justify-center"
+          : "items-center justify-center h-auto"
+      }`}
+    >
       <div
         ref={modalRef}
         className="relative w-full max-w-5xl bg-white/10 backdrop-blur-2xl border border-white/20 rounded-3xl shadow-2xl overflow-hidden animate-modal-enter"
       >
         <button
           onClick={onClose}
-          className="absolute top-6 right-6 z-20 w-10 h-10 rounded-full bg-white/10 backdrop-blur-lg border border-white/20 flex items-center justify-center text-black hover:bg-white/20 transition-all duration-300 hover:scale-110 group"
+          className="absolute top-6 right-6 z-[1001] w-10 h-10 rounded-full bg-white/10 backdrop-blur-lg border border-white/20 flex items-center justify-center text-black hover:bg-white/20 transition-all duration-300 hover:scale-110 group"
           aria-label="Close login modal"
         >
           <X
@@ -248,7 +282,7 @@ const Login = ({ onClose, modalRef }) => {
           <div className="relative w-full lg:w-1/2 bg-gradient-to-br from-[#3A59D1] to-[#3D90D7] p-8 flex flex-col justify-between overflow-hidden lg:block hidden">
             <div className="absolute -top-40 -left-40 w-80 h-80 bg-white/10 rounded-full blur-3xl animate-float"></div>
             <div className="absolute -bottom-40 -right-40 w-80 h-80 bg-purple-400/20 rounded-full blur-3xl animate-float-delay"></div>
-            <div className="relative z-10 h-full flex flex-col justify-between">
+            <div className="relative z-[1001] h-full flex flex-col justify-between">
               <div className="flex items-center gap-3 mb-8">
                 <div className="w-12 h-12 bg-white/20 backdrop-blur-lg rounded-2xl flex items-center justify-center">
                   <Image
@@ -277,7 +311,7 @@ const Login = ({ onClose, modalRef }) => {
               {!otpSent ? (
                 <div className="space-y-8">
                   <div className="text-center space-y-3">
-                    <div className="w-50 h-16 flex items-center justify-center mx-auto mb-6 ">
+                    <div className="w-50 h-16 flex items-center justify-center mx-auto mb-6">
                       <Image
                         src={meetlogo}
                         width={700}
@@ -309,17 +343,17 @@ const Login = ({ onClose, modalRef }) => {
                       </div>
                     </div>
                   )}
-                  <div className="space-y-6 overflow-auto">
-                    <div className="space-y-3 ">
+                  <div className="space-y-6">
+                    <div className="space-y-3">
                       <Label className="text-black/90 text-sm font-medium">
                         Mobile Number
                       </Label>
-                      <div className="flex items-center gap-2 ">
+                      <div className="flex items-center gap-2">
                         <CountryCodeSelector
                           selectedCode={selectedCode}
                           onSelect={setSelectedCode}
                           setCountry={setCountry}
-                          className="h-14 bg-white/10  backdrop-blur-lg border border-white/20 text-black rounded-xl focus:border-purple-400/50 focus:ring-2 focus:ring-purple-400/25 w-24"
+                          className="h-14 bg-white/10 backdrop-blur-lg border border-white/20 text-black rounded-xl focus:border-purple-400/50 focus:ring-2 focus:ring-purple-400/25 w-24 z-[10002]"
                         />
                         <Input
                           ref={mobileInputRef}
@@ -465,8 +499,7 @@ const Login = ({ onClose, modalRef }) => {
       </div>
       <style jsx>{`
         @keyframes gradient-shift {
-          0%,
-          100% {
+          0%, 100% {
             background: linear-gradient(45deg, #3a59d1, #3d90d7, #3a59d1);
           }
           50% {
@@ -494,8 +527,7 @@ const Login = ({ onClose, modalRef }) => {
           }
         }
         @keyframes float {
-          0%,
-          100% {
+          0%, 100% {
             transform: translateY(0px) rotate(0deg);
           }
           50% {
@@ -503,8 +535,7 @@ const Login = ({ onClose, modalRef }) => {
           }
         }
         @keyframes float-delay {
-          0%,
-          100% {
+          0%, 100% {
             transform: translateY(0px) rotate(0deg);
           }
           50% {
@@ -531,4 +562,5 @@ const Login = ({ onClose, modalRef }) => {
     </div>
   );
 };
+
 export default Login;
