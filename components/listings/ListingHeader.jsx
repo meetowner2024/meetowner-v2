@@ -48,7 +48,6 @@ import { IoIosHeartEmpty } from "react-icons/io";
 import PromotionalBanner from "./PromotionalBanner";
 import { setPropertyDetails } from "../store/slices/propertyDetails";
 import theme from "../utils/theme.json";
-
 const commercialSubTypes = [
   { id: "Office", label: "Office", icon: Building },
   { id: "Retail Shop", label: "Retail Shop", icon: Home },
@@ -62,7 +61,6 @@ const furnishingOptions = [
   { label: "Semi Furnished", value: "Semi" },
   { label: "Fully Furnished", value: "Fully" },
 ];
-
 const ListingHeader = ({ setShowLoginModal, ads }) => {
   const dispatch = useDispatch();
   const router = useRouter();
@@ -70,7 +68,6 @@ const ListingHeader = ({ setShowLoginModal, ads }) => {
   const searchData = useSelector((state) => state.search);
   const [searchInput, setSearchInput] = useState(searchData.location || "");
   const Data = useSelector((state) => state.auth.loggedIn);
-  const [currentPromo, setCurrentPromo] = useState(0);
   const [city, setCity] = useState(searchData.city || "");
   const [isCommandOpen, setIsCommandOpen] = useState(false);
   const [localities, setLocalities] = useState([]);
@@ -81,12 +78,10 @@ const ListingHeader = ({ setShowLoginModal, ads }) => {
   const searchRef = useRef(null);
   const commandRef = useRef(null);
   const [localStorageUser, setLocalStorageUser] = useState(null);
-
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
     setLocalStorageUser(user);
   }, []);
-
   const handleNavigation = useCallback(
     async (property) => {
       let userDetails = null;
@@ -153,11 +148,9 @@ const ListingHeader = ({ setShowLoginModal, ads }) => {
     },
     [router, dispatch, searchData]
   );
-
   useEffect(() => {
     setCity(searchData.city);
   }, [searchData.city]);
-
   useEffect(() => {
     if (searchData.sub_type === "Plot" && searchData.plot_subType) {
       dispatch(setTab(searchData.plot_subType));
@@ -175,7 +168,11 @@ const ListingHeader = ({ setShowLoginModal, ads }) => {
     searchData.commercial_subType,
     dispatch,
   ]);
-
+  useEffect(() => {
+    if (searchData.location) {
+      setSearchInput(searchData.location);
+    }
+  }, [searchData]);
   const selectedFilters = useMemo(
     () => ({
       tab: searchData.tab === "Latest" ? "Buy" : searchData.tab || "Buy",
@@ -188,7 +185,6 @@ const ListingHeader = ({ setShowLoginModal, ads }) => {
     }),
     [searchData]
   );
-
   const fetchCities = useCallback(async () => {
     try {
       const response = await axios.get(
@@ -203,11 +199,9 @@ const ListingHeader = ({ setShowLoginModal, ads }) => {
       console.error("Error fetching cities:", error);
     }
   }, []);
-
   useEffect(() => {
     fetchCities();
   }, [fetchCities]);
-
   const fetchLocalities = useCallback(
     debounce(async (city, query) => {
       if (!city || !query) {
@@ -227,11 +221,9 @@ const ListingHeader = ({ setShowLoginModal, ads }) => {
     }, 500),
     []
   );
-
   useEffect(() => {
     fetchLocalities(city, searchInput);
   }, [searchInput, city, fetchLocalities]);
-
   const updateUrlWithSearchData = useCallback(() => {
     if (pathname !== "/listings") return;
     const queryParts = Object.entries(searchData)
@@ -248,15 +240,13 @@ const ListingHeader = ({ setShowLoginModal, ads }) => {
           value !== "" &&
           value !== undefined
       )
-      .map(([key, value]) => `${key}-${encodeURIComponent(value)}`); // Use hyphen instead of equals
+      .map(([key, value]) => `${key}-${encodeURIComponent(value)}`);
     const queryString = queryParts.join("&");
     router.replace(`/listings?${queryString}`, { scroll: false });
   }, [router, searchData, pathname]);
-
   useEffect(() => {
     updateUrlWithSearchData();
   }, [searchData, updateUrlWithSearchData]);
-
   useEffect(() => {
     if (
       ["Plot", "Land"].includes(selectedFilters.subType) &&
@@ -298,7 +288,6 @@ const ListingHeader = ({ setShowLoginModal, ads }) => {
       dispatch(setOccupancy(""));
     }
   }, [selectedFilters, dispatch]);
-
   const dropdownOptions = useMemo(
     () => ({
       Buy: ["Buy", "Rent"],
@@ -327,7 +316,6 @@ const ListingHeader = ({ setShowLoginModal, ads }) => {
     }),
     [selectedFilters.propertyIn, selectedFilters.subType]
   );
-
   const activeFilters = useMemo(() => {
     const filters = [];
     if (selectedFilters.bhk) filters.push(`${selectedFilters.bhk} BHK`);
@@ -352,7 +340,6 @@ const ListingHeader = ({ setShowLoginModal, ads }) => {
     if (selectedFilters.occupancy) filters.push(selectedFilters.occupancy);
     return filters;
   }, [selectedFilters, dropdownOptions]);
-
   const handleUserSearched = useCallback(
     async (searchValue) => {
       let userDetails = null;
@@ -388,12 +375,10 @@ const ListingHeader = ({ setShowLoginModal, ads }) => {
     },
     [city, selectedFilters]
   );
-
   const debouncedUserActivity = useCallback(
     debounce(handleUserSearched, 1000),
     [handleUserSearched]
   );
-
   const handleValueChange = useCallback(
     (value) => {
       setSearchInput(value);
@@ -402,7 +387,6 @@ const ListingHeader = ({ setShowLoginModal, ads }) => {
     },
     [dispatch, debouncedUserActivity]
   );
-
   const handleClear = useCallback(() => {
     setSearchInput("");
     dispatch(setSearchData({ location: "" }));
@@ -412,7 +396,6 @@ const ListingHeader = ({ setShowLoginModal, ads }) => {
       router.replace("/listings", { scroll: false });
     }
   }, [dispatch, debouncedUserActivity, pathname, router]);
-
   const clearFilter = useCallback(
     (filterText) => {
       if (filterText.includes("BHK")) {
@@ -438,7 +421,6 @@ const ListingHeader = ({ setShowLoginModal, ads }) => {
     },
     [dispatch, dropdownOptions]
   );
-
   const clearAllFilters = useCallback(() => {
     dispatch(clearSearch());
     setSearchInput("");
@@ -449,11 +431,9 @@ const ListingHeader = ({ setShowLoginModal, ads }) => {
       router.replace("/listings", { scroll: false });
     }
   }, [dispatch, debouncedUserActivity, pathname, router]);
-
   const handleRouteHome = useCallback(() => {
     router.push("/");
   }, [router]);
-
   const handleFavRoute = () => {
     const data = localStorage.getItem("user");
     if (!data) {
@@ -466,7 +446,6 @@ const ListingHeader = ({ setShowLoginModal, ads }) => {
     }
     router.push("/favourites");
   };
-
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -481,11 +460,9 @@ const ListingHeader = ({ setShowLoginModal, ads }) => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
   const shouldShowFurnishing = !["Plot", "Land"].includes(
     selectedFilters.subType
   );
-
   return (
     <>
       <PromotionalBanner
@@ -1118,8 +1095,8 @@ const ListingHeader = ({ setShowLoginModal, ads }) => {
                 <div className="grid grid-cols-2 gap-2">
                   {dropdownOptions.Type.map((option) => {
                     const subtypeLabel =
-                      commercialSubTypes.find((st) => st.id === option)?.label ||
-                      option;
+                      commercialSubTypes.find((st) => st.id === option)
+                        ?.label || option;
                     return (
                       <button
                         key={option}
@@ -1196,5 +1173,4 @@ const ListingHeader = ({ setShowLoginModal, ads }) => {
     </>
   );
 };
-
 export default ListingHeader;

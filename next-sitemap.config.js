@@ -2,7 +2,7 @@ module.exports = {
   siteUrl: "https://meetowner.in",
   generateRobotsTxt: true,
   sitemapSize: 7000,
-  exclude: ["/api/*", "/private/*"],
+  exclude: ["/api/*", "/lib/*", "/components/utils/useWhatsappHook.jsx"],
   additionalPaths: async (config) => {
     const staticRoutes = [
       {
@@ -61,17 +61,17 @@ module.exports = {
       },
     ];
     try {
-      const response = await fetch(
+      const sitemapResponse = await fetch(
         "https://api.meetowner.in/listings/v1/getSitemapData"
       );
-      if (!response.ok) {
-        console.error("Failed to fetch sitemap data:", response.status);
-        return staticRoutes;
+      if (!sitemapResponse.ok) {
+        console.error("Failed to fetch sitemap data:", sitemapResponse.status);
       }
-      const { sitemap } = await response.json();
+      const { sitemap } = await sitemapResponse.json();
       const dynamicRoutes = [];
       sitemap.forEach((cityData) => {
-        const citySlug = cityData.city[("Rent", "Sell")].forEach((purpose) => {
+        const citySlug = cityData.city;
+        ["Rent", "Sell"].forEach((purpose) => {
           if (cityData[purpose].subTypes.length > 0) {
             dynamicRoutes.push({
               loc: `${config.siteUrl}/sitemap/${purpose}/${citySlug}`,
@@ -90,7 +90,21 @@ module.exports = {
           }
         });
       });
-      return [...staticRoutes, ...dynamicRoutes];
+      const listingResponse = await fetch(
+        "https://api.meetowner.in/listings/v1/getSitemapListingLinks"
+      );
+      if (!listingResponse.ok) {
+        console.error("Failed to fetch listing links:", listingResponse.status);
+        return [...staticRoutes, ...dynamicRoutes];
+      }
+      const { links } = await listingResponse.json();
+      const listingRoutes = links.map((link) => ({
+        loc: link,
+        lastmod: new Date().toISOString(),
+        changefreq: "daily",
+        priority: 0.65,
+      }));
+      return [...staticRoutes, ...listingRoutes, ...dynamicRoutes];
     } catch (error) {
       console.error("Error generating sitemap paths:", error);
       return staticRoutes;
