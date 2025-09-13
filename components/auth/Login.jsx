@@ -258,11 +258,7 @@ const Login = ({ onClose, modalRef }) => {
 
   return (
     <div
-      className={`fixed inset-0 z-[1000] flex p-4 ${
-        isKeyboardOpen
-          ? "h-fit items-start sm:items-center sm:justify-center"
-          : "items-center justify-center h-auto"
-      }`}
+      className={`fixed inset-0 z-[1000] flex p-4 h-fit sm:h-auto sm:items-center sm:justify-center`}
     >
       <div
         ref={modalRef}
@@ -306,7 +302,7 @@ const Login = ({ onClose, modalRef }) => {
               </div>
             </div>
           </div>
-          <div className="w-full lg:w-1/2 p-8 lg:p-12 bg-white backdrop-blur-xs">
+          <div className="w-full lg:w-1/2 p-6 lg:p-12 bg-white backdrop-blur-xs">
             <div className="h-auto lg:h-full flex flex-col justify-center max-w-md mx-auto">
               {!otpSent ? (
                 <div className="space-y-8">

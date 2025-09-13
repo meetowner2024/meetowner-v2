@@ -35,7 +35,7 @@ const Property = () => {
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+const [propertyLoading, setPropertyLoading] = useState(true);
   const JWT_SECRET = process.env.NEXT_PUBLIC_ENCRYPTION_SECRET;
   const ENCRYPTION_KEY = CryptoJS.SHA256(JWT_SECRET).toString();
 
@@ -126,12 +126,12 @@ const Property = () => {
     <>
       <PropertyHeader setHeaderHeight={setHeaderHeight} />
       <div
-        className="flex flex-col lg:flex-row w-full max-w-[1536px] mx-auto justify-between h-auto p-3 gap-3"
+        className="flex flex-col lg:flex-row w-full max-w-[1536px] mx-auto justify-between h-auto sm:p-3 gap-3"
         style={{ paddingTop: `${headerHeight || 10}px` }}
       >
         <div className="w-full lg:w-[70%]">
           <Breadcrumb />
-          <PropertyBody />
+          <PropertyBody handleLoading={setPropertyLoading} />
         </div>
         <div className="hidden lg:block w-[30%]">
           <PropertyDetails />
@@ -149,7 +149,7 @@ const Property = () => {
         pauseOnHover
         theme="light"
       />
-      <Footer />
+       {!propertyLoading && <Footer />}
     </>
   );
 };

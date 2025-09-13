@@ -336,9 +336,9 @@ const PropertyDeatils = () => {
     <>
       <div
         style={{ backgroundColor: PropertyAdsColors.secondary.background }}
-        className="bg-white/80 sm:mt-7 backdrop-blur-lg border border-white/20 rounded-2xl shadow-xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]"
+        className="bg-white/80 mt-3 sm:mt-7 backdrop-blur-lg border border-white/20 sm:rounded-2xl sm:shadow-xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]"
       >
-        <div className="p-5 ">
+        <div className=" p-2 sm:p-5 ">
           <div className="flex  ">
             <h1
               style={{ color: PropertyAdsColors.primary.text }}
@@ -387,7 +387,7 @@ const PropertyDeatils = () => {
               <MdOutlineVerified color="green" size={18} /> RERA
             </span>
           </p>
-          <div className="mt-4 grid sm:grid-cols-2 cursor-pointer gap-3">
+          <div className="mt-4 grid sm:grid-cols-2  cursor-pointer gap-3">
             <Stat
               label={
                 property?.property_for === "Rent" ? "Monthly Rent" : "Price"
