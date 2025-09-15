@@ -108,7 +108,6 @@ const PropertyDeatils = () => {
   const [contacted, setContacted] = useState([]);
   const propertyData = useSelector((state) => state.property.propertyDetails);
   const [property, setProperty] = useState(propertyData);
-
   const [error, setError] = useState(null);
   const getPropertyDetails = async (propertyData) => {
     try {

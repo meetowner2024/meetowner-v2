@@ -4,7 +4,6 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
-import axios from "axios";
 import {
   Building,
   ChevronUp,
@@ -79,8 +78,6 @@ import Image from "next/image";
 import AmenitiesColor from "../utils/dynamic-colors/AmenitiesColor.json";
 import AroundTheme from "../utils/dynamic-colors/AroundProperty.json";
 import PropertyDetails from "./PropertyDetails";
-import CryptoJS from "crypto-js";
-import { set } from "lodash";
 
 const PropertyBody = ({ handleLoading }) => {
   const pathname = usePathname();
