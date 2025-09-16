@@ -78,14 +78,12 @@ import Image from "next/image";
 import AmenitiesColor from "../utils/dynamic-colors/AmenitiesColor.json";
 import AroundTheme from "../utils/dynamic-colors/AroundProperty.json";
 import PropertyDetails from "./PropertyDetails";
-
 const PropertyBody = ({ handleLoading }) => {
   const pathname = usePathname();
   const modalRef = useRef(null);
   const propertyData = useSelector((state) => state.property.propertyDetails);
   const [property, setProperty] = useState(pathname.state || propertyData);
   const maplocation = `${property?.location_id},${property?.city_id},${property?.state_id}`;
-
   const [error, setError] = useState(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const [floorplan, setFloorPlan] = useState("");
@@ -123,10 +121,8 @@ const PropertyBody = ({ handleLoading }) => {
         }
       }
     };
-
     fetchPropertyData();
   }, [property?.unique_property_id]);
-
   useEffect(() => {
     const handleScroll = () => {
       setShowScrollTop(window.scrollY > 200);
@@ -182,7 +178,6 @@ const PropertyBody = ({ handleLoading }) => {
     );
     return fallbackIcons[hash % fallbackIcons.length];
   };
-
   const handleClose = () => {
     setShowLoginModal(false);
   };
@@ -197,7 +192,6 @@ const PropertyBody = ({ handleLoading }) => {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
-
   const getPlaceIcon = (title) => {
     const lowerTitle = title.toLowerCase();
     if (lowerTitle.includes("school") || lowerTitle.includes("college"))
@@ -228,7 +222,6 @@ const PropertyBody = ({ handleLoading }) => {
       ? parseInt(value)
       : parseFloat(value).toFixed(2).replace(/\.00$/, "");
   };
-
   const formatDate = (date) => {
     if (!date) return "N/A";
     try {
@@ -245,6 +238,9 @@ const PropertyBody = ({ handleLoading }) => {
   const isSell = property?.property_for === "Sell";
   const isRent = property?.property_for === "Rent";
   const propertySubtype = property?.sub_type;
+  const isUnderConstruction = property?.occupancy === "Under Construction";
+  const isFuture = property?.possession_status === "Future";
+
   const fieldVisibility = useMemo(
     () => ({
       ...(isResidential &&
@@ -256,7 +252,7 @@ const PropertyBody = ({ handleLoading }) => {
             bathroom: true,
             balconies: true,
             furnished_status: true,
-            property_age: true,
+            property_age: !isUnderConstruction,
             area_units: true,
             builtup_area: true,
             carpet_area: true,
@@ -282,7 +278,7 @@ const PropertyBody = ({ handleLoading }) => {
             bathroom: true,
             balconies: true,
             furnished_status: true,
-            property_age: true,
+            property_age: !isUnderConstruction,
             area_units: true,
             builtup_area: true,
             carpet_area: true,
@@ -307,7 +303,7 @@ const PropertyBody = ({ handleLoading }) => {
             bathroom: true,
             balconies: true,
             furnished_status: true,
-            property_age: true,
+            property_age: !isUnderConstruction,
             area_units: true,
             builtup_area: true,
             carpet_area: true,
@@ -329,7 +325,7 @@ const PropertyBody = ({ handleLoading }) => {
           },
           Plot: {
             rera_approved: true,
-            property_age: true,
+            property_age: !isFuture,
             area_units: true,
             length_area: true,
             builtup_unit: true,
@@ -829,19 +825,17 @@ const PropertyBody = ({ handleLoading }) => {
     },
     occupancy: {
       label: (prop) =>
-        prop.possession_status === "Under Construction"
+        prop.occupancy === "Under Construction"
           ? "Possession Starts"
           : "Occupancy Status",
       value: (prop) =>
         ["Apartment", "Independent House", "Independent Villa"].includes(
           prop.sub_type
         )
-          ? prop.possession_status === "Under Construction"
-            ? `Under Construction${
-                prop.under_construction
-                  ? ` (${formatDate(prop.under_construction)})`
-                  : ""
-              }`
+          ? prop.occupancy === "Under Construction"
+            ? prop.under_construction
+              ? ` ${formatDate(prop.under_construction)}`
+              : ""
             : "Ready to Move"
           : "",
       icon: <DoorOpen className="w-5 h-5" />,
@@ -1026,7 +1020,7 @@ const PropertyBody = ({ handleLoading }) => {
               : fieldConfigs[field].label,
           value:
             typeof fieldConfigs[field].value === "function"
-              ? fieldConfigs[field].value(property) // Call the function here
+              ? fieldConfigs[field].value(property)
               : fieldConfigs[field].value,
           icon: fieldConfigs[field].icon,
         });
@@ -1044,7 +1038,7 @@ const PropertyBody = ({ handleLoading }) => {
       }
       items.push({
         label: fieldConfigs.length_area.label,
-        value: fieldConfigs.length_area.value(property), // Call the function here
+        value: fieldConfigs.length_area.value(property),
         icon: fieldConfigs.length_area.icon,
       });
     }
@@ -1071,18 +1065,16 @@ const PropertyBody = ({ handleLoading }) => {
   const isLong = description.length > 320;
   const shortText = description.slice(0, 320);
   const toggleReadMore = () => setIsExpanded(!isExpanded);
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-200 flex items-center justify-center p-4">
-        {/* Mobile Layout (below md: 768px) */}
+        {}
         <div className="block md:hidden h-full w-full max-w-sm space-y-6">
-          {/* Main Image Placeholder */}
+          {}
           <div className="bg-white rounded-xl shadow-md p-2">
             <div className="w-full h-[250px] bg-gray-300 rounded-2xl animate-pulse"></div>
           </div>
-
-          {/* Swiper Carousel Placeholder */}
+          {}
           <div className="bg-white rounded-xl shadow-md p-4">
             <div className="grid grid-cols-4 gap-4">
               <div className="h-20 bg-gray-300 rounded-lg animate-pulse"></div>
@@ -1096,8 +1088,7 @@ const PropertyBody = ({ handleLoading }) => {
               <div className="w-6 h-6 bg-gray-300 rounded-full animate-pulse"></div>
             </div>
           </div>
-
-          {/* Property Description Placeholder */}
+          {}
           <div className="bg-white rounded-xl shadow-md p-6 space-y-4">
             <div className="h-6 bg-gray-300 rounded w-1/2 animate-pulse"></div>
             <div className="space-y-2">
@@ -1106,16 +1097,14 @@ const PropertyBody = ({ handleLoading }) => {
               <div className="h-4 bg-gray-300 rounded w-2/3 animate-pulse"></div>
             </div>
           </div>
-
-          {/* Floor Plan Placeholder (if applicable) */}
+          {}
           {floorplan?.image && (
             <div className="bg-white rounded-xl shadow-md p-6 space-y-4">
               <div className="h-6 bg-gray-300 rounded w-1/2 animate-pulse"></div>
               <div className="w-full h-64 bg-gray-300 rounded-lg animate-pulse"></div>
             </div>
           )}
-
-          {/* Amenities Placeholder */}
+          {}
           {property?.facilities && (
             <div className="bg-white rounded-xl shadow-md p-6 space-y-4">
               <div className="h-6 bg-gray-300 rounded w-1/2 animate-pulse"></div>
@@ -1129,8 +1118,7 @@ const PropertyBody = ({ handleLoading }) => {
               </div>
             </div>
           )}
-
-          {/* Property Location Placeholder */}
+          {}
           {aroundProperty && aroundProperty.length > 0 && (
             <div className="bg-white rounded-xl shadow-md p-6 space-y-4">
               <div className="h-6 bg-gray-300 rounded w-1/2 animate-pulse"></div>
@@ -1151,8 +1139,7 @@ const PropertyBody = ({ handleLoading }) => {
               </div>
             </div>
           )}
-
-          {/* Property Overview Placeholder */}
+          {}
           <div className="bg-white rounded-xl shadow-md p-6 space-y-4">
             <div className="h-6 bg-gray-300 rounded w-1/2 animate-pulse"></div>
             <div className="grid grid-cols-2 gap-4">
@@ -1170,18 +1157,16 @@ const PropertyBody = ({ handleLoading }) => {
               ))}
             </div>
           </div>
-
-          {/* Explore Map Placeholder */}
+          {}
           <div className="bg-white rounded-xl shadow-md p-6 space-y-4">
             <div className="h-6 bg-gray-300 rounded w-1/2 animate-pulse"></div>
             <div className="w-full h-64 bg-gray-300 rounded-lg animate-pulse"></div>
           </div>
         </div>
-
-        {/* Laptop Layout (md and above: 768px+) */}
+        {}
         <div className="hidden h-screen md:block w-full max-w-6xl">
           <div className="bg-white rounded-xl shadow-md p-8 space-y-6 animate-pulse">
-            {/* Image Gallery Placeholder */}
+            {}
             <div className="flex gap-4">
               <div className="w-24 space-y-2">
                 <div className="h-24 bg-gray-300 rounded-lg"></div>
@@ -1190,23 +1175,23 @@ const PropertyBody = ({ handleLoading }) => {
               </div>
               <div className="flex-grow h-[450px] bg-gray-300 rounded-lg"></div>
             </div>
-            {/* Property Title Placeholder */}
+            {}
             <div className="h-8 bg-gray-300 rounded w-1/2"></div>
-            {/* Property Details Placeholders */}
+            {}
             <div className="grid grid-cols-2 gap-4">
               <div className="h-4 bg-gray-300 rounded w-full"></div>
               <div className="h-4 bg-gray-300 rounded w-3/4"></div>
               <div className="h-4 bg-gray-300 rounded w-2/3"></div>
               <div className="h-4 bg-gray-300 rounded w-1/2"></div>
             </div>
-            {/* Amenities Placeholder */}
+            {}
             <div className="grid grid-cols-4 gap-4">
               <div className="h-16 bg-gray-300 rounded-lg"></div>
               <div className="h-16 bg-gray-300 rounded-lg"></div>
               <div className="h-16 bg-gray-300 rounded-lg"></div>
               <div className="h-16 bg-gray-300 rounded-lg"></div>
             </div>
-            {/* Map Placeholder */}
+            {}
             <div className="h-80 bg-gray-300 rounded-lg"></div>
           </div>
         </div>
@@ -1422,7 +1407,6 @@ const PropertyBody = ({ handleLoading }) => {
           </div>
         </div>
       )}
-
       {facilitiesList && facilitiesList.length > 0 && (
         <div className="mb-12 rounded-3xl">
           <h2
@@ -1487,7 +1471,6 @@ const PropertyBody = ({ handleLoading }) => {
           </div>
         </div>
       )}
-
       {aroundProperty && aroundProperty.length > 0 && (
         <div className="mt-12 max-w-6xl mx-auto rounded-3xl">
           {}
@@ -1510,7 +1493,6 @@ const PropertyBody = ({ handleLoading }) => {
               />
             </svg>
           </h2>
-
           {}
           <p
             style={{ color: AroundTheme.card.text }}
@@ -1518,7 +1500,6 @@ const PropertyBody = ({ handleLoading }) => {
           >
             {property?.google_address}
           </p>
-
           {}
           <div className="relative sm:rounded-3xl  sm:hadow-xl sm:p-8 transition-all duration-500 hover:shadow-xl">
             <h3
@@ -1527,7 +1508,6 @@ const PropertyBody = ({ handleLoading }) => {
             >
               Around This Property
             </h3>
-
             {}
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
               {aroundProperty.map((place, index) => (
@@ -1546,7 +1526,6 @@ const PropertyBody = ({ handleLoading }) => {
                     }}
                     className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                   />
-
                   {}
                   <div className="relative flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -1564,7 +1543,6 @@ const PropertyBody = ({ handleLoading }) => {
                       </span>
                     </div>
 
-                    {}
                     <span
                       style={{
                         background: AroundTheme.badge.background,
@@ -1579,7 +1557,6 @@ const PropertyBody = ({ handleLoading }) => {
               ))}
             </div>
 
-            {}
             <div
               style={{
                 backgroundColor: AroundTheme.decor.background,
@@ -1590,7 +1567,6 @@ const PropertyBody = ({ handleLoading }) => {
           </div>
         </div>
       )}
-
       <div className="mt-12 max-w-6xl mx-auto rounded-3xl">
         <h2 className="text-xl text-left font-bold text-slate-900 mb-8 sm:mb-10  tracking-tight relative">
           Property Overview
@@ -1634,7 +1610,6 @@ const PropertyBody = ({ handleLoading }) => {
           </div>
         </div>
       </div>
-
       <div className="mt-6 rounded ">
         <h2 className="text-xl text-left font-bold text-slate-900 mb-8 tracking-tight relative">
           Explore Map
