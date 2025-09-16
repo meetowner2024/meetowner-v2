@@ -20,12 +20,21 @@ const nextConfig: NextConfig = {
       },
     {
       protocol: "https",
-      hostname: "images.unsplash.com", // ✅ Add this
+      hostname: "images.unsplash.com", 
       pathname: "/**",
     },
       {
         protocol: "https",
         hostname: "via.placeholder.com",
+        pathname: "/**",
+      },{
+        protocol: "https",
+        hostname: "**",  
+        pathname: "/**",
+      },
+      {
+        protocol: "http",
+        hostname: "**",   
         pathname: "/**",
       },
     ],
