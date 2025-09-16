@@ -6,7 +6,7 @@ import { ArrowLeft, Search } from "lucide-react";
 import { Input } from "../../components/ui/input";
 import Head from "next/head";
 import { useRouter } from "next/navigation";
-
+import config from "../../components/utils/config";
 export default function Blog() {
   const router = useRouter();
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -19,7 +19,7 @@ export default function Blog() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const res = await fetch("https://api.meetowner.in/blogs/getAllBlogs", {
+       const res = await fetch(`${config.awsApiUrl}/blogs/getAllBlogs`, {
         cache: "no-store",
       });
       if (!res.ok) {

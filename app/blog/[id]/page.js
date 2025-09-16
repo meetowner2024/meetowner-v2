@@ -8,6 +8,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { toast } from "react-toastify";
 import Head from "next/head";
+import config from "../../../components/utils/config";
 
 export default function BlogPost() {
   const router = useRouter();
@@ -22,9 +23,9 @@ export default function BlogPost() {
     const fetchPost = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`https://api.meetowner.in/blogs/getAllBlogs`, {
-          cache: "no-store",
-        });
+         const res = await fetch(`${config.awsApiUrl}/blogs/getAllBlogs`, {
+        cache: "no-store",
+      });
         if (!res.ok) {
           throw new Error("Failed to fetch blog post");
         }
