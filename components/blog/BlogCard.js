@@ -10,10 +10,13 @@ export default function BlogCard({ post }) {
       <Card className="h-full shadow-blog-card hover:shadow-blog-card-hover transition-all duration-300 group-hover:-translate-y-1 overflow-hidden">
         <div className="aspect-video overflow-hidden">
           <Image
-            src={post.image}
-            alt={post.title}
+            src={
+              post.image || "https://placehold.co/800x400?text=Blog+Post+Image"
+            }
+            alt={`${post.title} - Meetowner Blog`}
             width={800}
             height={400}
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
         </div>
@@ -43,7 +46,7 @@ export default function BlogCard({ post }) {
             <div className="flex items-center gap-2">
               <Image
                 src={post.author.avatar}
-                alt={post.author.name}
+                alt={`${post.author.name} avatar`}
                 width={24}
                 height={24}
                 className="w-6 h-6 rounded-full object-cover"

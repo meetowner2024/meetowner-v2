@@ -84,6 +84,8 @@ const PropertyBody = ({ handleLoading }) => {
   const modalRef = useRef(null);
   const propertyData = useSelector((state) => state.property.propertyDetails);
   const [property, setProperty] = useState(pathname.state || propertyData);
+  const maplocation = `${property?.location_id},${property?.city_id},${property?.state_id}`;
+
   const [error, setError] = useState(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const [floorplan, setFloorPlan] = useState("");
@@ -247,500 +249,500 @@ const PropertyBody = ({ handleLoading }) => {
     () => ({
       ...(isResidential &&
         isSell && {
-        Apartment: {
-          rera_approved: true,
-          occupancy: true,
-          bedrooms: true,
-          bathroom: true,
-          balconies: true,
-          furnished_status: true,
-          property_age: true,
-          area_units: true,
-          builtup_area: true,
-          carpet_area: true,
-          total_project_area: true,
-          builtup_unit: true,
-          property_cost: true,
-          facilities: true,
-          investor_property: true,
-          loan_facility: true,
-          facing: true,
-          car_parking: true,
-          bike_parking: true,
-          open_parking: true,
-          around_places: true,
-          servant_room: true,
-          description: true,
-          unit_flat_house_no: true,
-        },
-        "Independent House": {
-          rera_approved: true,
-          occupancy: true,
-          bedrooms: true,
-          bathroom: true,
-          balconies: true,
-          furnished_status: true,
-          property_age: true,
-          area_units: true,
-          builtup_area: true,
-          carpet_area: true,
-          total_project_area: true,
-          builtup_unit: true,
-          pent_house: true,
-          property_cost: true,
-          facilities: true,
-          loan_facility: true,
-          facing: true,
-          car_parking: true,
-          bike_parking: true,
-          open_parking: true,
-          around_places: true,
-          servant_room: true,
-          description: true,
-          unit_flat_house_no: true,
-        },
-        "Independent Villa": {
-          rera_approved: true,
-          occupancy: true,
-          bathroom: true,
-          balconies: true,
-          furnished_status: true,
-          property_age: true,
-          area_units: true,
-          builtup_area: true,
-          carpet_area: true,
-          total_project_area: true,
-          builtup_unit: true,
-          pent_house: true,
-          property_cost: true,
-          facilities: true,
-          investor_property: true,
-          loan_facility: true,
-          facing: true,
-          car_parking: true,
-          bike_parking: true,
-          open_parking: true,
-          around_places: true,
-          servant_room: true,
-          description: true,
-          unit_flat_house_no: true,
-        },
-        Plot: {
-          rera_approved: true,
-          property_age: true,
-          area_units: true,
-          length_area: true,
-          builtup_unit: true,
-          width_area: true,
-          plot_area: true,
-          total_project_area: true,
-          property_cost: true,
-          possession_status: true,
-          investor_property: true,
-          loan_facility: true,
-          facing: true,
-          around_places: true,
-          description: true,
-          plot_number: true,
-        },
-        Land: {
-          rera_approved: true,
-          area_units: true,
-          length_area: true,
-          builtup_unit: true,
-          width_area: true,
-          total_project_area: true,
-          property_cost: true,
-          possession_status: true,
-          loan_facility: true,
-          facing: true,
-          around_places: true,
-          description: true,
-          plot_number: true,
-          land_sub_type: true,
-        },
-      }),
+          Apartment: {
+            rera_approved: true,
+            occupancy: true,
+            bedrooms: true,
+            bathroom: true,
+            balconies: true,
+            furnished_status: true,
+            property_age: true,
+            area_units: true,
+            builtup_area: true,
+            carpet_area: true,
+            total_project_area: true,
+            builtup_unit: true,
+            property_cost: true,
+            facilities: true,
+            investor_property: true,
+            loan_facility: true,
+            facing: true,
+            car_parking: true,
+            bike_parking: true,
+            open_parking: true,
+            around_places: true,
+            servant_room: true,
+            description: true,
+            unit_flat_house_no: true,
+          },
+          "Independent House": {
+            rera_approved: true,
+            occupancy: true,
+            bedrooms: true,
+            bathroom: true,
+            balconies: true,
+            furnished_status: true,
+            property_age: true,
+            area_units: true,
+            builtup_area: true,
+            carpet_area: true,
+            total_project_area: true,
+            builtup_unit: true,
+            pent_house: true,
+            property_cost: true,
+            facilities: true,
+            loan_facility: true,
+            facing: true,
+            car_parking: true,
+            bike_parking: true,
+            open_parking: true,
+            around_places: true,
+            servant_room: true,
+            description: true,
+            unit_flat_house_no: true,
+          },
+          "Independent Villa": {
+            rera_approved: true,
+            occupancy: true,
+            bathroom: true,
+            balconies: true,
+            furnished_status: true,
+            property_age: true,
+            area_units: true,
+            builtup_area: true,
+            carpet_area: true,
+            total_project_area: true,
+            builtup_unit: true,
+            pent_house: true,
+            property_cost: true,
+            facilities: true,
+            investor_property: true,
+            loan_facility: true,
+            facing: true,
+            car_parking: true,
+            bike_parking: true,
+            open_parking: true,
+            around_places: true,
+            servant_room: true,
+            description: true,
+            unit_flat_house_no: true,
+          },
+          Plot: {
+            rera_approved: true,
+            property_age: true,
+            area_units: true,
+            length_area: true,
+            builtup_unit: true,
+            width_area: true,
+            plot_area: true,
+            total_project_area: true,
+            property_cost: true,
+            possession_status: true,
+            investor_property: true,
+            loan_facility: true,
+            facing: true,
+            around_places: true,
+            description: true,
+            plot_number: true,
+          },
+          Land: {
+            rera_approved: true,
+            area_units: true,
+            length_area: true,
+            builtup_unit: true,
+            width_area: true,
+            total_project_area: true,
+            property_cost: true,
+            possession_status: true,
+            loan_facility: true,
+            facing: true,
+            around_places: true,
+            description: true,
+            plot_number: true,
+            land_sub_type: true,
+          },
+        }),
       ...(isCommercial &&
         isSell && {
-        Office: {
-          rera_approved: true,
-          occupancy: true,
-          passenger_lifts: true,
-          service_lifts: true,
-          stair_cases: true,
-          private_parking: true,
-          public_parking: true,
-          private_washrooms: true,
-          public_washrooms: true,
-          area_units: true,
-          builtup_area: true,
-          carpet_area: true,
-          total_project_area: true,
-          builtup_unit: true,
-          property_cost: true,
-          ownership_type: true,
-          facilities: true,
-          unit_flat_house_no: true,
-          zone_types: true,
-          loan_facility: true,
-          facing: true,
-          car_parking: true,
-          bike_parking: true,
-          open_parking: true,
-          around_places: true,
-          pantry_room: true,
-          description: true,
-        },
-        "Retail Shop": {
-          rera_approved: true,
-          occupancy: true,
-          passenger_lifts: true,
-          service_lifts: true,
-          stair_cases: true,
-          private_parking: true,
-          public_parking: true,
-          private_washrooms: true,
-          public_washrooms: true,
-          area_units: true,
-          builtup_area: true,
-          carpet_area: true,
-          total_project_area: true,
-          builtup_unit: true,
-          property_cost: true,
-          ownership_type: true,
-          facilities: true,
-          unit_flat_house_no: true,
-          suitable: true,
-          loan_facility: true,
-          facing: true,
-          car_parking: true,
-          bike_parking: true,
-          open_parking: true,
-          around_places: true,
-          description: true,
-        },
-        "Show Room": {
-          rera_approved: true,
-          occupancy: true,
-          passenger_lifts: true,
-          service_lifts: true,
-          stair_cases: true,
-          private_parking: true,
-          public_parking: true,
-          private_washrooms: true,
-          public_washrooms: true,
-          area_units: true,
-          builtup_area: true,
-          carpet_area: true,
-          total_project_area: true,
-          builtup_unit: true,
-          property_cost: true,
-          ownership_type: true,
-          facilities: true,
-          unit_flat_house_no: true,
-          suitable: true,
-          loan_facility: true,
-          facing: true,
-          car_parking: true,
-          bike_parking: true,
-          open_parking: true,
-          around_places: true,
-          pantry_room: true,
-          description: true,
-        },
-        Warehouse: {
-          rera_approved: true,
-          occupancy: true,
-          area_units: true,
-          plot_area: true,
-          total_project_area: true,
-          builtup_unit: true,
-          property_cost: true,
-          ownership_type: true,
-          unit_flat_house_no: true,
-          zone_types: true,
-          loan_facility: true,
-          facing: true,
-          car_parking: true,
-          bike_parking: true,
-          open_parking: true,
-          around_places: true,
-          description: true,
-        },
-        Plot: {
-          rera_approved: true,
-          area_units: true,
-          length_area: true,
-          width_area: true,
-          plot_area: true,
-          total_project_area: true,
-          builtup_unit: true,
-          property_cost: true,
-          possession_status: true,
-          ownership_type: true,
-          unit_flat_house_no: true,
-          suitable: true,
-          investor_property: true,
-          loan_facility: true,
-          facing: true,
-          car_parking: true,
-          bike_parking: true,
-          open_parking: true,
-          around_places: true,
-          description: true,
-        },
-        Others: {
-          rera_approved: true,
-          occupancy: true,
-          area_units: true,
-          plot_area: true,
-          total_project_area: true,
-          builtup_unit: true,
-          property_cost: true,
-          ownership_type: true,
-          unit_flat_house_no: true,
-          suitable: true,
-          loan_facility: true,
-          facing: true,
-          car_parking: true,
-          bike_parking: true,
-          open_parking: true,
-          around_places: true,
-          pantry_room: true,
-          description: true,
-        },
-      }),
+          Office: {
+            rera_approved: true,
+            occupancy: true,
+            passenger_lifts: true,
+            service_lifts: true,
+            stair_cases: true,
+            private_parking: true,
+            public_parking: true,
+            private_washrooms: true,
+            public_washrooms: true,
+            area_units: true,
+            builtup_area: true,
+            carpet_area: true,
+            total_project_area: true,
+            builtup_unit: true,
+            property_cost: true,
+            ownership_type: true,
+            facilities: true,
+            unit_flat_house_no: true,
+            zone_types: true,
+            loan_facility: true,
+            facing: true,
+            car_parking: true,
+            bike_parking: true,
+            open_parking: true,
+            around_places: true,
+            pantry_room: true,
+            description: true,
+          },
+          "Retail Shop": {
+            rera_approved: true,
+            occupancy: true,
+            passenger_lifts: true,
+            service_lifts: true,
+            stair_cases: true,
+            private_parking: true,
+            public_parking: true,
+            private_washrooms: true,
+            public_washrooms: true,
+            area_units: true,
+            builtup_area: true,
+            carpet_area: true,
+            total_project_area: true,
+            builtup_unit: true,
+            property_cost: true,
+            ownership_type: true,
+            facilities: true,
+            unit_flat_house_no: true,
+            suitable: true,
+            loan_facility: true,
+            facing: true,
+            car_parking: true,
+            bike_parking: true,
+            open_parking: true,
+            around_places: true,
+            description: true,
+          },
+          "Show Room": {
+            rera_approved: true,
+            occupancy: true,
+            passenger_lifts: true,
+            service_lifts: true,
+            stair_cases: true,
+            private_parking: true,
+            public_parking: true,
+            private_washrooms: true,
+            public_washrooms: true,
+            area_units: true,
+            builtup_area: true,
+            carpet_area: true,
+            total_project_area: true,
+            builtup_unit: true,
+            property_cost: true,
+            ownership_type: true,
+            facilities: true,
+            unit_flat_house_no: true,
+            suitable: true,
+            loan_facility: true,
+            facing: true,
+            car_parking: true,
+            bike_parking: true,
+            open_parking: true,
+            around_places: true,
+            pantry_room: true,
+            description: true,
+          },
+          Warehouse: {
+            rera_approved: true,
+            occupancy: true,
+            area_units: true,
+            plot_area: true,
+            total_project_area: true,
+            builtup_unit: true,
+            property_cost: true,
+            ownership_type: true,
+            unit_flat_house_no: true,
+            zone_types: true,
+            loan_facility: true,
+            facing: true,
+            car_parking: true,
+            bike_parking: true,
+            open_parking: true,
+            around_places: true,
+            description: true,
+          },
+          Plot: {
+            rera_approved: true,
+            area_units: true,
+            length_area: true,
+            width_area: true,
+            plot_area: true,
+            total_project_area: true,
+            builtup_unit: true,
+            property_cost: true,
+            possession_status: true,
+            ownership_type: true,
+            unit_flat_house_no: true,
+            suitable: true,
+            investor_property: true,
+            loan_facility: true,
+            facing: true,
+            car_parking: true,
+            bike_parking: true,
+            open_parking: true,
+            around_places: true,
+            description: true,
+          },
+          Others: {
+            rera_approved: true,
+            occupancy: true,
+            area_units: true,
+            plot_area: true,
+            total_project_area: true,
+            builtup_unit: true,
+            property_cost: true,
+            ownership_type: true,
+            unit_flat_house_no: true,
+            suitable: true,
+            loan_facility: true,
+            facing: true,
+            car_parking: true,
+            bike_parking: true,
+            open_parking: true,
+            around_places: true,
+            pantry_room: true,
+            description: true,
+          },
+        }),
       ...(isResidential &&
         isRent && {
-        Apartment: {
-          bedrooms: true,
-          bathroom: true,
-          balconies: true,
-          furnished_status: true,
-          available_from: true,
-          monthly_rent: true,
-          maintenance: true,
-          security_deposit: true,
-          lock_in: true,
-          brokerage_charge: true,
-          types: true,
-          area_units: true,
-          builtup_area: true,
-          carpet_area: true,
-          total_project_area: true,
-          facilities: true,
-          facing: true,
-          car_parking: true,
-          bike_parking: true,
-          open_parking: true,
-          around_places: true,
-          servant_room: true,
-          description: true,
-          unit_flat_house_no: true,
-        },
-        "Independent House": {
-          bedrooms: true,
-          furnished_status: true,
-          available_from: true,
-          bathroom: true,
-          balconies: true,
-          monthly_rent: true,
-          maintenance: true,
-          security_deposit: true,
-          lock_in: true,
-          brokerage_charge: true,
-          types: true,
-          area_units: true,
-          builtup_area: true,
-          carpet_area: true,
-          plot_area: true,
-          total_project_area: true,
-          pent_house: true,
-          facilities: true,
-          facing: true,
-          car_parking: true,
-          bike_parking: true,
-          open_parking: true,
-          around_places: true,
-          servant_room: true,
-          description: true,
-          unit_flat_house_no: true,
-        },
-        "Independent Villa": {
-          bedrooms: true,
-          furnished_status: true,
-          bathroom: true,
-          balconies: true,
-          available_from: true,
-          monthly_rent: true,
-          maintenance: true,
-          security_deposit: true,
-          lock_in: true,
-          brokerage_charge: true,
-          types: true,
-          area_units: true,
-          builtup_area: true,
-          carpet_area: true,
-          plot_area: true,
-          total_project_area: true,
-          pent_house: true,
-          facilities: true,
-          facing: true,
-          car_parking: true,
-          bike_parking: true,
-          open_parking: true,
-          around_places: true,
-          servant_room: true,
-          description: true,
-          unit_flat_house_no: true,
-        },
-      }),
+          Apartment: {
+            bedrooms: true,
+            bathroom: true,
+            balconies: true,
+            furnished_status: true,
+            available_from: true,
+            monthly_rent: true,
+            maintenance: true,
+            security_deposit: true,
+            lock_in: true,
+            brokerage_charge: true,
+            types: true,
+            area_units: true,
+            builtup_area: true,
+            carpet_area: true,
+            total_project_area: true,
+            facilities: true,
+            facing: true,
+            car_parking: true,
+            bike_parking: true,
+            open_parking: true,
+            around_places: true,
+            servant_room: true,
+            description: true,
+            unit_flat_house_no: true,
+          },
+          "Independent House": {
+            bedrooms: true,
+            furnished_status: true,
+            available_from: true,
+            bathroom: true,
+            balconies: true,
+            monthly_rent: true,
+            maintenance: true,
+            security_deposit: true,
+            lock_in: true,
+            brokerage_charge: true,
+            types: true,
+            area_units: true,
+            builtup_area: true,
+            carpet_area: true,
+            plot_area: true,
+            total_project_area: true,
+            pent_house: true,
+            facilities: true,
+            facing: true,
+            car_parking: true,
+            bike_parking: true,
+            open_parking: true,
+            around_places: true,
+            servant_room: true,
+            description: true,
+            unit_flat_house_no: true,
+          },
+          "Independent Villa": {
+            bedrooms: true,
+            furnished_status: true,
+            bathroom: true,
+            balconies: true,
+            available_from: true,
+            monthly_rent: true,
+            maintenance: true,
+            security_deposit: true,
+            lock_in: true,
+            brokerage_charge: true,
+            types: true,
+            area_units: true,
+            builtup_area: true,
+            carpet_area: true,
+            plot_area: true,
+            total_project_area: true,
+            pent_house: true,
+            facilities: true,
+            facing: true,
+            car_parking: true,
+            bike_parking: true,
+            open_parking: true,
+            around_places: true,
+            servant_room: true,
+            description: true,
+            unit_flat_house_no: true,
+          },
+        }),
       ...(isCommercial &&
         isRent && {
-        Office: {
-          passenger_lifts: true,
-          service_lifts: true,
-          stair_cases: true,
-          private_parking: true,
-          public_parking: true,
-          private_washrooms: true,
-          public_washrooms: true,
-          available_from: true,
-          monthly_rent: true,
-          maintenance: true,
-          security_deposit: true,
-          lock_in: true,
-          brokerage_charge: true,
-          area_units: true,
-          builtup_area: true,
-          carpet_area: true,
-          total_project_area: true,
-          facilities: true,
-          unit_flat_house_no: true,
-          zone_types: true,
-          facing: true,
-          car_parking: true,
-          bike_parking: true,
-          open_parking: true,
-          around_places: true,
-          pantry_room: true,
-          description: true,
-        },
-        "Retail Shop": {
-          passenger_lifts: true,
-          service_lifts: true,
-          stair_cases: true,
-          private_parking: true,
-          public_parking: true,
-          private_washrooms: true,
-          public_washrooms: true,
-          available_from: true,
-          monthly_rent: true,
-          maintenance: true,
-          security_deposit: true,
-          lock_in: true,
-          brokerage_charge: true,
-          area_units: true,
-          builtup_area: true,
-          carpet_area: true,
-          total_project_area: true,
-          facilities: true,
-          unit_flat_house_no: true,
-          suitable: true,
-          facing: true,
-          car_parking: true,
-          bike_parking: true,
-          open_parking: true,
-          around_places: true,
-          description: true,
-        },
-        "Show Room": {
-          passenger_lifts: true,
-          service_lifts: true,
-          stair_cases: true,
-          private_parking: true,
-          public_parking: true,
-          private_washrooms: true,
-          public_washrooms: true,
-          available_from: true,
-          monthly_rent: true,
-          maintenance: true,
-          security_deposit: true,
-          lock_in: true,
-          brokerage_charge: true,
-          area_units: true,
-          builtup_area: true,
-          carpet_area: true,
-          total_project_area: true,
-          facilities: true,
-          unit_flat_house_no: true,
-          suitable: true,
-          facing: true,
-          car_parking: true,
-          bike_parking: true,
-          open_parking: true,
-          around_places: true,
-          pantry_room: true,
-          description: true,
-        },
-        Warehouse: {
-          available_from: true,
-          monthly_rent: true,
-          maintenance: true,
-          security_deposit: true,
-          lock_in: true,
-          brokerage_charge: true,
-          area_units: true,
-          plot_area: true,
-          total_project_area: true,
-          unit_flat_house_no: true,
-          zone_types: true,
-          facing: true,
-          car_parking: true,
-          bike_parking: true,
-          open_parking: true,
-          around_places: true,
-          description: true,
-        },
-        Plot: {
-          available_from: true,
-          monthly_rent: true,
-          maintenance: true,
-          security_deposit: true,
-          lock_in: true,
-          brokerage_charge: true,
-          area_units: true,
-          length_area: true,
-          width_area: true,
-          plot_area: true,
-          total_project_area: true,
-          unit_flat_house_no: true,
-          suitable: true,
-          facing: true,
-          around_places: true,
-          description: true,
-        },
-        Others: {
-          available_from: true,
-          monthly_rent: true,
-          maintenance: true,
-          security_deposit: true,
-          lock_in: true,
-          brokerage_charge: true,
-          area_units: true,
-          plot_area: true,
-          total_project_area: true,
-          unit_flat_house_no: true,
-          suitable: true,
-          facing: true,
-          car_parking: true,
-          bike_parking: true,
-          open_parking: true,
-          around_places: true,
-          pantry_room: true,
-          description: true,
-        },
-      }),
+          Office: {
+            passenger_lifts: true,
+            service_lifts: true,
+            stair_cases: true,
+            private_parking: true,
+            public_parking: true,
+            private_washrooms: true,
+            public_washrooms: true,
+            available_from: true,
+            monthly_rent: true,
+            maintenance: true,
+            security_deposit: true,
+            lock_in: true,
+            brokerage_charge: true,
+            area_units: true,
+            builtup_area: true,
+            carpet_area: true,
+            total_project_area: true,
+            facilities: true,
+            unit_flat_house_no: true,
+            zone_types: true,
+            facing: true,
+            car_parking: true,
+            bike_parking: true,
+            open_parking: true,
+            around_places: true,
+            pantry_room: true,
+            description: true,
+          },
+          "Retail Shop": {
+            passenger_lifts: true,
+            service_lifts: true,
+            stair_cases: true,
+            private_parking: true,
+            public_parking: true,
+            private_washrooms: true,
+            public_washrooms: true,
+            available_from: true,
+            monthly_rent: true,
+            maintenance: true,
+            security_deposit: true,
+            lock_in: true,
+            brokerage_charge: true,
+            area_units: true,
+            builtup_area: true,
+            carpet_area: true,
+            total_project_area: true,
+            facilities: true,
+            unit_flat_house_no: true,
+            suitable: true,
+            facing: true,
+            car_parking: true,
+            bike_parking: true,
+            open_parking: true,
+            around_places: true,
+            description: true,
+          },
+          "Show Room": {
+            passenger_lifts: true,
+            service_lifts: true,
+            stair_cases: true,
+            private_parking: true,
+            public_parking: true,
+            private_washrooms: true,
+            public_washrooms: true,
+            available_from: true,
+            monthly_rent: true,
+            maintenance: true,
+            security_deposit: true,
+            lock_in: true,
+            brokerage_charge: true,
+            area_units: true,
+            builtup_area: true,
+            carpet_area: true,
+            total_project_area: true,
+            facilities: true,
+            unit_flat_house_no: true,
+            suitable: true,
+            facing: true,
+            car_parking: true,
+            bike_parking: true,
+            open_parking: true,
+            around_places: true,
+            pantry_room: true,
+            description: true,
+          },
+          Warehouse: {
+            available_from: true,
+            monthly_rent: true,
+            maintenance: true,
+            security_deposit: true,
+            lock_in: true,
+            brokerage_charge: true,
+            area_units: true,
+            plot_area: true,
+            total_project_area: true,
+            unit_flat_house_no: true,
+            zone_types: true,
+            facing: true,
+            car_parking: true,
+            bike_parking: true,
+            open_parking: true,
+            around_places: true,
+            description: true,
+          },
+          Plot: {
+            available_from: true,
+            monthly_rent: true,
+            maintenance: true,
+            security_deposit: true,
+            lock_in: true,
+            brokerage_charge: true,
+            area_units: true,
+            length_area: true,
+            width_area: true,
+            plot_area: true,
+            total_project_area: true,
+            unit_flat_house_no: true,
+            suitable: true,
+            facing: true,
+            around_places: true,
+            description: true,
+          },
+          Others: {
+            available_from: true,
+            monthly_rent: true,
+            maintenance: true,
+            security_deposit: true,
+            lock_in: true,
+            brokerage_charge: true,
+            area_units: true,
+            plot_area: true,
+            total_project_area: true,
+            unit_flat_house_no: true,
+            suitable: true,
+            facing: true,
+            car_parking: true,
+            bike_parking: true,
+            open_parking: true,
+            around_places: true,
+            pantry_room: true,
+            description: true,
+          },
+        }),
     }),
     [isResidential, isCommercial, isRent, isSell]
   );
@@ -790,7 +792,8 @@ const PropertyBody = ({ handleLoading }) => {
     total_project_area: {
       label: "Project Area",
       value: (prop) =>
-        `${formatValue(prop.total_project_area)} ${prop.total_project_area_type || "Acres"
+        `${formatValue(prop.total_project_area)} ${
+          prop.total_project_area_type || "Acres"
         }`,
       icon: <FaBorderAll className="w-5 h-5" />,
     },
@@ -834,10 +837,11 @@ const PropertyBody = ({ handleLoading }) => {
           prop.sub_type
         )
           ? prop.possession_status === "Under Construction"
-            ? `Under Construction${prop.under_construction
-              ? ` (${formatDate(prop.under_construction)})`
-              : ""
-            }`
+            ? `Under Construction${
+                prop.under_construction
+                  ? ` (${formatDate(prop.under_construction)})`
+                  : ""
+              }`
             : "Ready to Move"
           : "",
       icon: <DoorOpen className="w-5 h-5" />,
@@ -1068,162 +1072,162 @@ const PropertyBody = ({ handleLoading }) => {
   const shortText = description.slice(0, 320);
   const toggleReadMore = () => setIsExpanded(!isExpanded);
 
-
   if (loading) {
-  return (
-    <div className="min-h-screen bg-gray-200 flex items-center justify-center p-4">
-      {/* Mobile Layout (below md: 768px) */}
-      <div className="block md:hidden h-full w-full max-w-sm space-y-6">
-        {/* Main Image Placeholder */}
-        <div className="bg-white rounded-xl shadow-md p-2">
-          <div className="w-full h-[250px] bg-gray-300 rounded-2xl animate-pulse"></div>
-        </div>
-
-        {/* Swiper Carousel Placeholder */}
-        <div className="bg-white rounded-xl shadow-md p-4">
-          <div className="grid grid-cols-4 gap-4">
-            <div className="h-20 bg-gray-300 rounded-lg animate-pulse"></div>
-            <div className="h-20 bg-gray-300 rounded-lg animate-pulse"></div>
-            <div className="h-20 bg-gray-300 rounded-lg animate-pulse"></div>
-            <div className="h-20 bg-gray-300 rounded-lg animate-pulse"></div>
+    return (
+      <div className="min-h-screen bg-gray-200 flex items-center justify-center p-4">
+        {/* Mobile Layout (below md: 768px) */}
+        <div className="block md:hidden h-full w-full max-w-sm space-y-6">
+          {/* Main Image Placeholder */}
+          <div className="bg-white rounded-xl shadow-md p-2">
+            <div className="w-full h-[250px] bg-gray-300 rounded-2xl animate-pulse"></div>
           </div>
-          <div className="flex justify-center items-center gap-6 mt-4">
-            <div className="w-6 h-6 bg-gray-300 rounded-full animate-pulse"></div>
-            <div className="w-20 h-2 bg-gray-300 rounded animate-pulse"></div>
-            <div className="w-6 h-6 bg-gray-300 rounded-full animate-pulse"></div>
-          </div>
-        </div>
 
-        {/* Property Description Placeholder */}
-        <div className="bg-white rounded-xl shadow-md p-6 space-y-4">
-          <div className="h-6 bg-gray-300 rounded w-1/2 animate-pulse"></div>
-          <div className="space-y-2">
-            <div className="h-4 bg-gray-300 rounded w-full animate-pulse"></div>
-            <div className="h-4 bg-gray-300 rounded w-5/6 animate-pulse"></div>
-            <div className="h-4 bg-gray-300 rounded w-2/3 animate-pulse"></div>
+          {/* Swiper Carousel Placeholder */}
+          <div className="bg-white rounded-xl shadow-md p-4">
+            <div className="grid grid-cols-4 gap-4">
+              <div className="h-20 bg-gray-300 rounded-lg animate-pulse"></div>
+              <div className="h-20 bg-gray-300 rounded-lg animate-pulse"></div>
+              <div className="h-20 bg-gray-300 rounded-lg animate-pulse"></div>
+              <div className="h-20 bg-gray-300 rounded-lg animate-pulse"></div>
+            </div>
+            <div className="flex justify-center items-center gap-6 mt-4">
+              <div className="w-6 h-6 bg-gray-300 rounded-full animate-pulse"></div>
+              <div className="w-20 h-2 bg-gray-300 rounded animate-pulse"></div>
+              <div className="w-6 h-6 bg-gray-300 rounded-full animate-pulse"></div>
+            </div>
           </div>
-        </div>
 
-        {/* Floor Plan Placeholder (if applicable) */}
-        {floorplan?.image && (
+          {/* Property Description Placeholder */}
+          <div className="bg-white rounded-xl shadow-md p-6 space-y-4">
+            <div className="h-6 bg-gray-300 rounded w-1/2 animate-pulse"></div>
+            <div className="space-y-2">
+              <div className="h-4 bg-gray-300 rounded w-full animate-pulse"></div>
+              <div className="h-4 bg-gray-300 rounded w-5/6 animate-pulse"></div>
+              <div className="h-4 bg-gray-300 rounded w-2/3 animate-pulse"></div>
+            </div>
+          </div>
+
+          {/* Floor Plan Placeholder (if applicable) */}
+          {floorplan?.image && (
+            <div className="bg-white rounded-xl shadow-md p-6 space-y-4">
+              <div className="h-6 bg-gray-300 rounded w-1/2 animate-pulse"></div>
+              <div className="w-full h-64 bg-gray-300 rounded-lg animate-pulse"></div>
+            </div>
+          )}
+
+          {/* Amenities Placeholder */}
+          {property?.facilities && (
+            <div className="bg-white rounded-xl shadow-md p-6 space-y-4">
+              <div className="h-6 bg-gray-300 rounded w-1/2 animate-pulse"></div>
+              <div className="grid grid-cols-2 gap-4">
+                {Array.from({ length: 4 }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="h-12 bg-gray-300 rounded-lg animate-pulse"
+                  ></div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Property Location Placeholder */}
+          {aroundProperty && aroundProperty.length > 0 && (
+            <div className="bg-white rounded-xl shadow-md p-6 space-y-4">
+              <div className="h-6 bg-gray-300 rounded w-1/2 animate-pulse"></div>
+              <div className="h-4 bg-gray-300 rounded w-3/4 animate-pulse"></div>
+              <div className="grid grid-cols-1 gap-4">
+                {Array.from({ length: 3 }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="flex justify-between items-center p-4 bg-gray-100 rounded-lg animate-pulse"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-6 h-6 bg-gray-300 rounded-full"></div>
+                      <div className="h-4 bg-gray-300 rounded w-24"></div>
+                    </div>
+                    <div className="h-6 bg-gray-300 rounded w-16"></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Property Overview Placeholder */}
+          <div className="bg-white rounded-xl shadow-md p-6 space-y-4">
+            <div className="h-6 bg-gray-300 rounded w-1/2 animate-pulse"></div>
+            <div className="grid grid-cols-2 gap-4">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="flex items-center gap-4 p-4 bg-gray-100 rounded-lg animate-pulse"
+                >
+                  <div className="w-6 h-6 bg-gray-300 rounded-full"></div>
+                  <div className="space-y-2">
+                    <div className="h-4 bg-gray-300 rounded w-20"></div>
+                    <div className="h-4 bg-gray-300 rounded w-16"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Explore Map Placeholder */}
           <div className="bg-white rounded-xl shadow-md p-6 space-y-4">
             <div className="h-6 bg-gray-300 rounded w-1/2 animate-pulse"></div>
             <div className="w-full h-64 bg-gray-300 rounded-lg animate-pulse"></div>
           </div>
-        )}
+        </div>
 
-        {/* Amenities Placeholder */}
-        {property?.facilities && (
-          <div className="bg-white rounded-xl shadow-md p-6 space-y-4">
-            <div className="h-6 bg-gray-300 rounded w-1/2 animate-pulse"></div>
-            <div className="grid grid-cols-2 gap-4">
-              {Array.from({ length: 4 }).map((_, index) => (
-                <div
-                  key={index}
-                  className="h-12 bg-gray-300 rounded-lg animate-pulse"
-                ></div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Property Location Placeholder */}
-        {aroundProperty && aroundProperty.length > 0 && (
-          <div className="bg-white rounded-xl shadow-md p-6 space-y-4">
-            <div className="h-6 bg-gray-300 rounded w-1/2 animate-pulse"></div>
-            <div className="h-4 bg-gray-300 rounded w-3/4 animate-pulse"></div>
-            <div className="grid grid-cols-1 gap-4">
-              {Array.from({ length: 3 }).map((_, index) => (
-                <div
-                  key={index}
-                  className="flex justify-between items-center p-4 bg-gray-100 rounded-lg animate-pulse"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 bg-gray-300 rounded-full"></div>
-                    <div className="h-4 bg-gray-300 rounded w-24"></div>
-                  </div>
-                  <div className="h-6 bg-gray-300 rounded w-16"></div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Property Overview Placeholder */}
-        <div className="bg-white rounded-xl shadow-md p-6 space-y-4">
-          <div className="h-6 bg-gray-300 rounded w-1/2 animate-pulse"></div>
-          <div className="grid grid-cols-2 gap-4">
-            {Array.from({ length: 6 }).map((_, index) => (
-              <div
-                key={index}
-                className="flex items-center gap-4 p-4 bg-gray-100 rounded-lg animate-pulse"
-              >
-                <div className="w-6 h-6 bg-gray-300 rounded-full"></div>
-                <div className="space-y-2">
-                  <div className="h-4 bg-gray-300 rounded w-20"></div>
-                  <div className="h-4 bg-gray-300 rounded w-16"></div>
-                </div>
+        {/* Laptop Layout (md and above: 768px+) */}
+        <div className="hidden h-screen md:block w-full max-w-6xl">
+          <div className="bg-white rounded-xl shadow-md p-8 space-y-6 animate-pulse">
+            {/* Image Gallery Placeholder */}
+            <div className="flex gap-4">
+              <div className="w-24 space-y-2">
+                <div className="h-24 bg-gray-300 rounded-lg"></div>
+                <div className="h-24 bg-gray-300 rounded-lg"></div>
+                <div className="h-24 bg-gray-300 rounded-lg"></div>
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Explore Map Placeholder */}
-        <div className="bg-white rounded-xl shadow-md p-6 space-y-4">
-          <div className="h-6 bg-gray-300 rounded w-1/2 animate-pulse"></div>
-          <div className="w-full h-64 bg-gray-300 rounded-lg animate-pulse"></div>
-        </div>
-      </div>
-
-      {/* Laptop Layout (md and above: 768px+) */}
-      <div className="hidden h-screen md:block w-full max-w-6xl">
-        <div className="bg-white rounded-xl shadow-md p-8 space-y-6 animate-pulse">
-          {/* Image Gallery Placeholder */}
-          <div className="flex gap-4">
-            <div className="w-24 space-y-2">
-              <div className="h-24 bg-gray-300 rounded-lg"></div>
-              <div className="h-24 bg-gray-300 rounded-lg"></div>
-              <div className="h-24 bg-gray-300 rounded-lg"></div>
+              <div className="flex-grow h-[450px] bg-gray-300 rounded-lg"></div>
             </div>
-            <div className="flex-grow h-[450px] bg-gray-300 rounded-lg"></div>
+            {/* Property Title Placeholder */}
+            <div className="h-8 bg-gray-300 rounded w-1/2"></div>
+            {/* Property Details Placeholders */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="h-4 bg-gray-300 rounded w-full"></div>
+              <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+              <div className="h-4 bg-gray-300 rounded w-2/3"></div>
+              <div className="h-4 bg-gray-300 rounded w-1/2"></div>
+            </div>
+            {/* Amenities Placeholder */}
+            <div className="grid grid-cols-4 gap-4">
+              <div className="h-16 bg-gray-300 rounded-lg"></div>
+              <div className="h-16 bg-gray-300 rounded-lg"></div>
+              <div className="h-16 bg-gray-300 rounded-lg"></div>
+              <div className="h-16 bg-gray-300 rounded-lg"></div>
+            </div>
+            {/* Map Placeholder */}
+            <div className="h-80 bg-gray-300 rounded-lg"></div>
           </div>
-          {/* Property Title Placeholder */}
-          <div className="h-8 bg-gray-300 rounded w-1/2"></div>
-          {/* Property Details Placeholders */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="h-4 bg-gray-300 rounded w-full"></div>
-            <div className="h-4 bg-gray-300 rounded w-3/4"></div>
-            <div className="h-4 bg-gray-300 rounded w-2/3"></div>
-            <div className="h-4 bg-gray-300 rounded w-1/2"></div>
-          </div>
-          {/* Amenities Placeholder */}
-          <div className="grid grid-cols-4 gap-4">
-            <div className="h-16 bg-gray-300 rounded-lg"></div>
-            <div className="h-16 bg-gray-300 rounded-lg"></div>
-            <div className="h-16 bg-gray-300 rounded-lg"></div>
-            <div className="h-16 bg-gray-300 rounded-lg"></div>
-          </div>
-          {/* Map Placeholder */}
-          <div className="h-80 bg-gray-300 rounded-lg"></div>
         </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
   return (
     <div className="relative p-1   w-full px-4 rounded-xl shadow-sm space-y-4">
       <div className="hidden md:block font-['Inter']">
         <div className="flex flex-col md:flex-row gap-2">
-          { }
+          {}
           {images.length > 1 && (
             <div className="flex flex-col w-full md:w-24 lg:w-30 gap-2 overflow-y-auto max-h-[450px] hide-scrollbar p-2 md:p-0">
               {images.map((img, index) => (
                 <div
                   key={index}
-                  className={`relative flex-shrink-0 w-full md:w-24 lg:w-28 h-20 md:h-24 lg:h-28 rounded-md overflow-hidden cursor-pointer border-2 ${mainImage === img.url
+                  className={`relative flex-shrink-0 w-full md:w-24 lg:w-28 h-20 md:h-24 lg:h-28 rounded-md overflow-hidden cursor-pointer border-2 ${
+                    mainImage === img.url
                       ? "border-blue-500"
                       : "border-gray-200"
-                    } hover:border-blue-700 transition-all duration-200`}
+                  } hover:border-blue-700 transition-all duration-200`}
                   onClick={() => {
                     setMainImage(img.url || "");
                   }}
@@ -1235,23 +1239,25 @@ const PropertyBody = ({ handleLoading }) => {
                     src={
                       img.url && typeof img.url === "string" && img.url.trim()
                         ? img.url
-                        : `https://placehold.co/112x112?text=Thumbnail+${index + 1
-                        }`
+                        : `https://placehold.co/112x112?text=Thumbnail+${
+                            index + 1
+                          }`
                     }
                     alt={`Thumbnail ${index + 1}`}
                     crossOrigin="anonymous"
                     className="w-full h-full object-cover"
                     onError={(e) => {
                       console.error("Thumbnail image failed to load:", img.url);
-                      e.target.src = `https://placehold.co/112x112?text=Thumbnail+${index + 1
-                        }`;
+                      e.target.src = `https://placehold.co/112x112?text=Thumbnail+${
+                        index + 1
+                      }`;
                     }}
                   />
                 </div>
               ))}
             </div>
           )}
-          { }
+          {}
           <div className="relative rounded-lg overflow-hidden shadow-md border border-teal-100/50 flex-grow">
             <Image
               key={mainImage || "default"}
@@ -1262,8 +1268,8 @@ const PropertyBody = ({ handleLoading }) => {
                 mainImage && typeof mainImage === "string" && mainImage.trim()
                   ? mainImage.trim()
                   : `https://placehold.co/600x400?text=${encodeURIComponent(
-                    (property?.property_name || "No Image Found").trim()
-                  )}`
+                      (property?.property_name || "No Image Found").trim()
+                    )}`
               }
               alt="Property Image"
               className="w-full h-[250px] sm:h-[350px] md:h-[450px] object-cover"
@@ -1289,8 +1295,8 @@ const PropertyBody = ({ handleLoading }) => {
               mainImage && typeof mainImage === "string" && mainImage.trim()
                 ? mainImage.trim()
                 : `https://placehold.co/600x400?text=${encodeURIComponent(
-                  (property?.property_name || "No Image Found").trim()
-                )}`
+                    (property?.property_name || "No Image Found").trim()
+                  )}`
             }
             alt="Property Image"
             className="w-full h-auto md:h-[500px] object-cover rounded-2xl shadow-md"
@@ -1484,7 +1490,7 @@ const PropertyBody = ({ handleLoading }) => {
 
       {aroundProperty && aroundProperty.length > 0 && (
         <div className="mt-12 max-w-6xl mx-auto rounded-3xl">
-          { }
+          {}
           <h2
             style={{ color: AroundTheme.header.text }}
             className="text-xl text-left font-bold mb-4 tracking-tight relative"
@@ -1505,7 +1511,7 @@ const PropertyBody = ({ handleLoading }) => {
             </svg>
           </h2>
 
-          { }
+          {}
           <p
             style={{ color: AroundTheme.card.text }}
             className="text-left text-base mb-6 font-medium tracking-wide"
@@ -1513,7 +1519,7 @@ const PropertyBody = ({ handleLoading }) => {
             {property?.google_address}
           </p>
 
-          { }
+          {}
           <div className="relative sm:rounded-3xl  sm:hadow-xl sm:p-8 transition-all duration-500 hover:shadow-xl">
             <h3
               style={{ color: AroundTheme.header.text }}
@@ -1522,7 +1528,7 @@ const PropertyBody = ({ handleLoading }) => {
               Around This Property
             </h3>
 
-            { }
+            {}
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
               {aroundProperty.map((place, index) => (
                 <div
@@ -1533,7 +1539,7 @@ const PropertyBody = ({ handleLoading }) => {
                   }}
                   className="group  relative rounded-xl p-4 border shadow-md hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300 overflow-hidden"
                 >
-                  { }
+                  {}
                   <div
                     style={{
                       background: `linear-gradient(to right, ${AroundTheme.card.gradientFrom}, ${AroundTheme.card.gradientTo})`,
@@ -1541,7 +1547,7 @@ const PropertyBody = ({ handleLoading }) => {
                     className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                   />
 
-                  { }
+                  {}
                   <div className="relative flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div
@@ -1558,7 +1564,7 @@ const PropertyBody = ({ handleLoading }) => {
                       </span>
                     </div>
 
-                    { }
+                    {}
                     <span
                       style={{
                         background: AroundTheme.badge.background,
@@ -1573,7 +1579,7 @@ const PropertyBody = ({ handleLoading }) => {
               ))}
             </div>
 
-            { }
+            {}
             <div
               style={{
                 backgroundColor: AroundTheme.decor.background,
@@ -1653,7 +1659,7 @@ const PropertyBody = ({ handleLoading }) => {
             frameBorder="0"
             style={{ border: 0 }}
             src={`https://www.google.com/maps?q=${encodeURIComponent(
-              property?.google_address
+              property?.google_address || maplocation
             )}&output=embed`}
             allowFullScreen
             loading="lazy"
