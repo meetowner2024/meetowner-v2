@@ -1428,7 +1428,7 @@ const PropertyBody = ({ handleLoading }) => {
               />
             </svg>
           </h2>
-          <div className="relative px-1 sm:px-0 sm:rounded-3xl sm:border sm:border-gray-200 sm:shadow-xl w-full  sm:p-8 transition-all duration-500 hover:shadow-2xl">
+          <div className="relative px-1  sm:rounded-3xl sm:border sm:border-gray-200 sm:shadow-xl w-full  sm:p-8 transition-all duration-500 hover:shadow-2xl">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {facilitiesList.map((facility, index) => (
                 <div
