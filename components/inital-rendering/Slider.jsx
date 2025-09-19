@@ -242,6 +242,7 @@ const PropertyListing = ({
   );
   const handleNavigation = useCallback(
     async (property) => {
+      console.log("property in handleNavigation:", property);
       let userDetails = null;
       try {
         const data = localStorage.getItem("user");

@@ -85,7 +85,7 @@ const Empty = ({ message = "No data found." }) => (
     {message}
   </div>
 );
-const PropertyDeatils = () => {
+const PropertyDeatils = ({propertyDataDetails}) => {
   const JWT_SECRET = process.env.NEXT_PUBLIC_ENCRYPTION_SECRET;
   const ENCRYPTION_KEY = CryptoJS.SHA256(JWT_SECRET).toString();
   function decrypt(encryptedText) {
@@ -106,8 +106,14 @@ const PropertyDeatils = () => {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [submittedStates, setSubmittedStates] = useState([]);
   const [contacted, setContacted] = useState([]);
-  const propertyData = useSelector((state) => state.property.propertyDetails);
-  const [property, setProperty] = useState(propertyData);
+  const [property, setProperty] = useState();
+
+
+ useEffect(() => {
+    setProperty(propertyDataDetails);
+  }, [propertyDataDetails]);
+
+
   const [error, setError] = useState(null);
   const getPropertyDetails = async (propertyData) => {
     try {
@@ -518,7 +524,7 @@ const PropertyDeatils = () => {
         )}
       </div>
       <div className="mt-6">
-        <PropertyAds handleRender={handleProperty} />
+        <PropertyAds handleRender={handleProperty} propertyDataDetails={property} />
       </div>
     </>
   );

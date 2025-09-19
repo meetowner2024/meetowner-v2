@@ -16,6 +16,7 @@ import config from "../utils/config";
 import Login from "../auth/Login";
 import noPropertiesFound from "../../app/assets/Images/urban-planning_10891692.png";
 import theme from "../utils/theme.json";
+
 function PropertyCardSkeleton() {
   return (
     <div className="relative rounded-xl shadow-lg overflow-hidden bg-white">
@@ -51,6 +52,7 @@ const PropertyListingAds = () => {
   const modalRef = useRef(null);
   const swiperRef = useRef(null);
 
+
   const fetchLatestProperties = async () => {
     setProperty([]);
     try {
@@ -58,9 +60,8 @@ const PropertyListingAds = () => {
         `${config.awsApiUrl}/adAssets/v1/getAds?ads_page=listing_ads&city`
       );
       const data = await response.json();
-      // Filter properties with valid images and names
       const validProperties = data.ads.filter(
-        (item) => item.property_data?.image && item.property_data?.property_name
+        (item) => item.property_data?.image && item.property_data?.property_name 
       );
       setProperty(validProperties);
     } catch (err) {
@@ -252,7 +253,7 @@ const PropertyListingAds = () => {
         </div>
       )}
 
-      {/* Secondary Properties Carousel */}
+    
       {property.length > 0 ? (
         <div className="mt-4 relative">
           <Swiper

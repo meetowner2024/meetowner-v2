@@ -275,7 +275,8 @@ export default function SearchBar() {
           : "Apartment",
       location: searchInput,
     };
-    router.push(`/listings`);
+   router.push(`/listings${seoUrl}`);
+
   }, [activeTab, location, searchInput, selected, handleUserSearched, router]);
 
   const getCurrentLocation = useCallback(() => {

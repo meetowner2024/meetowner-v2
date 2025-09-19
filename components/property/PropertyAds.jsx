@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { use, useCallback, useEffect, useRef, useState } from "react";
 import {
   Play,
   Pause,
@@ -14,41 +14,17 @@ import {
 import { useSelector, useDispatch } from "react-redux";
 import { setSearchData } from "../store/slices/searchSlice";
 import config from "../utils/config";
-import {
-  setPropertyDetails
-} from "../store/slices/propertyDetails";
 import { usePathname, useRouter } from "next/navigation";
 import CryptoJS from "crypto-js";
 import theme from "../utils/theme.json";
 import PropertyListingAds from "./PropertyListingAds";
 import Image from "next/image";
 
-const PropertyAds = ({ handleRender }) => {
-  const JWT_SECRET = process.env.NEXT_PUBLIC_ENCRYPTION_SECRET;
-
-  const ENCRYPTION_KEY = CryptoJS.SHA256(JWT_SECRET).toString();
-
-  function decrypt(encryptedText) {
-    const [ivHex, encryptedHex] = encryptedText.split(":");
-    const iv = CryptoJS.enc.Hex.parse(ivHex);
-    const encrypted = CryptoJS.enc.Hex.parse(encryptedHex);
-
-    const decrypted = CryptoJS.AES.decrypt(
-      { ciphertext: encrypted },
-      CryptoJS.enc.Hex.parse(ENCRYPTION_KEY),
-      { iv }
-    );
-
-    return decrypted.toString(CryptoJS.enc.Utf8);
-  }
+const PropertyAds = ({ handleRender, propertyDataDetails }) => {
   const router = useRouter();
-  const pathname = usePathname();
   const dispatch = useDispatch();
   const videoRef = useRef(null);
-  const searchData = useSelector((state) => state.search);
-   const propertyData = useSelector((state) => state.property.propertyDetails );
-  const [property, setProperty] = useState(pathname.state || propertyData);
-  const [loading, setLoading] = useState(!pathname.state);
+  const [property, setProperty] = useState();
   const [error, setError] = useState(null);
   const [videos, setVideos] = useState([]);
   const [images, setImages] = useState([]);
@@ -61,7 +37,9 @@ const PropertyAds = ({ handleRender }) => {
   const [showControls, setShowControls] = useState(false);
   const [isSeeking, setIsSeeking] = useState(false);
 
-  
+  useEffect(() => {
+    setProperty(propertyDataDetails);
+  }, [propertyDataDetails]);
   const fetchPropertyVideos = async () => {
     if (!property?.unique_property_id) return;
     setVideos([]);
@@ -107,7 +85,7 @@ const PropertyAds = ({ handleRender }) => {
       fetchPropertyimages();
       fetchUserProperties();
     }
-  }, [property?.unique_property_id, property?.user_id]);
+  }, [property?.unique_property_id, property?.user_id, propertyDataDetails]);
   useEffect(() => {
     const video = videoRef.current;
     if (!video) {
@@ -213,8 +191,8 @@ const PropertyAds = ({ handleRender }) => {
     );
     router.push("/listings");
   }, [router, dispatch, property?.property_name]);
-  
- 
+
+
   if (error || !property) {
     return null;
   }
@@ -222,7 +200,7 @@ const PropertyAds = ({ handleRender }) => {
     <>
       <div className="hidden lg:block sticky top-6">
         <div className="bg-white/80 backdrop-blur-lg border border-white/20 rounded-2xl shadow-xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]">
-          {}
+          { }
           <div className="relative" onClick={toggleControls}>
             {videos[0]?.url ? (
               <>
@@ -251,9 +229,8 @@ const PropertyAds = ({ handleRender }) => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20"></div>
                 <div
-                  className={`absolute inset-0 transition-all duration-300 ${
-                    showControls ? "opacity-100" : "opacity-0"
-                  }`}
+                  className={`absolute inset-0 transition-all duration-300 ${showControls ? "opacity-100" : "opacity-0"
+                    }`}
                 >
                   <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
                   <button
@@ -354,11 +331,9 @@ const PropertyAds = ({ handleRender }) => {
                         style={{
                           background:
                             duration > 0
-                              ? `linear-gradient(to right, #3B82F6 0%, #3B82F6 ${
-                                  (currentTime / duration) * 100
-                                }%, rgba(255,255,255,0.3) ${
-                                  (currentTime / duration) * 100
-                                }%, rgba(255,255,255,0.3) 100%)`
+                              ? `linear-gradient(to right, #3B82F6 0%, #3B82F6 ${(currentTime / duration) * 100
+                              }%, rgba(255,255,255,0.3) ${(currentTime / duration) * 100
+                              }%, rgba(255,255,255,0.3) 100%)`
                               : "rgba(255,255,255,0.3)",
                         }}
                       />
@@ -432,7 +407,7 @@ const PropertyAds = ({ handleRender }) => {
           </div>
           {properties.properties?.length > 0 && (
             <div className="p-6">
-              {}
+              { }
               <div className="mb-6">
                 <div className="flex items-center gap-2 mb-2">
                   <div className="p-1.5 bg-blue-100 rounded-lg">
@@ -444,7 +419,7 @@ const PropertyAds = ({ handleRender }) => {
                 </div>
                 <div className="w-12 h-1 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-full"></div>
               </div>
-              {}
+              { }
               <div className="space-y-4 mb-6">
                 {properties.properties
                   ?.slice(0, 3)
@@ -457,7 +432,7 @@ const PropertyAds = ({ handleRender }) => {
                     >
                       <div className="bg-gradient-to-br from-white to-slate-50 border border-slate-200/50 rounded-xl p-4 transition-all duration-300 group-hover:border-blue-300/50 group-hover:shadow-md">
                         <div className="flex items-center gap-4">
-                          {}
+                          { }
                           <div className="relative overflow-hidden rounded-lg flex-shrink-0">
                             <Image
                               width={600}
@@ -465,20 +440,18 @@ const PropertyAds = ({ handleRender }) => {
                               src={
                                 propertyItem.image
                                   ? `https://api.meetowner.in/assets/v1/serve/${propertyItem.image}`
-                                  : `https://placehold.co/600x400?text=${
-                                      propertyItem?.property_name ||
-                                      "No Image Found"
-                                    }`
+                                  : `https://placehold.co/600x400?text=${propertyItem?.property_name ||
+                                  "No Image Found"
+                                  }`
                               }
                               alt="Property"
                               crossOrigin="anonymous"
                               className="w-16 h-16 object-cover transition-transform duration-300 group-hover:scale-110"
                               onError={(e) => {
                                 e.target.onerror = null;
-                                e.target.src = `https://placehold.co/600x400?text=${
-                                  propertyItem?.property_name ||
+                                e.target.src = `https://placehold.co/600x400?text=${propertyItem?.property_name ||
                                   "No Image Found"
-                                }`;
+                                  }`;
                               }}
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -486,7 +459,7 @@ const PropertyAds = ({ handleRender }) => {
                               <Eye className="w-3 h-3 text-white drop-shadow-lg" />
                             </div>
                           </div>
-                          {}
+                          { }
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between mb-1">
                               <p className="text-md font-semibold text-blue-900">
@@ -503,8 +476,8 @@ const PropertyAds = ({ handleRender }) => {
                                 {propertyItem?.sub_type === "Apartment"
                                   ? "BHK"
                                   : propertyItem?.sub_type === "Plot"
-                                  ? "Plot"
-                                  : "Land"}
+                                    ? "Plot"
+                                    : "Land"}
                               </span>
                               {propertyItem.location_id && (
                                 <div className="flex items-center gap-1">
@@ -521,7 +494,7 @@ const PropertyAds = ({ handleRender }) => {
                     </div>
                   ))}
               </div>
-              {}
+              { }
               <button
                 onClick={handleNavigation}
                 className={`w-full group relative overflow-hidden  ${theme.button.secondary.bg}              ${theme.button.secondary.text} font-semibold py-3.5 px-6 rounded-xl transition-all duration-300 hover:from-blue-700 hover:to-cyan-700 hover:shadow-lg hover:shadow-blue-500/25 active:scale-[0.98]`}

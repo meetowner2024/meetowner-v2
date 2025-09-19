@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { usePathname } from "next/navigation";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
@@ -72,17 +71,14 @@ import {
   FaWifi,
 } from "react-icons/fa6";
 import Login from "../auth/Login";
-import { useSelector } from "react-redux";
 import config from "../utils/config";
 import Image from "next/image";
 import AmenitiesColor from "../utils/dynamic-colors/AmenitiesColor.json";
 import AroundTheme from "../utils/dynamic-colors/AroundProperty.json";
 import PropertyDetails from "./PropertyDetails";
-const PropertyBody = ({ handleLoading }) => {
-  const pathname = usePathname();
+const PropertyBody = ({ handleLoading ,propertyDataDetails }) => {
+ const [property, setProperty] = useState(propertyDataDetails); 
   const modalRef = useRef(null);
-  const propertyData = useSelector((state) => state.property.propertyDetails);
-  const [property, setProperty] = useState(pathname.state || propertyData);
   const maplocation = `${property?.location_id},${property?.city_id},${property?.state_id}`;
   const [error, setError] = useState(null);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -93,6 +89,16 @@ const PropertyBody = ({ handleLoading }) => {
   const [aroundProperty, setAroundProperty] = useState("");
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [loading, setLoading] = useState(true);
+   useEffect(() => {
+    setProperty(propertyDataDetails);
+  }, [propertyDataDetails]);
+
+ 
+  useEffect(() => {
+    if (property) {
+      handleLoading(false); 
+    }
+  }, [property, handleLoading]);
   useEffect(() => {
     const fetchPropertyData = async () => {
       if (property?.unique_property_id) {
@@ -122,7 +128,7 @@ const PropertyBody = ({ handleLoading }) => {
       }
     };
     fetchPropertyData();
-  }, [property?.unique_property_id]);
+  }, [property?.unique_property_id,propertyDataDetails]);
   useEffect(() => {
     const handleScroll = () => {
       setShowScrollTop(window.scrollY > 200);
