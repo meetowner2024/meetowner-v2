@@ -14,7 +14,6 @@ const LoginModal = dynamic(() => import("../../components/utils/LoginModal"), { 
 export default function ListingsPageClient() {
   const dispatch = useDispatch();
   const searchParams = useSearchParams();
-
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [ads, setAds] = useState([]);
   const modalRef = useRef(null);
@@ -34,10 +33,31 @@ export default function ListingsPageClient() {
     fetchAds();
   }, []);
 
-  useEffect(() => {
-    const queryParams = Object.fromEntries(searchParams.entries());
-    dispatch(setSearchData(queryParams));
-  }, [searchParams, dispatch]);
+ useEffect(() => {
+  const queryParams = {};
+  for (const key of searchParams.keys()) {
+    const [paramKey, paramValue] = key.split("-");
+    if (paramKey && paramValue) {
+      queryParams[paramKey] = decodeURIComponent(paramValue.replace(/\+/g, " "));
+    }
+  }
+
+  const normalizedParams = {
+    city: queryParams.city || "Hyderabad", 
+    property_for: queryParams.property_for || "Sell",
+    tab: queryParams.tab || "Buy",
+    property_status: queryParams.property_status || "1",
+    property_in:
+      queryParams.property_in === "Residential or Commercial" ||
+      !["Residential", "Commercial", "Plot"].includes(queryParams.property_in)
+        ? "Residential" 
+        : queryParams.property_in,
+    sub_type: queryParams.sub_type || "",
+    bhk: queryParams.bhk || "",
+    location: queryParams.location || "", 
+  };
+  dispatch(setSearchData(normalizedParams));
+}, [searchParams, dispatch]);
 
   return (
     <>
@@ -50,6 +70,7 @@ export default function ListingsPageClient() {
         <div className="flex w-full max-w-[1400px] flex-col md:flex-row gap-6">
           <div className="w-full md:w-[70%]">
             <ListingsBody
+              key={searchParams.toString()} 
               showLoginModal={showLoginModal}
               setShowLoginModal={setShowLoginModal}
             />

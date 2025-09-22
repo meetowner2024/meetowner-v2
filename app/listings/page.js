@@ -1,26 +1,30 @@
 import ListingsPageClient from "./ListingsPageClient";
 
 export async function generateMetadata({ searchParams }) {
+  const paramsObj = await searchParams;
   const params = {};
-  for (const key in searchParams) {
+
+  for (const key in paramsObj) {
     const [paramKey, paramValue] = key.split("-");
     if (paramKey && paramValue) {
-      params[paramKey] = decodeURIComponent(paramValue);
+      params[paramKey] = decodeURIComponent(paramValue.replace(/\+/g, " "));
     }
   }
 
-  const city = params.city || "";
+  const city = params.city || "Hyderabad";
   const location = params.location || "";
-  const propertyFor = params.property_for || "Sell"; 
-  const tab = params.tab || ""; 
-  const propertyIn = params.property_in || "Residential or Commercial";
+  const propertyFor = params.property_for || "Sell";
+  const tab = params.tab || "";
+  const propertyIn =
+    params.property_in === "Residential or Commercial" ||
+    !["Residential", "Commercial", "Plot"].includes(params.property_in)
+      ? "Residential"
+      : params.property_in;
   const subType = params.sub_type || "";
   const bhk = params.bhk || "";
 
-
   let propertyStatus = propertyFor.toLowerCase() === "rent" ? "for Rent" : "for Sale";
   if (tab) {
- 
     if (tab.toLowerCase() === "rent") propertyStatus = "for Rent";
     else if (tab.toLowerCase() === "buy") propertyStatus = "for Sale";
   }
@@ -47,7 +51,13 @@ export async function generateMetadata({ searchParams }) {
     .filter(Boolean)
     .join(", ");
 
-  const queryString = new URLSearchParams(params).toString();
+  const normalizedParams = {
+    ...params,
+    property_in: propertyIn,
+  };
+  const queryString = new URLSearchParams(
+    Object.entries(normalizedParams).map(([key, value]) => [`${key}-${value}`, ""])
+  ).toString();
 
   return {
     title: pageTitle,
@@ -71,7 +81,6 @@ export async function generateMetadata({ searchParams }) {
     },
   };
 }
-
 export default function Page() {
   return <ListingsPageClient />;
 }

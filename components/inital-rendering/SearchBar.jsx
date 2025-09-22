@@ -14,7 +14,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
 import config from "../utils/config";
 import ad1 from "../../app/assets/FAMILY MEETOWNER (1).jpg";
-
 import axios from "axios";
 import Image from "next/image";
 import theme from "../utils/theme.json";
@@ -33,10 +32,9 @@ const NextArrow = (props) => {
 };
 
 export default function SearchBar() {
-  const Data = useSelector((state) => state.search.tab);
   const searchData = useSelector((state) => state.search);
   const [activeTab, setActiveTab] = useState(0);
-  const [searchInput, setSearchInput] = useState("");
+  const [searchInput, setSearchInput] = useState(searchData.location || "");
   const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const videoRefs = useRef([]);
@@ -52,7 +50,7 @@ export default function SearchBar() {
   const [mediaList, setMediaList] = useState([
     { id: 1, order: 1, video_url: ad1 },
   ]);
-  const [localites, setLocalities] = useState([]);
+  const [localities, setLocalities] = useState([]);
   const [isError, setIsError] = useState(false);
   const containerRef = useRef(null);
   const [city, setCity] = useState(searchData.city || "");
@@ -132,21 +130,20 @@ export default function SearchBar() {
   }, [searchInput, selected, location, searchData]);
 
   useEffect(() => {
-    const selectedTab = TABS[activeTab];
     dispatch(
       setSearchData({
         city: location,
-        tab: selectedTab,
-        property_for: selectedTab === "Rent" ? "Rent" : "Sell",
+        tab: TABS[activeTab],
+        property_for: TABS[activeTab] === "Rent" ? "Rent" : "Sell",
         property_in:
-          selectedTab === "Commercial" ? "Commercial" : "Residential",
+          TABS[activeTab] === "Commercial" ? "Commercial" : "Residential",
         sub_type:
-          selectedTab === "Plot"
+          TABS[activeTab] === "Plot"
             ? "Plot"
-            : selectedTab === "Commercial"
+            : TABS[activeTab] === "Commercial"
             ? "Others"
             : "Apartment",
-        location: searchInput,
+        location: searchInput, 
         plot_subType: plotSubType,
         commercial_subType: commercialSubType,
       })
@@ -238,46 +235,59 @@ export default function SearchBar() {
   }, [location, fetchMedia, fetchCities]);
 
   const handleNavigation = useCallback(() => {
-    const propertyFor = TABS[activeTab] === "Rent" ? "rent" : "sale";
-    const propertyType = (() => {
-      switch (TABS[activeTab]) {
-        case "Plot":
-          return "plots";
-        case "Commercial":
-          return "commercial-properties";
-        case "Rent":
-        case "Buy":
-        default:
-          return "apartments";
-      }
-    })();
-    const citySlug = location
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "_")
-      .replace(/(^_|_$)/g, "");
-    const locationSlug = searchInput
-      ? searchInput
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, "_")
-          .replace(/(^_|_$)/g, "")
-      : "";
-    const seoUrl = `?${propertyType}_for_${propertyFor}_in_${citySlug}${
-      locationSlug ? `_${locationSlug}` : ""
-    }`;
+    if (!location) {
+      alert("Please select a city");
+      return;
+    }
+    dispatch(
+      setSearchData({
+        city: location,
+        location: searchInput,
+        tab: TABS[activeTab],
+        property_for: TABS[activeTab] === "Rent" ? "Rent" : "Sell",
+        property_in:
+          TABS[activeTab] === "Commercial" ? "Commercial" : "Residential",
+        sub_type:
+          TABS[activeTab] === "Plot"
+            ? "Plot"
+            : TABS[activeTab] === "Commercial"
+            ? "Others"
+            : "Apartment",
+        plot_subType: plotSubType,
+        commercial_subType: commercialSubType,
+      })
+    );
     const params = {
       city: location,
-      property_for: selected === "Rent" ? "Rent" : "Sell",
-      property_type:
+      location: searchInput,
+      tab: TABS[activeTab],
+      property_for: TABS[activeTab] === "Rent" ? "Rent" : "Sell",
+      property_in:
+        TABS[activeTab] === "Commercial" ? "Commercial" : "Residential",
+      sub_type:
         TABS[activeTab] === "Plot"
           ? "Plot"
           : TABS[activeTab] === "Commercial"
-          ? "Commercial"
+          ? "Others"
           : "Apartment",
-      location: searchInput,
     };
-   router.push(`/listings${seoUrl}`);
-
-  }, [activeTab, location, searchInput, selected, handleUserSearched, router]);
+    const queryString = Object.entries(params)
+      .filter(([_, value]) => value !== "" && value !== undefined)
+      .map(([key, value]) => `${key}-${encodeURIComponent(value)}`)
+      .join("&");
+    router.push(`/listings?${queryString}`);
+    handleUserSearched();
+  }, [
+    activeTab,
+    location,
+    searchInput,
+    selected,
+    plotSubType,
+    commercialSubType,
+    dispatch,
+    handleUserSearched,
+    router,
+  ]);
 
   const getCurrentLocation = useCallback(() => {
     if (!navigator.geolocation) {
@@ -287,15 +297,31 @@ export default function SearchBar() {
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude } = position.coords;
-        await fetch(
-          `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
-        );
+        try {
+          const response = await fetch(
+            `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+          );
+          const data = await response.json();
+          const city = data.city || "";
+          setCity(city);
+          setLocation(city);
+          setSearchInput("");
+          dispatch(
+            setSearchData({
+              city: city,
+              location: "",
+            })
+          );
+        } catch (error) {
+          console.error("Error fetching geolocation city:", error);
+          alert("Failed to fetch location.");
+        }
       },
       () => {
         alert("Please enable location services.");
       }
     );
-  }, []);
+  }, [dispatch]);
 
   return (
     <div
@@ -335,15 +361,15 @@ export default function SearchBar() {
       </Slider>
 
       <div className="relative bottom-15 sm:bottom-20 left-1/2 transform -translate-x-1/2 w-11/12 sm:w-10/12 md:w-3/4 lg:w-2/3">
-        <div className="bg-white/30 flex justify-center rounded-t-2xl shadow-lg  p-3 sm:p-4 border border-white/20">
-          <div className="inline-flex flex-wrap justify-center bg-white  rounded-full p-1 sm:p-2">
+        <div className="bg-white/30 flex justify-center rounded-t-2xl shadow-lg p-3 sm:p-4 border border-white/20">
+          <div className="inline-flex flex-wrap justify-center bg-white rounded-full p-1 sm:p-2">
             {TABS.map((item, index) => (
               <button
                 key={index}
                 onClick={() => setActiveTab(index)}
                 className={`relative z-10 w-auto px-4 py-1 cursor-pointer rounded-full text-xs sm:text-sm duration-300 ${
                   activeTab === index
-                    ? `${theme.button.secondary.bg}  ${theme.button.secondary.text} `
+                    ? `${theme.button.secondary.bg} ${theme.button.secondary.text}`
                     : "text-gray-600"
                 }`}
               >
@@ -365,7 +391,7 @@ export default function SearchBar() {
                       setCity(e.target.value);
                       dispatch(
                         setSearchData({
-                          location: e.target.value,
+                          city: e.target.value, 
                         })
                       );
                       if (!isLocationOpen) setIsLocationOpen(true);
@@ -381,18 +407,18 @@ export default function SearchBar() {
                       onClick={(e) => {
                         e.stopPropagation();
                         setCity("");
+                        setLocation("");
+                        setSearchInput("");
                         dispatch(
                           setSearchData({
-                            location: "",
                             city: "",
+                            location: "",
                           })
                         );
                       }}
                     />
                   )}
                 </div>
-
-               
                 <button
                   type="button"
                   onClick={(e) => {
@@ -404,7 +430,6 @@ export default function SearchBar() {
                   <IoChevronDownOutline className="w-3 h-3 sm:w-4 sm:h-4 text-[#1D3A76]" />
                 </button>
               </div>
-
               {isLocationOpen && (
                 <ul
                   className="absolute left-0 top-10 sm:top-12 mt-1 w-full z-50 bg-white rounded-md shadow-md border border-gray-300 max-h-48 sm:max-h-60 overflow-y-auto hide-scrollbar text-sm sm:text-base"
@@ -417,13 +442,17 @@ export default function SearchBar() {
                       <li
                         key={option}
                         onPointerDown={(e) => {
-                      
                           e.preventDefault();
                           e.stopPropagation();
                           setLocation(option);
                           setCity(option);
                           setIsLocationOpen(false);
-                          setSearchInput("");
+                          dispatch(
+                            setSearchData({
+                              city: option,
+                              location: searchInput, 
+                            })
+                          );
                         }}
                         className={`px-3 py-1 text-left rounded-md ${theme.button.secondary.hover} ${theme.button.secondary.hoverText} cursor-pointer transition-all duration-200`}
                       >
@@ -436,19 +465,21 @@ export default function SearchBar() {
                 </ul>
               )}
             </div>
-
             <span className="hidden md:block text-gray-400">
               <div style={{ border: "0.5px solid #ddd", height: 40 }}></div>
             </span>
-
             <div className="relative flex-1 items-start text-left">
               <input
                 type="text"
                 placeholder="Search Locality, City, Property..."
                 value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setSearchInput(value);
+                  dispatch(setSearchData({ location: value }))
+                }}
                 onFocus={() => setIsSearchDropdownOpen(true)}
-                onBlur={() => setIsSearchDropdownOpen(false)}
+                onBlur={() => setTimeout(() => setIsSearchDropdownOpen(false), 200)}
                 className="w-full outline-none bg-transparent text-gray-800 placeholder-gray-500 text-sm sm:text-base px-2 py-1"
               />
               {searchInput && (
@@ -457,15 +488,15 @@ export default function SearchBar() {
                   onClick={(e) => {
                     e.stopPropagation();
                     setSearchInput("");
+                    dispatch(setSearchData({ location: "" }));
                   }}
                 />
               )}
-
               {isSearchDropdownOpen && (
                 <ul className="absolute z-1000 left-0 top-11 sm:top-13 w-full bg-white rounded-md shadow-md border border-gray-300 max-h-48 sm:max-h-60 overflow-y-auto text-sm sm:text-base">
                   {searchInput.trim() === "" ? (
-                    localites.length > 0 ? (
-                      localites.map((item) => {
+                    localities.length > 0 ? (
+                      localities.map((item) => {
                         const isDisabled = item.locality === "Most Searched";
                         return (
                           <li
@@ -476,6 +507,7 @@ export default function SearchBar() {
                               if (isDisabled) return;
                               setSearchInput(item.locality);
                               setIsSearchDropdownOpen(false);
+                              dispatch(setSearchData({ location: item.locality }));
                             }}
                             className={`px-3 py-1 text-left rounded-md transition-all duration-200 ${
                               isDisabled
@@ -503,8 +535,8 @@ export default function SearchBar() {
                     ) : (
                       <li className="px-3 py-1 text-gray-500">No matching localities</li>
                     )
-                  ) : localites.length > 0 ? (
-                    localites.map((item) => (
+                  ) : localities.length > 0 ? (
+                    localities.map((item) => (
                       <li
                         key={item.locality}
                         onPointerDown={(e) => {
@@ -512,6 +544,7 @@ export default function SearchBar() {
                           e.stopPropagation();
                           setSearchInput(item.locality);
                           setIsSearchDropdownOpen(false);
+                          dispatch(setSearchData({ location: item.locality }));
                         }}
                         className="px-3 flex flex-row justify-between py-1 text-left hover:bg-[#1D3A76] hover:text-white rounded-md cursor-pointer transition-all duration-200"
                       >
@@ -524,18 +557,15 @@ export default function SearchBar() {
                 </ul>
               )}
             </div>
-
             <IoSearch
               className="w-5 h-5 text-gray-600 cursor-pointer md:hidden"
               onClick={handleNavigation}
             />
           </div>
-
           <div className="hidden md:flex space-x-1 sm:space-x-2 items-center flex-shrink-0">
             <span className="hidden md:block text-gray-400">
               <div style={{ border: "0.1px solid #ddd", height: 40 }}></div>
             </span>
-
             {(activeTab === 2 || activeTab === 3) && (
               <div className="relative inline-block w-32">
                 <button
@@ -555,6 +585,12 @@ export default function SearchBar() {
                           else if (activeTab === 3) setCommercialSubType(option);
                           setSelected(option);
                           setIsOpen(false);
+                          dispatch(
+                            setSearchData({
+                              plot_subType: activeTab === 2 ? option : plotSubType,
+                              commercial_subType: activeTab === 3 ? option : commercialSubType,
+                            })
+                          );
                         }}
                         className="px-3 py-1 text-left hover:bg-[#1D3A76] hover:text-white cursor-pointer rounded-md transition-all duration-200"
                       >
@@ -565,14 +601,12 @@ export default function SearchBar() {
                 )}
               </div>
             )}
-
             <FaLocationCrosshairs
-              onClick={getCurrentLocation}
               className="hidden md:block p-1 sm:p-2 w-7 h-7 sm:w-8 sm:h-8 bg-white rounded-full hover:bg-gray-300 transition-all duration-300 cursor-pointer"
+              onClick={getCurrentLocation}
             />
-
             <button
-              className={`hidden md:block ${theme.button.secondary.bg}  ${theme.button.secondary.text} px-3 sm:px-4 py-1 rounded-full shadow-lg ${theme.button.secondary.hover}  hover:border-1 hover:border-black transition-all duration-300 cursor-pointer text-sm sm:text-base whitespace-nowrap`}
+              className={`hidden md:block ${theme.button.secondary.bg} ${theme.button.secondary.text} px-3 sm:px-4 py-1 rounded-full shadow-lg ${theme.button.secondary.hover} hover:border-1 hover:border-black transition-all duration-300 cursor-pointer text-sm sm:text-base whitespace-nowrap`}
               onClick={handleNavigation}
             >
               Search
