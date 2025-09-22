@@ -192,7 +192,6 @@ const PropertyAds = ({ handleRender, propertyDataDetails }) => {
     router.push("/listings");
   }, [router, dispatch, property?.property_name]);
 
-
   if (error || !property) {
     return null;
   }
@@ -200,7 +199,7 @@ const PropertyAds = ({ handleRender, propertyDataDetails }) => {
     <>
       <div className="hidden lg:block sticky top-6">
         <div className="bg-white/80 backdrop-blur-lg border border-white/20 rounded-2xl shadow-xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]">
-          { }
+          {}
           <div className="relative" onClick={toggleControls}>
             {videos[0]?.url ? (
               <>
@@ -229,8 +228,9 @@ const PropertyAds = ({ handleRender, propertyDataDetails }) => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20"></div>
                 <div
-                  className={`absolute inset-0 transition-all duration-300 ${showControls ? "opacity-100" : "opacity-0"
-                    }`}
+                  className={`absolute inset-0 transition-all duration-300 ${
+                    showControls ? "opacity-100" : "opacity-0"
+                  }`}
                 >
                   <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
                   <button
@@ -331,9 +331,11 @@ const PropertyAds = ({ handleRender, propertyDataDetails }) => {
                         style={{
                           background:
                             duration > 0
-                              ? `linear-gradient(to right, #3B82F6 0%, #3B82F6 ${(currentTime / duration) * 100
-                              }%, rgba(255,255,255,0.3) ${(currentTime / duration) * 100
-                              }%, rgba(255,255,255,0.3) 100%)`
+                              ? `linear-gradient(to right, #3B82F6 0%, #3B82F6 ${
+                                  (currentTime / duration) * 100
+                                }%, rgba(255,255,255,0.3) ${
+                                  (currentTime / duration) * 100
+                                }%, rgba(255,255,255,0.3) 100%)`
                               : "rgba(255,255,255,0.3)",
                         }}
                       />
@@ -407,7 +409,7 @@ const PropertyAds = ({ handleRender, propertyDataDetails }) => {
           </div>
           {properties.properties?.length > 0 && (
             <div className="p-6">
-              { }
+              {}
               <div className="mb-6">
                 <div className="flex items-center gap-2 mb-2">
                   <div className="p-1.5 bg-blue-100 rounded-lg">
@@ -419,7 +421,7 @@ const PropertyAds = ({ handleRender, propertyDataDetails }) => {
                 </div>
                 <div className="w-12 h-1 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-full"></div>
               </div>
-              { }
+              {}
               <div className="space-y-4 mb-6">
                 {properties.properties
                   ?.slice(0, 3)
@@ -432,7 +434,7 @@ const PropertyAds = ({ handleRender, propertyDataDetails }) => {
                     >
                       <div className="bg-gradient-to-br from-white to-slate-50 border border-slate-200/50 rounded-xl p-4 transition-all duration-300 group-hover:border-blue-300/50 group-hover:shadow-md">
                         <div className="flex items-center gap-4">
-                          { }
+                          {}
                           <div className="relative overflow-hidden rounded-lg flex-shrink-0">
                             <Image
                               width={600}
@@ -440,18 +442,20 @@ const PropertyAds = ({ handleRender, propertyDataDetails }) => {
                               src={
                                 propertyItem.image
                                   ? `https://api.meetowner.in/assets/v1/serve/${propertyItem.image}`
-                                  : `https://placehold.co/600x400?text=${propertyItem?.property_name ||
-                                  "No Image Found"
-                                  }`
+                                  : `https://placehold.co/600x400?text=${
+                                      propertyItem?.property_name ||
+                                      "No Image Found"
+                                    }`
                               }
                               alt="Property"
                               crossOrigin="anonymous"
                               className="w-16 h-16 object-cover transition-transform duration-300 group-hover:scale-110"
                               onError={(e) => {
                                 e.target.onerror = null;
-                                e.target.src = `https://placehold.co/600x400?text=${propertyItem?.property_name ||
+                                e.target.src = `https://placehold.co/600x400?text=${
+                                  propertyItem?.property_name ||
                                   "No Image Found"
-                                  }`;
+                                }`;
                               }}
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -459,14 +463,18 @@ const PropertyAds = ({ handleRender, propertyDataDetails }) => {
                               <Eye className="w-3 h-3 text-white drop-shadow-lg" />
                             </div>
                           </div>
-                          { }
+                          {}
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between mb-1">
                               <p className="text-md font-semibold text-blue-900">
-                                ₹
-                                {formatToIndianCurrency(
-                                  propertyItem.property_cost
-                                )}
+                                ₹{" "}
+                                {property.property_for === "Sell"
+                                  ? formatToIndianCurrency(
+                                      property?.property_cost
+                                    )
+                                  : formatToIndianCurrency(
+                                      property?.monthly_rent
+                                    )}
                               </p>
                               <ArrowRight className="w-4 h-4 text-slate-400 transition-all duration-300 group-hover:text-blue-600 group-hover:translate-x-1" />
                             </div>
@@ -476,8 +484,8 @@ const PropertyAds = ({ handleRender, propertyDataDetails }) => {
                                 {propertyItem?.sub_type === "Apartment"
                                   ? "BHK"
                                   : propertyItem?.sub_type === "Plot"
-                                    ? "Plot"
-                                    : "Land"}
+                                  ? "Plot"
+                                  : "Land"}
                               </span>
                               {propertyItem.location_id && (
                                 <div className="flex items-center gap-1">
@@ -494,7 +502,7 @@ const PropertyAds = ({ handleRender, propertyDataDetails }) => {
                     </div>
                   ))}
               </div>
-              { }
+              {}
               <button
                 onClick={handleNavigation}
                 className={`w-full group relative overflow-hidden  ${theme.button.secondary.bg}              ${theme.button.secondary.text} font-semibold py-3.5 px-6 rounded-xl transition-all duration-300 hover:from-blue-700 hover:to-cyan-700 hover:shadow-lg hover:shadow-blue-500/25 active:scale-[0.98]`}
