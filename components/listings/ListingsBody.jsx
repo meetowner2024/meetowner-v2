@@ -252,12 +252,7 @@ function ListingsBody({ setShowLoginModal }) {
         try {
           decrypted = decrypt(res.data);
         } catch (error) {
-          console.error(
-            "Decryption failed:",
-            error,
-            "Encrypted data:",
-            res.data
-          );
+          console.error("Decryption failed:", error);
           throw new Error("Failed to decrypt API response");
         }
         let parsed;
