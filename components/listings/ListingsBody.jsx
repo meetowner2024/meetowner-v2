@@ -247,7 +247,7 @@ function ListingsBody({ setShowLoginModal }) {
         if (!res.data) {
           setHasMore(false);
           return;
-        }sd
+        }
         let decrypted;
         try {
           decrypted = decrypt(res.data);
