@@ -132,167 +132,181 @@ function ListingsBody({ setShowLoginModal }) {
     };
     fetchLikedProperties();
   }, []);
-  
 
- 
-const fetchProperties = useCallback(
-  async (currentPage = 1, reset = false) => {
-    let apiUrl; 
-    try {
-      setLoading(true);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      handleUserSearched();
-
-    
-      const validPropertyIn = ["Residential", "Commercial", "Plot"];
-      if (searchData?.property_in && !validPropertyIn.includes(searchData.property_in)) {
-        console.warn("Invalid property_in in searchData:", searchData.property_in);
-        toast.error("Invalid property type provided", {
-          position: "top-right",
-          autoClose: 3000,
-        });
-        const currentParams = {
-          city: searchData.city,
-          property_for: searchData.property_for || "Sell",
-          tab: searchData.tab || "Buy",
-          property_status: searchData.property_status || "1",
-          property_in: "Residential", 
-          location: searchData.location || "", 
-        };
-        const queryString = new URLSearchParams(
-          Object.entries(currentParams)
-            .filter(([_, value]) => value !== "" && value !== undefined)
-            .map(([key, value]) => [`${key}-${value}`, ""])
-        ).toString();
-        router.push(`/listings?${queryString}`);
-        return;
-      }
-
-    
-      if (searchData?.location && !/^[a-zA-Z\s]+$/.test(searchData.location)) {
-        console.warn("Invalid location in searchData:", searchData.location);
-        toast.error("Invalid location provided", {
-          position: "top-right",
-          autoClose: 3000,
-        });
-        const currentParams = {
-          city: searchData.city,
-          property_for: searchData.property_for || "Sell",
-          tab: searchData.tab || "Buy",
-          property_status: searchData.property_status || "1",
-          property_in: searchData.property_in || "Residential",
-          location: "", 
-        };
-        const queryString = new URLSearchParams(
-          Object.entries(currentParams)
-            .filter(([_, value]) => value !== "" && value !== undefined)
-            .map(([key, value]) => [`${key}-${value}`, ""])
-        ).toString();
-        router.push(`/listings?${queryString}`);
-        return;
-      }
-
-      const isPlot = searchData?.sub_type === "Plot";
-      const statusParam = isPlot
-        ? `possession_status=${searchData?.possession_status || ""}`
-        : `occupancy=${searchData?.occupancy || ""}`;
-
-    
-      const queryParams = {
-        page: currentPage,
-        limit: 70,
-        property_for:
-          searchData?.tab === "Latest"
-            ? "Sell"
-            : searchData.tab === "Buy"
-            ? "Sell"
-            : searchData?.tab === "Rent"
-            ? "Rent"
-            : searchData?.tab === "Plot"
-            ? "Sell"
-            : "Sell",
-        property_in: searchData?.property_in || "Residential",
-        sub_type: searchData?.sub_type === "Others" ? "" : searchData?.sub_type,
-        search: searchData?.location || "",
-        bedrooms: searchData?.bhk || "",
-        property_cost: searchData?.budget || "",
-        priceFilter: encodeURIComponent(selected),
-        property_status: searchData?.property_status || "",
-        city: searchData?.city,
-        furnished_status: searchData?.furnished_status || "",
-        extra_filters: searchData?.tab === "New Launch" ? "new_launches" : "",
-      };
-
-      
-      const queryString = new URLSearchParams(
-        Object.entries(queryParams).filter(([_, value]) => value !== "" && value !== undefined)
-      ).toString() + (isPlot ? `&${statusParam}` : `&${statusParam}`);
-
-      apiUrl = `${config.awsApiUrl}/listings/v1/gapbType?${queryString}`;
-    
-
-      const response = await fetch(apiUrl);
-
-      if (!response.ok) {
-        throw new Error(`API request failed with status ${response.status}`);
-      }
-      const res = await response.json();
-   
-      if (!res.data) {
-        setData([]);
-        setHasMore(false);
-        return;
-      }
-      let decrypted;
+  const fetchProperties = useCallback(
+    async (currentPage = 1, reset = false) => {
+      let apiUrl;
       try {
-        decrypted = decrypt(res.data);
-      
-      } catch (error) {
-        console.error("Decryption failed:", error, "Encrypted data:", res.data);
-        throw new Error("Failed to decrypt API response");
-      }
-      let parsed;
-      try {
-        parsed = JSON.parse(decrypted);
-      } catch (error) {
-        console.error("JSON parse error:", error, "Decrypted data:", decrypted);
-        throw new Error("Invalid decrypted JSON");
-      }
-      const newData = parsed.properties || [];
+        setLoading(true);
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        handleUserSearched();
 
-      setData((prevData) => {
-        if (reset) {
-          return newData.slice(0, maxLimit);
+        const validPropertyIn = ["Residential", "Commercial", "Plot"];
+        if (
+          searchData?.property_in &&
+          !validPropertyIn.includes(searchData.property_in)
+        ) {
+          console.warn(
+            "Invalid property_in in searchData:",
+            searchData.property_in
+          );
+          toast.error("Invalid property type provided", {
+            position: "top-right",
+            autoClose: 3000,
+          });
+          const currentParams = {
+            city: searchData.city,
+            property_for: searchData.property_for || "Sell",
+            tab: searchData.tab || "Buy",
+            property_status: searchData.property_status || "1",
+            property_in: "Residential",
+            location: searchData.location || "",
+          };
+          const queryString = new URLSearchParams(
+            Object.entries(currentParams)
+              .filter(([_, value]) => value !== "" && value !== undefined)
+              .map(([key, value]) => [`${key}-${value}`, ""])
+          ).toString();
+          router.push(`/listings?${queryString}`);
+          return;
         }
-        const combined = [
-          ...prevData,
-          ...newData.filter(
-            (newItem) =>
-              !prevData.some(
-                (prevItem) =>
-                  prevItem.unique_property_id === newItem.unique_property_id
-              )
-          ),
-        ].slice(0, maxLimit);
-        return combined;
-      });
-      setHasMore(newData.length > 0 && currentPage * 70 < maxLimit);
-    } catch (error) {
-      console.error("Failed to fetch properties:", error, "URL:", apiUrl);
-      if (reset) {
-        setData([]);
+
+        if (
+          searchData?.location &&
+          !/^[a-zA-Z\s]+$/.test(searchData.location)
+        ) {
+          console.warn("Invalid location in searchData:", searchData.location);
+          toast.error("Invalid location provided", {
+            position: "top-right",
+            autoClose: 3000,
+          });
+          const currentParams = {
+            city: searchData.city,
+            property_for: searchData.property_for || "Sell",
+            tab: searchData.tab || "Buy",
+            property_status: searchData.property_status || "1",
+            property_in: searchData.property_in || "Residential",
+            location: "",
+          };
+          const queryString = new URLSearchParams(
+            Object.entries(currentParams)
+              .filter(([_, value]) => value !== "" && value !== undefined)
+              .map(([key, value]) => [`${key}-${value}`, ""])
+          ).toString();
+          router.push(`/listings?${queryString}`);
+          return;
+        }
+
+        const isPlot = searchData?.sub_type === "Plot";
+        const statusParam = isPlot
+          ? `possession_status=${searchData?.possession_status || ""}`
+          : `occupancy=${searchData?.occupancy || ""}`;
+
+        const queryParams = {
+          page: currentPage,
+          limit: 70,
+          property_for:
+            searchData?.tab === "Latest"
+              ? "Sell"
+              : searchData.tab === "Buy"
+              ? "Sell"
+              : searchData?.tab === "Rent"
+              ? "Rent"
+              : searchData?.tab === "Plot"
+              ? "Sell"
+              : "Sell",
+          property_in: searchData?.property_in || "Residential",
+          sub_type:
+            searchData?.sub_type === "Others" ? "" : searchData?.sub_type,
+          search: searchData?.location || "",
+          bedrooms: searchData?.bhk || "",
+          property_cost: searchData?.budget || "",
+          priceFilter: encodeURIComponent(selected),
+          property_status: searchData?.property_status || "",
+          city: searchData?.city,
+          furnished_status: searchData?.furnished_status || "",
+          extra_filters: searchData?.tab === "New Launch" ? "new_launches" : "",
+        };
+
+        const queryString =
+          new URLSearchParams(
+            Object.entries(queryParams).filter(
+              ([_, value]) => value !== "" && value !== undefined
+            )
+          ).toString() + (isPlot ? `&${statusParam}` : `&${statusParam}`);
+
+        apiUrl = `${config.awsApiUrl}/listings/v1/gapbType?${queryString}`;
+
+        const response = await fetch(apiUrl);
+
+        if (!response.ok) {
+          throw new Error(`API request failed with status ${response.status}`);
+        }
+        const res = await response.json();
+
+        if (!res.data) {
+          setHasMore(false);
+          return;
+        }sd
+        let decrypted;
+        try {
+          decrypted = decrypt(res.data);
+        } catch (error) {
+          console.error(
+            "Decryption failed:",
+            error,
+            "Encrypted data:",
+            res.data
+          );
+          throw new Error("Failed to decrypt API response");
+        }
+        let parsed;
+        try {
+          parsed = JSON.parse(decrypted);
+        } catch (error) {
+          console.error(
+            "JSON parse error:",
+            error,
+            "Decrypted data:",
+            decrypted
+          );
+          throw new Error("Invalid decrypted JSON");
+        }
+        const newData = parsed.properties || [];
+
+        setData((prevData) => {
+          if (reset) {
+            return newData.slice(0, maxLimit);
+          }
+          const combined = [
+            ...prevData,
+            ...newData.filter(
+              (newItem) =>
+                !prevData.some(
+                  (prevItem) =>
+                    prevItem.unique_property_id === newItem.unique_property_id
+                )
+            ),
+          ].slice(0, maxLimit);
+          return combined;
+        });
+        setHasMore(newData.length > 0 && currentPage * 70 < maxLimit);
+      } catch (error) {
+        console.error("Failed to fetch properties:", error, "URL:", apiUrl);
+        if (reset) {
+          setData([]);
+        }
+        setHasMore(false);
+        toast.error("Failed to load properties", {
+          position: "top-right",
+          autoClose: 3000,
+        });
+      } finally {
+        setLoading(false);
       }
-      setHasMore(false);
-      toast.error("Failed to load properties", {
-        position: "top-right",
-        autoClose: 3000,
-      });
-    } finally {
-      setLoading(false);
-   }
-  },
-  [searchData, selected, router, decrypt]
-);
+    },
+    [searchData, selected, router, decrypt]
+  );
   const fetchContactedProperties = async () => {
     const data = localStorage.getItem("user");
     if (!data) {
