@@ -85,7 +85,7 @@ const Empty = ({ message = "No data found." }) => (
     {message}
   </div>
 );
-const PropertyDeatils = ({propertyDataDetails}) => {
+const PropertyDeatils = ({ propertyDataDetails }) => {
   const JWT_SECRET = process.env.NEXT_PUBLIC_ENCRYPTION_SECRET;
   const ENCRYPTION_KEY = CryptoJS.SHA256(JWT_SECRET).toString();
   function decrypt(encryptedText) {
@@ -108,11 +108,9 @@ const PropertyDeatils = ({propertyDataDetails}) => {
   const [contacted, setContacted] = useState([]);
   const [property, setProperty] = useState();
 
-
- useEffect(() => {
+  useEffect(() => {
     setProperty(propertyDataDetails);
   }, [propertyDataDetails]);
-
 
   const [error, setError] = useState(null);
   const getPropertyDetails = async (propertyData) => {
@@ -399,7 +397,10 @@ const PropertyDeatils = ({propertyDataDetails}) => {
               }
               value={
                 <>
-                  ₹ {formatToIndianCurrency(property?.property_cost)}
+                  ₹{" "}
+                  {property.property_for === "Sell"
+                    ? formatToIndianCurrency(property?.property_cost)
+                    : formatToIndianCurrency(property?.monthly_rent)}
                   {property?.property_cost_type && (
                     <span
                       style={{ color: PropertyAdsColors.primary.text }}
@@ -524,7 +525,10 @@ const PropertyDeatils = ({propertyDataDetails}) => {
         )}
       </div>
       <div className="mt-6">
-        <PropertyAds handleRender={handleProperty} propertyDataDetails={property} />
+        <PropertyAds
+          handleRender={handleProperty}
+          propertyDataDetails={property}
+        />
       </div>
     </>
   );
