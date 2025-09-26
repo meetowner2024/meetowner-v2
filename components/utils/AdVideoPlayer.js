@@ -166,10 +166,11 @@ const AdVideoPlayer = ({ initialPosition = { x: 100, y: 100 } }) => {
       position={position}
       onDrag={handleDrag}
       bounds="body"
+       cancel=".no-drag" 
     >
       <div
         ref={nodeRef}
-        className="fixed bottom-28 right-28 z-[1000] cursor-pointer animate-float "
+        className="hidden lg:flex fixed bottom-28 right-28 z-[1000] cursor-pointer animate-float "
         style={{
           width: `${dimensions.width}px`,
           height: `${dimensions.height}px`,
@@ -179,7 +180,7 @@ const AdVideoPlayer = ({ initialPosition = { x: 100, y: 100 } }) => {
           <Button
             variant="ghost"
             size="icon"
-            className="absolute top-3 right-3 bg-video-overlay hover:bg-white hover:text-black text-white border-0 rounded-full w-8 h-8 z-[1001] transition-all duration-200 hover:scale-110"
+            className="absolute top-3 no-drag  right-3 bg-video-overlay hover:bg-white hover:text-black text-white border-0 rounded-full w-8 h-8 z-[1001] transition-all duration-200 hover:scale-110"
             onClick={() => setIsOpen(false)}
             aria-label="Close video player"
           >
@@ -202,7 +203,7 @@ const AdVideoPlayer = ({ initialPosition = { x: 100, y: 100 } }) => {
               Your browser does not support the video tag.
             </video>
             <div
-              className="absolute top-0 left-0 right-0 bg-gradient-to-b from-video-overlay to-transparent p-4 pt-12"
+              className="absolute top-0 no-drag left-0 right-0 bg-gradient-to-b from-video-overlay to-transparent p-4 pt-12"
               onClick={() => handleNavigation(videoData)}
             >
               <h3 className="text-white font-bold text-xl mb-1 drop-shadow-lg">
@@ -216,7 +217,7 @@ const AdVideoPlayer = ({ initialPosition = { x: 100, y: 100 } }) => {
             </div>
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-video-overlay to-transparent p-4 flex justify-between items-center">
               <div
-                className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-3 py-1"
+                className="bg-white/10 no-drag  backdrop-blur-sm border border-white/20 rounded-full px-3 py-1"
                 onClick={() => handleNavigation(videoData)}
               >
                 <span className="text-white text-xs font-semibold">
@@ -228,7 +229,7 @@ const AdVideoPlayer = ({ initialPosition = { x: 100, y: 100 } }) => {
                 </span>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex no-drag  items-center gap-2">
                 <Button
                   variant="ghost"
                   size="icon"

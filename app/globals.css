@@ -218,3 +218,6 @@ body::-webkit-scrollbar {
 }
 
 
+.no-drag {
+  touch-action: manipulation; 
+}
