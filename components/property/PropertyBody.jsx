@@ -1372,8 +1372,8 @@ const PropertyBody = ({ handleLoading ,propertyDataDetails }) => {
             </span>
           )}
         </p>
-        <div className=" w-[100%] block lg:hidden">
-          <PropertyDetails />
+        <div className=" w-[100%]  block lg:hidden">
+          <PropertyDetails  propertyDataDetails={property} />
         </div>
       </div>
       {floorplan?.image && (

@@ -12,36 +12,33 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
+
 export const metadata = {
-  title:
-    "Meet Owner | Buy & Sell Real Estate in Hyderabad | Properties for Sale",
-  description:
-    "Discover premium, real estate in Hyderabad with Meet Owner. Buy, sell, or rent properties directly with owners. Find apartments, villas, and plots in Hyderabad.",
-  keywords:
-    "real estate Hyderabad, buy property Hyderabad, sell property Hyderabad, apartments in Hyderabad, villas in Hyderabad, plots for sale",
-  authors: [{ name: "Meet Owner" }],
+  title: "MeetOwner | Buy, Sell & Rent Properties in Hyderabad & Major Cities",
+  description: "Find apartments, villas, plots & commercial properties in Hyderabad, Chennai, Bengaluru, and Andhra Pradesh cities. Connect directly with owners.",
+  keywords: "real estate Hyderabad, buy property Hyderabad, sell property Hyderabad, apartments Hyderabad, villas Hyderabad, plots Hyderabad, Chennai properties, Bengaluru properties, AP real estate, rent property",
+  authors: [{ name: "MeetOwner" }],
   openGraph: {
-    title: "Meet Owner | Buy & Sell Real Estate in Hyderabad",
-    description:
-      "Explore top properties in Hyderabad. Buy or sell apartments, villas, and plots directly with owners through Meet Owner.",
+    title: "MeetOwner | Buy, Sell & Rent Properties in Hyderabad & Major Cities",
+    description: "Explore top apartments, villas, plots & commercial properties in Hyderabad, Chennai, Bengaluru, and AP cities. Buy, sell, or rent directly with owners.",
     url: "https://www.meetowner.in",
-    siteName: "Meet Owner",
+    siteName: "MeetOwner",
     images: [
       {
         url: "https://www.meetowner.in/favicon.ico",
-        alt: "Meet Owner logo",
+        alt: "MeetOwner logo",
       },
     ],
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Meet Owner | Buy & Sell Real Estate in Hyderabad",
-    description:
-      "Find your dream property in Hyderabad with Meet Owner. Buy, sell, or rent directly with owners.",
+    title: "MeetOwner | Buy, Sell & Rent Properties in Hyderabad & Major Cities",
+    description: "Discover apartments, villas, plots & commercial properties in Hyderabad, Chennai, Bengaluru, and AP cities. Buy, sell, or rent directly with owners.",
     images: ["https://www.meetowner.in/favicon.ico"],
   },
 };
+
 const structuredData = {
   "@context": "https://schema.org",
   "@type": "RealEstateAgent",

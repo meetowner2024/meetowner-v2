@@ -146,7 +146,7 @@ export default function Blog() {
         <section className="relative py-12 px-4 overflow-hidden">
           <div className="flex items-center gap-2">
             <button
-              onClick={() => router.back()}
+              onClick={() => router.push("/")}
               className="bg-gray-200 hover:bg-gray-300 text-gray-800 sm:font-bold p-1 sm:py-2 sm:px-4 rounded"
             >
               <ArrowLeft />

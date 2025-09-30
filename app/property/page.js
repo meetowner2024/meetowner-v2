@@ -1,17 +1,16 @@
-
 import CryptoJS from "crypto-js";
 import config from "../../components/utils/config";
 import PropertyClient from "./PropertyClient";
 
-
 function buildSeoContent(property, id) {
   const bhkText = property.bedrooms ? `${property.bedrooms} BHK ` : "";
   const subTypeText = property.sub_type || "";
-  const propertyInText = property.property_in
-    && !["other", "others"].includes(property.property_in.toLowerCase())
-    ? property.property_in
-    : "";
-  const locationText = property.location_id ? `${property.location_id}, ` : "";
+  const propertyInText =
+    property.property_in &&
+    !["other", "others"].includes(property.property_in.toLowerCase())
+      ? property.property_in
+      : "";
+  const locationText = property.location_id ? `${property.location_id} ` : "";
   const cityText = property.city || "";
   const forText = property.property_for === "Sell" ? "for Sale" : "for Rent";
 
@@ -19,12 +18,25 @@ function buildSeoContent(property, id) {
   if (bhkText) propertyTypeParts.push(bhkText.trim());
   if (subTypeText) propertyTypeParts.push(subTypeText);
   if (propertyInText) propertyTypeParts.push(propertyInText);
-  const propertyTypeStr = propertyTypeParts.join(" ");
+  const propertyTypeStr1 = `${
+    property?.facing ? ` ${property.facing} Facing` : ""
+  } ${propertyTypeParts.reverse().join(" ")} `;
 
+  const propertyTypeStrApartmentsAndResidential = `${bhkText} ${
+    property?.facing ? ` ${property.facing} Facing` : ""
+  } ${subTypeText} `;
+  const propertyTypeStr =
+    property?.property_in === "Residential" || "Apartments"
+      ? propertyTypeStrApartmentsAndResidential
+      : propertyTypeStr1;
   const finalPropertyType = propertyTypeStr || subTypeText || "Property";
-  const title = `${finalPropertyType} in ${locationText}${cityText} ${forText}`.replace(/\s+/g, ' ').trim();
-  const description = `Explore ${finalPropertyType.toLowerCase()} in ${locationText}${cityText} ${forText.toLowerCase()}. ${property.description?.slice(0, 150) || "Find your dream property with modern amenities and prime location."
-    }`;
+  const title = ` ${finalPropertyType} ${forText} in ${locationText}${cityText}`
+    .replace(/\s+/g, " ")
+    .trim();
+  const description = `Explore ${finalPropertyType.toLowerCase()} in ${locationText}${cityText} ${forText.toLowerCase()}. ${
+    property.description?.slice(0, 150) ||
+    "Find your dream property with modern amenities and prime location."
+  }`;
 
   const keywords = [
     `${finalPropertyType} in ${locationText}${cityText}`,
@@ -52,7 +64,8 @@ export async function generateMetadata({ searchParams }) {
   if (!id) {
     return {
       title: "Property Not Found | Meet Owner",
-      description: "The requested property could not be found. Explore other properties for sale or rent.",
+      description:
+        "The requested property could not be found. Explore other properties for sale or rent.",
       robots: "noindex",
     };
   }
@@ -79,9 +92,11 @@ export async function generateMetadata({ searchParams }) {
     );
     const decryptedJson = decrypted.toString(CryptoJS.enc.Utf8);
     const property = JSON.parse(decryptedJson);
-
-    const { title, description, keywords, canonicalUrl } = buildSeoContent(property, id);
-
+    const { title, description, keywords, canonicalUrl } = buildSeoContent(
+      property,
+      id
+    );
+    const feature = `https://api.meetowner.in/aws/v1/s3/uploads/${property?.image}`;
     return {
       title,
       description,
@@ -94,9 +109,7 @@ export async function generateMetadata({ searchParams }) {
         url: canonicalUrl,
         images: [
           {
-            url: property.image
-              ? `https://api.meetowner.in/assets/v1/serve/${property.image}`
-              : "https://placehold.co/600x400?text=Property+Image",
+            url: feature,
             width: 600,
             height: 400,
             alt: `${title} - Property Image`,
@@ -108,11 +121,7 @@ export async function generateMetadata({ searchParams }) {
         card: "summary_large_image",
         title,
         description,
-        images: [
-          property.image
-            ? `https://api.meetowner.in/assets/v1/serve/${property.image}`
-            : "https://placehold.co/600x400?text=Property+Image",
-        ],
+           images: [{ url: feature }],
       },
       alternates: { canonical: canonicalUrl },
     };
@@ -167,5 +176,12 @@ export default async function PropertyPage({ searchParams }) {
     }
   }
 
-  return <PropertyClient property={property} loading={loading} error={error} rawQuery={Object.keys(params)[0] || ""} />;
+  return (
+    <PropertyClient
+      property={property}
+      loading={loading}
+      error={error}
+      rawQuery={Object.keys(params)[0] || ""}
+    />
+  );
 }

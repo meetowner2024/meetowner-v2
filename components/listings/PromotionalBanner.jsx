@@ -345,7 +345,7 @@ const PromotionalBanner = ({
       } catch (error) {
         if (error.name === "AbortError") return;
         console.error("Error fetching property images:", error);
-        toast.error("Failed to load property images");
+        
       }
     };
     fetchImages();
