@@ -52,15 +52,16 @@ const FooterLinks = ({ basePath = "/listings" }) => {
     return () => observer.disconnect();
   }, []);
   const handleLinkClick = (link) => {
-    const searchData = {
-      location: link.location,
-      city_id: link.city,
-      property_for: link.property_for,
-      tab: link.property_for,
-      property_in: link.property_in,
-      sub_type: link.sub_type,
-    };
-    dispatch(setSearchData(searchData));
+    dispatch(
+      setSearchData({
+        location: link.location,
+        city: link.city,
+        property_for: link.property_for,
+        tab: link.property_for,
+        property_in: link.property_in,
+        sub_type: link.sub_type,
+      })
+    );
     const filters = `?city=${encodeURIComponent(
       link.city
     )}&type=${encodeURIComponent(link.property_in)}`;

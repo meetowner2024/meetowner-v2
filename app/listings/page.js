@@ -1,3 +1,4 @@
+import config from "@/components/utils/config";
 import ListingsPageClient from "./ListingsPageClient";
 import CryptoJS from "crypto-js";
 async function fetchPropertiesForSEO(params) {
@@ -35,7 +36,7 @@ async function fetchPropertiesForSEO(params) {
         ([_, value]) => value !== "" && value !== undefined
       )
     ).toString();
-    const apiUrl = `http://localhost:5000/listings/v1/gapbType?${queryString}`;
+    const apiUrl = `${config.awsApiUrl}/listings/v1/gapbType?${queryString}`;
     const res = await fetch(apiUrl, { cache: "no-cache" });
     const data = await res.json();
     if (!data.data) {
@@ -52,7 +53,7 @@ async function fetchPropertiesForSEO(params) {
     const parsed = JSON.parse(decrypted);
     return parsed?.properties?.length > 0 ? parsed.properties : null;
   } catch (err) {
-    console.error("fetchPropertiesForSEO failed:", err.message);
+    console.error("fetchPropertiesForSEO failed:", err);
     return null;
   }
 }
@@ -146,7 +147,7 @@ export async function generateMetadata({ searchParams }) {
       alt: "Property Image Placeholder",
     });
   }
-const imagesForListing= featuredImages.map((e)=>e.url)
+  const imagesForListing = featuredImages.map((e) => e.url);
 
   return {
     title: pageTitle,
@@ -165,7 +166,7 @@ const imagesForListing= featuredImages.map((e)=>e.url)
       card: "summary_large_image",
       title: pageTitle,
       description: pageDescription,
-       images: imagesForListing[0],
+      images: imagesForListing[0],
     },
     alternates: {
       canonical: `https://www.meetowner.in/listings?${queryString}`,

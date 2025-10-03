@@ -176,7 +176,7 @@ function ListingsBody({ setShowLoginModal }) {
           !/^[a-zA-Z\s]+$/.test(searchData.location)
         ) {
           console.warn("Invalid location in searchData:", searchData.location);
-         
+
           const currentParams = {
             city: searchData.city,
             property_for: searchData.property_for || "Sell",
