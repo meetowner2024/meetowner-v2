@@ -123,9 +123,9 @@ module.exports = {
       }
       return [
         ...staticRoutes,
+        ...propertyRoutes,
         ...listingRoutes,
         ...dynamicRoutes,
-        ...propertyRoutes,
       ];
     } catch (error) {
       console.error("Error generating sitemap paths:", error);
