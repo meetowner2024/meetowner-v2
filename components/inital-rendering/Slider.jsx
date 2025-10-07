@@ -111,7 +111,6 @@ const PropertyListing = ({
       setProperty(data.properties || []);
     } catch (err) {
       console.error("Failed to fetch properties:", err);
-      toast.error("Failed to load properties. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -310,7 +309,7 @@ const PropertyListing = ({
       const shareData = {
         title: `${property.property_name} - ${property.location_id}`,
         text: `Check out this ${property.bedrooms || ""} BHK ${
-          property.property_type
+          property.sub_type
         } for ${propertyFor} in ${property.location_id}! Price: ₹${
           propertyFor === "rent"
             ? formatPrice(property.monthly_rent)

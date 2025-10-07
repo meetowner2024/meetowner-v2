@@ -289,10 +289,7 @@ function ListingsBody({ setShowLoginModal }) {
           setData([]);
         }
         setHasMore(false);
-        toast.error("Failed to load properties", {
-          position: "top-right",
-          autoClose: 3000,
-        });
+      
       } finally {
         setLoading(false);
       }

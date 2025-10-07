@@ -168,11 +168,10 @@ const ListingHeader = ({ setShowLoginModal, ads }) => {
     searchData.commercial_subType,
     dispatch,
   ]);
+
   useEffect(() => {
-    if (searchData.location) {
-      setSearchInput(searchData.location);
-    }
-  }, [searchData]);
+  setSearchInput(searchData.location || "");
+}, [searchData.location]);
   const selectedFilters = useMemo(
     () => ({
       tab: searchData.tab === "Latest" ? "Buy" : searchData.tab || "Buy",
