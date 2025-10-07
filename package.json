@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "build:analyze": "cross-env ANALYZE=true next build",
-    "postbuild": "next-sitemap"
+    "postbuild": "next-sitemap && node scripts/generate-image-sitemap.js"
   },
   "dependencies": {
     "@radix-ui/react-alert-dialog": "^1.1.15",
@@ -45,6 +45,7 @@
     "react-toastify": "^11.0.5",
     "react-virtualized": "^9.22.6",
     "redux-persist": "^6.0.0",
+    "sitemap": "^8.0.0",
     "slick-carousel": "^1.8.1",
     "swiper": "^11.2.10",
     "tailwind-merge": "^3.3.1",
