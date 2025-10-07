@@ -2,6 +2,7 @@ import CryptoJS from "crypto-js";
 import config from "../../components/utils/config";
 import PropertyClient from "./PropertyClient";
 
+
 function buildSeoContent(property, id) {
   const bhkText = property.bedrooms ? `${property.bedrooms} BHK ` : "";
   const subTypeText = property.sub_type || "";
@@ -26,13 +27,16 @@ function buildSeoContent(property, id) {
     property?.facing ? ` ${property.facing} Facing` : ""
   } ${subTypeText} `;
   const propertyTypeStr =
-    property?.property_in === "Residential" || "Apartments"
+    property?.property_in === "Residential" || property?.property_in === "Apartments"
       ? propertyTypeStrApartmentsAndResidential
       : propertyTypeStr1;
+
   const finalPropertyType = propertyTypeStr || subTypeText || "Property";
-  const title = ` ${finalPropertyType} ${forText} in ${locationText}${cityText}`
-    .replace(/\s+/g, " ")
-    .trim();
+  const title = `${finalPropertyType} ${forText} in ${locationText}${cityText}`.replace(
+    /\s+/g,
+    " "
+  ).trim();
+
   const description = `Explore ${finalPropertyType.toLowerCase()} in ${locationText}${cityText} ${forText.toLowerCase()}. ${
     property.description?.slice(0, 150) ||
     "Find your dream property with modern amenities and prime location."
@@ -51,6 +55,7 @@ function buildSeoContent(property, id) {
   const canonicalUrl = `https://www.meetowner.in/property?Id_=${id}`;
   return { title, description, keywords, canonicalUrl };
 }
+
 
 export async function generateMetadata({ searchParams }) {
   const params = await searchParams;
@@ -75,7 +80,7 @@ export async function generateMetadata({ searchParams }) {
       `${config.awsApiUrl}/listings/v1/gspmeet?unique_property_id=${id}`,
       { cache: "no-store" }
     );
-    if (!response.ok) throw new Error(`Failed to fetch property details`);
+    if (!response.ok) throw new Error("Failed to fetch property details");
 
     const data = await response.json();
     if (!data.property) throw new Error("No property data in response");
@@ -90,13 +95,20 @@ export async function generateMetadata({ searchParams }) {
       CryptoJS.enc.Hex.parse(ENCRYPTION_KEY),
       { iv }
     );
-    const decryptedJson = decrypted.toString(CryptoJS.enc.Utf8);
-    const property = JSON.parse(decryptedJson);
+    const property = JSON.parse(decrypted.toString(CryptoJS.enc.Utf8));
     const { title, description, keywords, canonicalUrl } = buildSeoContent(
       property,
       id
     );
-    const feature = `https://api.meetowner.in/aws/v1/s3/uploads/${property?.image}`;
+
+ 
+    const featureImage =
+      property?.images?.[0] ||
+      property?.image?.[0] ||
+      property?.image ||
+      "default-property.jpg";
+    const feature = `https://api.meetowner.in/aws/v1/s3/uploads/${featureImage}`;
+       
     return {
       title,
       description,
@@ -110,8 +122,8 @@ export async function generateMetadata({ searchParams }) {
         images: [
           {
             url: feature,
-            width: 600,
-            height: 400,
+            width: 1200,
+            height: 630,
             alt: `${title} - Property Image`,
           },
         ],
@@ -121,7 +133,7 @@ export async function generateMetadata({ searchParams }) {
         card: "summary_large_image",
         title,
         description,
-           images: [{ url: feature }],
+        images: [{ url: feature }],
       },
       alternates: { canonical: canonicalUrl },
     };
@@ -134,6 +146,7 @@ export async function generateMetadata({ searchParams }) {
   }
 }
 
+
 async function fetchProperty(propertyId) {
   const response = await fetch(
     `${config.awsApiUrl}/listings/v1/gspmeet?unique_property_id=${propertyId}`,
@@ -145,13 +158,13 @@ async function fetchProperty(propertyId) {
   const [ivHex, encryptedHex] = data.property.split(":");
   const iv = CryptoJS.enc.Hex.parse(ivHex);
   const encrypted = CryptoJS.enc.Hex.parse(encryptedHex);
-  const decrypted = CryptoJS.AES.decrypt(
+  return JSON.parse(CryptoJS.AES.decrypt(
     { ciphertext: encrypted },
     CryptoJS.enc.Hex.parse(ENCRYPTION_KEY),
     { iv }
-  );
-  return JSON.parse(decrypted.toString(CryptoJS.enc.Utf8));
+  ).toString(CryptoJS.enc.Utf8));
 }
+
 
 export default async function PropertyPage({ searchParams }) {
   const params = await searchParams;

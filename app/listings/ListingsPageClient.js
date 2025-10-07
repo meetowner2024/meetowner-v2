@@ -2,7 +2,7 @@
 import dynamic from "next/dynamic";
 import { ToastContainer } from "react-toastify";
 import { useEffect, useRef, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useSearchParams } from "next/navigation";
 import { setSearchData } from "../../components/store/slices/searchSlice";
 
@@ -17,7 +17,7 @@ export default function ListingsPageClient() {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [ads, setAds] = useState([]);
   const modalRef = useRef(null);
-
+ const currentSearchData = useSelector((state) => state.search); // Get current Redux state
   const handleClose = () => setShowLoginModal(false);
 
   useEffect(() => {
@@ -33,7 +33,8 @@ export default function ListingsPageClient() {
     fetchAds();
   }, []);
 
- useEffect(() => {
+
+useEffect(() => {
   const queryParams = {};
   for (const key of searchParams.keys()) {
     const [paramKey, paramValue] = key.split("-");
@@ -41,24 +42,22 @@ export default function ListingsPageClient() {
       queryParams[paramKey] = decodeURIComponent(paramValue.replace(/\+/g, " "));
     }
   }
-
   const normalizedParams = {
-    city: queryParams.city || "Hyderabad", 
-    property_for: queryParams.property_for || "Sell",
-    tab: queryParams.tab || "Buy",
-    property_status: queryParams.property_status || "1",
+    city: queryParams.city || currentSearchData.city || "Hyderabad",
+    property_for: queryParams.property_for || currentSearchData.property_for || "Sell",
+    tab: queryParams.tab || currentSearchData.tab || "Buy",
+    property_status: queryParams.property_status || currentSearchData.property_status || "1",
     property_in:
       queryParams.property_in === "Residential or Commercial" ||
       !["Residential", "Commercial", "Plot"].includes(queryParams.property_in)
-        ? "Residential" 
+        ? currentSearchData.property_in || "Residential"
         : queryParams.property_in,
-    sub_type: queryParams.sub_type || "",
-    bhk: queryParams.bhk || "",
-    location: queryParams.location || "", 
+    sub_type: queryParams.sub_type || currentSearchData.sub_type || "",
+    bhk: queryParams.bhk || currentSearchData.bhk || "",
+    location: queryParams.location || currentSearchData.location || "", // Preserve existing location
   };
   dispatch(setSearchData(normalizedParams));
 }, [searchParams, dispatch]);
-
   return (
     <>
       <ListingHeader

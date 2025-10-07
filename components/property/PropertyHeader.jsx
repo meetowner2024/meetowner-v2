@@ -82,7 +82,7 @@ const PropertyHeader = () => {
   const commandRef = useRef(null);
   const selectedFilters = useMemo(
     () => ({
-      tab: searchData.tab || "Buy",
+      tab: searchData.tab || "",
       bhk: searchData.bhk || null,
       budget: searchData.budget || "",
       propertyIn: searchData.property_in || "Residential",
@@ -92,7 +92,6 @@ const PropertyHeader = () => {
     }),
     [searchData]
   );
-
   const fetchCities = useCallback(async () => {
     try {
       const response = await axios.get(
@@ -352,8 +351,24 @@ const PropertyHeader = () => {
   );
 
   const handleRouteListings = useCallback(() => {
-    router.push("/listings");
-  }, [router]);
+  const queryParts = Object.entries(searchData)
+    .filter(
+      ([key, value]) =>
+        ![
+          "loading",
+          "error",
+          "userCity",
+          "plot_subType",
+          "commercial_subType",
+        ].includes(key) &&
+        value !== null &&
+        value !== "" &&
+        value !== undefined
+    )
+    .map(([key, value]) => `${key}-${encodeURIComponent(value)}`);
+  const queryString = queryParts.join("&");
+  router.push(`/listings?${queryString}`);
+}, [router, searchData]);
 
   const clearAllFilters = useCallback(() => {
     dispatch(clearSearch());
