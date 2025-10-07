@@ -7,3 +7,4 @@ Host: https://meetowner.in
 
 # Sitemaps
 Sitemap: https://meetowner.in/sitemap.xml
+Sitemap: https://meetowner.in/sitemap-images.xml

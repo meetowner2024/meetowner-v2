@@ -3,6 +3,7 @@ module.exports = {
   generateRobotsTxt: true,
   sitemapSize: 7000,
   exclude: ["/api/*", "/lib/*", "/components/utils/useWhatsappHook.jsx"],
+  additionalSitemaps: ["https://meetowner.in/sitemap-images.xml"],
   additionalPaths: async (config) => {
     const staticRoutes = [
       {
@@ -152,5 +153,8 @@ module.exports = {
       console.error("Error generating sitemap paths:", error);
       return staticRoutes;
     }
+  },
+  robotsTxtOptions: {
+    additionalSitemaps: ["https://meetowner.in/sitemap-images.xml"],
   },
 };
