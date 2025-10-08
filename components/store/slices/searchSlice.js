@@ -15,7 +15,6 @@ const initialState = {
   loading: false,
   error: null,
   furnished_status: "",
-  property_status: "1",
 };
 
 const searchSlice = createSlice({
@@ -36,7 +35,7 @@ const searchSlice = createSlice({
     loading: false,
     error: null,
     furnished_status: "",
-    property_status: "1",
+  
   },
   reducers: {
     setCity: (state, action) => {

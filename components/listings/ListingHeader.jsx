@@ -170,8 +170,8 @@ const ListingHeader = ({ setShowLoginModal, ads }) => {
   ]);
 
   useEffect(() => {
-  setSearchInput(searchData.location || "");
-}, [searchData.location]);
+    setSearchInput(searchData.location || "");
+  }, [searchData.location]);
   const selectedFilters = useMemo(
     () => ({
       tab: searchData.tab === "Latest" ? "Buy" : searchData.tab || "Buy",
@@ -223,34 +223,34 @@ const ListingHeader = ({ setShowLoginModal, ads }) => {
   useEffect(() => {
     fetchLocalities(city, searchInput);
   }, [searchInput, city, fetchLocalities]);
- const updateUrlWithSearchData = useCallback(() => {
-  if (pathname !== "/listings") return;
-  const validPropertyIn = ["Residential", "Commercial", "Plot"];
-  const normalizedSearchData = {
-    ...searchData,
-    property_in: validPropertyIn.includes(searchData.property_in)
-      ? searchData.property_in
-      : "Residential", 
-    location: searchData.location || "", 
-  };
-  const queryParts = Object.entries(normalizedSearchData)
-    .filter(
-      ([key, value]) =>
-        ![
-          "loading",
-          "error",
-          "userCity",
-          "plot_subType",
-          "commercial_subType",
-        ].includes(key) &&
-        value !== null &&
-        value !== "" &&
-        value !== undefined
-    )
-    .map(([key, value]) => `${key}-${encodeURIComponent(value)}`);
-  const queryString = queryParts.join("&");
-  router.replace(`/listings?${queryString}`, { scroll: false });
-}, [router, searchData, pathname]);
+  const updateUrlWithSearchData = useCallback(() => {
+    if (pathname !== "/listings") return;
+    const validPropertyIn = ["Residential", "Commercial", "Plot"];
+    const normalizedSearchData = {
+      ...searchData,
+      property_in: validPropertyIn.includes(searchData.property_in)
+        ? searchData.property_in
+        : "Residential",
+      location: searchData.location || "",
+    };
+    const queryParts = Object.entries(normalizedSearchData)
+      .filter(
+        ([key, value]) =>
+          ![
+            "loading",
+            "error",
+            "userCity",
+            "plot_subType",
+            "commercial_subType",
+          ].includes(key) &&
+          value !== null &&
+          value !== "" &&
+          value !== undefined
+      )
+      .map(([key, value]) => `${key}-${encodeURIComponent(value)}`);
+    const queryString = queryParts.join("&");
+    router.replace(`/listings?${queryString}`, { scroll: false });
+  }, [router, searchData, pathname]);
   useEffect(() => {
     updateUrlWithSearchData();
   }, [searchData, updateUrlWithSearchData]);
