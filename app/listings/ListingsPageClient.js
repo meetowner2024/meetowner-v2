@@ -43,95 +43,112 @@ export default function ListingsPageClient() {
     }
     fetchAds();
   }, []);
-  useEffect(() => {
-    const queryParams = {};
-    const keys = Array.from(searchParams.keys());
+ useEffect(() => {
+  const queryParams = {};
+  const keys = Array.from(searchParams.keys());
+  const bhkKey = keys.find((key) => key.startsWith("bhk-"));
+  let bhk = "";
+  if (bhkKey) bhk = bhkKey.split("-")[1] || "";
 
-    const bhkKey = keys.find((key) => key.startsWith("bhk-"));
-    let bhk = "";
-    if (bhkKey) bhk = bhkKey.split("-")[1] || "";
+   const seoKey = keys.find((key) =>
+    /(plot|land|apartment|villa|house|independent|shop|office|retail|commercial).*(for-sale|forrent|for-rent|for-sale-in)/i.test(
+      key
+    )
+  );
 
-    const seoKey = keys.find((key) =>
-      /(plot|apartment|villa).*(for-sale|forrent|for-rent|for-sale-in)/i.test(
-        key
-      )
-    );
+  if (seoKey) {
+    const parts = seoKey.split("-");
 
-    if (seoKey) {
-      const parts = seoKey.split("-");
-      const property_for = /(sale|sell|for-sale|buy|for-sale-in)/i.test(seoKey)
-        ? "Sell"
-        : "Rent";
-
-      let property_in = "Residential";
-      if (parts.includes("plot")) property_in = "Plot";
-      else if (parts.includes("apartment")) property_in = "Residential";
-      else if (parts.includes("villa")) property_in = "Residential";
-
-      const indiaIndex = parts.indexOf("india");
-      let city = "Hyderabad";
-      if (indiaIndex !== -1 && parts[indiaIndex + 1]) {
-        city = parts[indiaIndex + 1];
-      } else {
-        city = parts[parts.length - 1];
-      }
-      city = city.charAt(0).toUpperCase() + city.slice(1).toLowerCase();
-
-      const inIndex = parts.indexOf("in");
-      let location = "";
-      if (inIndex !== -1 && parts.length > inIndex + 1) {
-        location = parts[inIndex + 1];
-      }
-
-      const tab = property_for === "Sell" ? "Buy" : "Rent";
-
-      queryParams.city = decodeURIComponent(city);
-      queryParams.location = decodeURIComponent(location);
-      queryParams.property_in = property_in;
-      queryParams.property_for = property_for;
-      queryParams.tab = tab;
-      queryParams.bhk = bhk;
-    } else {
-      for (const key of keys) {
-        const [paramKey, ...rest] = key.split("-");
-        const paramValue = rest.join("-");
-        if (paramKey && paramValue !== undefined) {
-          queryParams[paramKey] = decodeURIComponent(
-            paramValue.replace(/\+/g, " ")
-          );
-        }
-      }
-      if (bhk) queryParams.bhk = bhk;
+    const forIndex = parts.indexOf("for");
+    let sub_type = "";
+    if (forIndex > 0) {
+      const subtypeParts = parts.slice(0, forIndex);
+      sub_type = subtypeParts
+        .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+        .join("");
     }
 
-    const normalizedParams = {
-      city: queryParams.city || currentSearchData.city || "Hyderabad",
-      property_for:
-        queryParams.property_for || currentSearchData.property_for || "Sell",
-      tab: queryParams.tab || currentSearchData.tab || "Buy",
-      property_in:
-        queryParams.property_in === "Residential or Commercial" ||
-        !["Residential", "Commercial", "Plot"].includes(queryParams.property_in)
-          ? currentSearchData.property_in || "Residential"
-          : queryParams.property_in,
-      sub_type: queryParams.sub_type || currentSearchData.sub_type || "",
-      bhk: queryParams.bhk || currentSearchData.bhk || "",
-      location: queryParams.location || currentSearchData.location || "",
-    };
+    const property_for = /(sale|sell|for-sale|buy|for-sale-in)/i.test(seoKey)
+      ? "Sell"
+      : "Rent";
 
-    const prev = currentSearchData;
+    let property_in = "Residential";
     if (
-      prev.city !== normalizedParams.city ||
-      prev.property_for !== normalizedParams.property_for ||
-      prev.tab !== normalizedParams.tab ||
-      prev.property_in !== normalizedParams.property_in ||
-      prev.sub_type !== normalizedParams.sub_type ||
-      prev.bhk !== normalizedParams.bhk ||
-      prev.location !== normalizedParams.location
+      /(plot|commercial|shop|office|retail)/i.test(seoKey)
     ) {
-      dispatch(setSearchData(normalizedParams));
+      property_in = "Commercial";
+    } else if (/villa|apartment/i.test(seoKey)) {
+      property_in = "Residential";
     }
-  }, [searchParams, dispatch]);
+
+
+    const indiaIndex = parts.indexOf("india");
+    let city = "Hyderabad";
+    if (indiaIndex !== -1 && parts[indiaIndex + 1]) {
+      city = parts[indiaIndex + 1];
+    } else {
+      city = parts[parts.length - 1];
+    }
+    city = city.charAt(0).toUpperCase() + city.slice(1).toLowerCase();
+
+
+    const inIndex = parts.indexOf("in");
+    let location = "";
+    if (inIndex !== -1 && parts.length > inIndex + 1) {
+      location = parts[inIndex + 1];
+    }
+    location = location.charAt(0).toUpperCase() + location.slice(1).toLowerCase();
+
+    const tab = property_for === "Sell" ? "Buy" : "Rent";
+    queryParams.city = decodeURIComponent(city);
+    queryParams.location = decodeURIComponent(location);
+    queryParams.property_in = property_in;
+    queryParams.property_for = property_for;
+    queryParams.tab = tab;
+    queryParams.sub_type = sub_type;
+    queryParams.bhk = bhk;
+  } else {
+    for (const key of keys) {
+      const [paramKey, ...rest] = key.split("-");
+      const paramValue = rest.join("-");
+      if (paramKey && paramValue !== undefined) {
+        queryParams[paramKey] = decodeURIComponent(
+          paramValue.replace(/\+/g, " ")
+        );
+      }
+    }
+    if (bhk) queryParams.bhk = bhk;
+  }
+
+
+  const normalizedParams = {
+    city: queryParams.city || currentSearchData.city || "Hyderabad",
+    property_for:
+      queryParams.property_for || currentSearchData.property_for || "Sell",
+    tab: queryParams.tab || currentSearchData.tab || "Buy",
+    property_in:
+      queryParams.property_in === "Residential or Commercial" ||
+      !["Residential", "Commercial", "Plot"].includes(queryParams.property_in)
+        ? currentSearchData.property_in || "Residential"
+        : queryParams.property_in,
+    sub_type: queryParams.sub_type || currentSearchData.sub_type || "",
+    bhk: queryParams.bhk || currentSearchData.bhk || "",
+    location: queryParams.location || currentSearchData.location || "",
+  };
+
+  const prev = currentSearchData;
+  if (
+    prev.city !== normalizedParams.city ||
+    prev.property_for !== normalizedParams.property_for ||
+    prev.tab !== normalizedParams.tab ||
+    prev.property_in !== normalizedParams.property_in ||
+    prev.sub_type !== normalizedParams.sub_type ||
+    prev.bhk !== normalizedParams.bhk ||
+    prev.location !== normalizedParams.location
+  ) {
+    dispatch(setSearchData(normalizedParams));
+  }
+}, [searchParams, dispatch]);
 
   return (
     <>
