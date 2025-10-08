@@ -158,7 +158,7 @@ function ListingsBody({ setShowLoginModal }) {
             city: searchData.city,
             property_for: searchData.property_for || "Sell",
             tab: searchData.tab || "Buy",
-            property_status: searchData.property_status || "1",
+            // property_status: searchData.property_status || "1",
             property_in: "Residential",
             location: searchData.location || "",
           };
@@ -181,7 +181,7 @@ function ListingsBody({ setShowLoginModal }) {
             city: searchData.city,
             property_for: searchData.property_for || "Sell",
             tab: searchData.tab || "Buy",
-            property_status: searchData.property_status || "1",
+            // property_status: searchData.property_status || "1",
             property_in: searchData.property_in || "Residential",
             location: "",
           };
@@ -219,7 +219,7 @@ function ListingsBody({ setShowLoginModal }) {
           bedrooms: searchData?.bhk || "",
           property_cost: searchData?.budget || "",
           priceFilter: encodeURIComponent(selected),
-          property_status: searchData?.property_status || "",
+          // property_status: searchData?.property_status || "",
           city: searchData?.city,
           furnished_status: searchData?.furnished_status || "",
           extra_filters: searchData?.tab === "New Launch" ? "new_launches" : "",
@@ -231,7 +231,6 @@ function ListingsBody({ setShowLoginModal }) {
               ([_, value]) => value !== "" && value !== undefined
             )
           ).toString() + (isPlot ? `&${statusParam}` : `&${statusParam}`);
-
         apiUrl = `${config.awsApiUrl}/listings/v1/gapbType?${queryString}`;
 
         const response = await fetch(apiUrl);
@@ -289,7 +288,6 @@ function ListingsBody({ setShowLoginModal }) {
           setData([]);
         }
         setHasMore(false);
-      
       } finally {
         setLoading(false);
       }
@@ -331,7 +329,7 @@ function ListingsBody({ setShowLoginModal }) {
     searchData?.sub_type,
     searchData?.budget,
     searchData?.furnished_status,
-    searchData?.property_status,
+    // searchData?.property_status,
     searchData?.occupancy,
     searchData?.possession_status,
     selected,
