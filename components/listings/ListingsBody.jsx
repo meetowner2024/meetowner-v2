@@ -158,7 +158,8 @@ function ListingsBody({ setShowLoginModal }) {
             city: searchData.city,
             property_for: searchData.property_for || "Sell",
             tab: searchData.tab || "Buy",
-            // property_status: searchData.property_status || "1",
+            property_status: "1",
+
             property_in: "Residential",
             location: searchData.location || "",
           };
@@ -181,7 +182,7 @@ function ListingsBody({ setShowLoginModal }) {
             city: searchData.city,
             property_for: searchData.property_for || "Sell",
             tab: searchData.tab || "Buy",
-            // property_status: searchData.property_status || "1",
+            property_status: "1",
             property_in: searchData.property_in || "Residential",
             location: "",
           };
@@ -219,7 +220,7 @@ function ListingsBody({ setShowLoginModal }) {
           bedrooms: searchData?.bhk || "",
           property_cost: searchData?.budget || "",
           priceFilter: encodeURIComponent(selected),
-          // property_status: searchData?.property_status || "",
+          property_status: "1",
           city: searchData?.city,
           furnished_status: searchData?.furnished_status || "",
           extra_filters: searchData?.tab === "New Launch" ? "new_launches" : "",
