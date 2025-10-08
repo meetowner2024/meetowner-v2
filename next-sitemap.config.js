@@ -105,6 +105,7 @@ module.exports = {
         changefreq: "daily",
         priority: 0.65,
       }));
+      let propertyRoutes = [];
       const propertyResponse = await fetch(
         "https://api.meetowner.in/listings/v1/getAllPropertiesLinks"
       );
@@ -119,7 +120,14 @@ module.exports = {
           loc: item.url,
           lastmod: new Date().toISOString(),
           changefreq: "daily",
-          priority: 0.65,
+          priority: 0.7,
+          images: [
+            {
+              loc: item.completeimage,
+              caption: item.property_name,
+              title: item.titlePart,
+            },
+          ],
         }));
       }
       const imageResponse = await fetch(
