@@ -106,6 +106,7 @@ module.exports = {
         priority: 0.65,
       }));
       let propertyRoutes = [];
+
       const propertyResponse = await fetch(
         "https://api.meetowner.in/listings/v1/getAllPropertiesLinks"
       );
@@ -121,41 +122,14 @@ module.exports = {
           lastmod: new Date().toISOString(),
           changefreq: "daily",
           priority: 0.7,
-          images: [
-            {
-              loc: item.completeimage,
-              caption: item.property_name,
-              title: item.titlePart,
-            },
-          ],
         }));
       }
-      const imageResponse = await fetch(
-        "https://api.meetowner.in/adAssets/v1/getSeoImages"
-      );
-      let imageRoutes = [];
-      if (imageResponse.ok) {
-        const { data } = await imageResponse.json();
-        imageRoutes = data.map((property) => ({
-          loc: property.seo_url,
-          lastmod: new Date().toISOString(),
-          changefreq: "daily",
-          priority: 0.7,
-          images: [
-            {
-              loc: property.image,
-              caption: `${property.property_name}`,
-              title: property.property_name,
-            },
-          ],
-        }));
-      }
+
       return [
         ...staticRoutes,
         ...propertyRoutes,
         ...listingRoutes,
         ...dynamicRoutes,
-        ...imageRoutes,
       ];
     } catch (error) {
       console.error("Error generating sitemap paths:", error);
