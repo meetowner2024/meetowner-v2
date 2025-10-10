@@ -1,6 +1,5 @@
 import Dashboard from "../components/Dashboard";
 import { cookies } from "next/headers";
-import AdVideoPlayer from "../components/utils/AdVideoPlayer";
 export default async function Home() {
   const cookieStore = await cookies();
   const userCookie = cookieStore.get("user");
@@ -155,7 +154,7 @@ export default async function Home() {
         formatted={formatted}
         contactedIds={contacted}
       />
-      <AdVideoPlayer />
+      {/* <AdVideoPlayer /> */}
     </div>
   );
 }
