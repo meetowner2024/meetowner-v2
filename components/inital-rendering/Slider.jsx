@@ -518,7 +518,10 @@ const PropertyListing = ({
                     className="text-xl font-bold text-[#1D3A76] text-left mb-2"
                     onClick={() => handleNavigation(property)}
                   >
-                    {property.property_name}
+                    {property.builder_name ? (
+                      <span>{property.builder_name} - </span>
+                    ) : null}
+                    {property?.property_name}
                   </h3>
                   <div
                     className="grid grid-cols-3 gap-2 mb-4 text-sm text-gray-700"
