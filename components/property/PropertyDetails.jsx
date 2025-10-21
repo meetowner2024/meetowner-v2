@@ -342,14 +342,18 @@ const PropertyDeatils = ({ propertyDataDetails }) => {
         className="bg-white/80 mt-3 sm:mt-7 backdrop-blur-lg border border-white/20 sm:rounded-2xl sm:shadow-xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]"
       >
         <div className=" p-2 sm:p-5 ">
-          <div className="flex  ">
+          <div className="flex justify-left text-center">
             <h1
               style={{ color: PropertyAdsColors.primary.text }}
-              className="text-xl sm:text-2xl font-bold text-center sm:leading-7 whitespace-nowrap"
+              className="text-xl sm:text-2xl font-bold sm:leading-7 break-words"
             >
+              {property.builder_name ? (
+                <span>{property.builder_name} - </span>
+              ) : null}
               {property?.property_name}
             </h1>
           </div>
+
           <div className="mt-1 flex items-center gap-1 sm:whitespace-nowrap text-center text-xs text-gray-600">
             <MapPin color="red" size={15} />
             <span
