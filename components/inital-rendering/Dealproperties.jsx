@@ -296,7 +296,10 @@ const DealProperties = ({ bestDealProperties, contacted, setContacted }) => {
                 className="p-4 w-full lg:w-2/2 flex flex-col justify-between cursor-pointer"
               >
                 <h3 className="text-start text-xl font-semibold mb-2">
-                  {property.property_name}
+                  {property.builder_name ? (
+                    <span>{property.builder_name} </span>
+                  ) : null}{" "}
+                  {property?.property_name}
                 </h3>
                 <div className="flex items-center text-gray-500 mb-2">
                   <FaMapMarkerAlt className="mr-2 text-gray-600" />

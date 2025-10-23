@@ -216,8 +216,8 @@ const PropertyCard = memo(
                 >
                   <p className="text-[#1D3A76] font-bold text-base md:text-[18px]">
                     {property.builder_name ? (
-                      <span>{property.builder_name} - </span>
-                    ) : null}
+                      <span>{property.builder_name} </span>
+                    ) : null}{" "}
                     {property?.property_name}
                   </p>
                   <p className="flex flex-col items-end text-[#1D3A76] font-semibold text-[18px] max-h-5">

@@ -348,8 +348,8 @@ const PropertyDeatils = ({ propertyDataDetails }) => {
               className="text-xl sm:text-2xl font-bold sm:leading-7 break-words"
             >
               {property.builder_name ? (
-                <span>{property.builder_name} - </span>
-              ) : null}
+                <span>{property.builder_name} </span>
+              ) : null}{" "}
               {property?.property_name}
             </h1>
           </div>

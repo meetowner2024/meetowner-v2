@@ -519,8 +519,8 @@ const PropertyListing = ({
                     onClick={() => handleNavigation(property)}
                   >
                     {property.builder_name ? (
-                      <span>{property.builder_name} - </span>
-                    ) : null}
+                      <span>{property.builder_name} </span>
+                    ) : null}{" "}
                     {property?.property_name}
                   </h3>
                   <div
