@@ -327,7 +327,7 @@ function ListingsBody({ setShowLoginModal }) {
     searchData?.property_in,
     searchData?.tab,
     searchData?.occupancy,
-    searchData?.sub_type,code .
+    searchData?.sub_type,
     
     searchData?.budget,
     searchData?.furnished_status,
