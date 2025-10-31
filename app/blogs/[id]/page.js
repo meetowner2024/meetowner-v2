@@ -21,7 +21,7 @@ const resolveImageUrl = (imagePath) => {
   }${imagePath}`;
 };
 export async function generateMetadata({ params }) {
-  const id = params.id;
+  const id = await params?.id;
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://www.meetowner.com";
 
   try {
