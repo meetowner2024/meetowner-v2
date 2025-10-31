@@ -9,12 +9,12 @@ export default function BlogCard({ post }) {
     ? post.author.name.charAt(0).toUpperCase()
     : "?";
   return (
-    <Link href={`/blog/${post.id}`} className="block group ">
+    <Link href={`/blogs/${post.id}`} className="block group ">
       <Card className="h-full shadow-2xl hover:shadow-blog-card-hover border-2 border-gray-300 transition-all duration-300 group-hover:-translate-y-1 overflow-hidden">
         <div className="aspect-video overflow-hidden">
           <Image
             priority
-            src={post.image}
+            src={`https://api.meetowner.in/aws/v1/s3/blogs/${post?.image}`}
             alt={`${post.title} - Meetowner Blog`}
             width={800}
             height={400}
@@ -46,17 +46,23 @@ export default function BlogCard({ post }) {
         <CardContent className="pt-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-full bg-gray-200 text-black flex items-center justify-center text-sm font-medium">
-                {authorInitial}
-              </div>
+              {post?.author?.avatar ? (
+                <Image
+                  src={post.author.avatar}
+                  alt={post.author.name || "Author"}
+                  width={24}
+                  height={24}
+                  className="w-6 h-6 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-6 h-6 rounded-full bg-gray-200 text-black flex items-center justify-center text-sm font-medium">
+                  {authorInitial}
+                </div>
+              )}
               <span className="text-sm text-muted-foreground">
                 {post.author.name}
               </span>
             </div>
-            {/* <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <Clock className="w-3 h-3" />
-              {post.readTime}
-            </div> */}
           </div>
         </CardContent>
       </Card>

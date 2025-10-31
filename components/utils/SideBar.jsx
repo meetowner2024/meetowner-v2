@@ -9,7 +9,7 @@ import "swiper/css/pagination";
 import axios from "axios";
 
 import { toast } from "react-toastify";
-import { ArrowDownRight, LogOutIcon, User2Icon } from "lucide-react";
+import { ArrowDownRight, FileText, LogOutIcon, User2Icon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { QRCodeSVG } from "qrcode.react";
 import { setPropertyDetails } from "../store/slices/propertyDetails";
@@ -17,6 +17,7 @@ import config from "./config";
 import Image from "next/image";
 import { Button } from "../ui/button";
 import theme from "./theme.json";
+import Link from "next/link";
 const Sidebar = ({
   menuOpen,
   setMenuOpen,
@@ -333,6 +334,15 @@ const Sidebar = ({
           <ArrowDownRight className="w-5 h-5 mr-2" />
           Upcoming Projects
         </Button>
+        <Link href="/blogs">
+          <Button
+            aria-label="View Blogs"
+            className={`w-full mt-6 ${theme.button.secondary.bg} ${theme.button.secondary.text} text-white font-medium py-2 rounded-lg hover:shadow-[0_0_12px_rgba(29,58,118,0.7)] transition-all duration-300 flex items-center justify-center`}
+          >
+            <FileText className="w-5 h-5 mr-2" />
+            Blogs
+          </Button>
+        </Link>
         <Button
           aria-label="Profile"
           onClick={handleRoute}
