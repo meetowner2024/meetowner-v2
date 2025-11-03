@@ -50,7 +50,6 @@ import axios from "axios";
 import config from "../utils/config";
 import { toast } from "react-toastify";
 import theme from "../utils/theme.json";
-
 const commercialSubTypes = [
   { id: "Office", label: "Office", icon: Building },
   { id: "Retail Shop", label: "Retail Shop", icon: Home },
@@ -59,13 +58,11 @@ const commercialSubTypes = [
   { id: "Plot", label: "Plot", icon: MapPin },
   { id: "Others", label: "Others", icon: MapPin },
 ];
-
 const furnishingOptions = [
   { label: "Unfurnished", value: "Unfurnished" },
   { label: "Semi Furnished", value: "Semi" },
   { label: "Fully Furnished", value: "Fully" },
 ];
-
 const PropertyHeader = () => {
   const dispatch = useDispatch();
   const router = useRouter();
@@ -106,11 +103,9 @@ const PropertyHeader = () => {
       console.error("Error fetching cities:", error);
     }
   }, []);
-
   useEffect(() => {
     fetchCities();
   }, [fetchCities]);
-
   const fetchLocalities = useCallback(async (city, query) => {
     try {
       const response = await fetch(
@@ -127,7 +122,6 @@ const PropertyHeader = () => {
       toast.error("Failed to fetch localities. Please try again.");
     }
   }, []);
-
   const debouncedFetchLocalities = useCallback(
     debounce((city, query) => {
       if (!city || !query) {
@@ -138,36 +132,29 @@ const PropertyHeader = () => {
     }, 500),
     [fetchLocalities]
   );
-
   useEffect(() => {
     debouncedFetchLocalities(city, searchInput);
   }, [searchInput, city, debouncedFetchLocalities]);
-
   const updateUrlWithSearchData = useCallback(() => {
-    if (pathname !== "/listings") return;
-    const queryParts = Object.entries(searchData)
-      .filter(
-        ([key, value]) =>
-          ![
-            "loading",
-            "error",
-            "userCity",
-            "plot_subType",
-            "commercial_subType",
-          ].includes(key) &&
-          value !== null &&
-          value !== "" &&
-          value !== undefined
-      )
-      .map(([key, value]) => `${key}-${encodeURIComponent(value)}`);
-    const queryString = queryParts.join("&");
-    router.replace(`/listings?${queryString}`, { scroll: false });
+    if (!pathname.startsWith("/listings")) return;
+    const { city, location, type, bhk, tab } = searchData;
+    const formattedCity = city
+      ? city.toLowerCase().replace(/[^a-z0-9]+/g, "-")
+      : "all";
+    const formattedLocation = location
+      ? location.toLowerCase().replace(/[^a-z0-9]+/g, "-")
+      : "all";
+    const formattedType = type
+      ? type.toLowerCase().replace(/[^a-z0-9]+/g, "-")
+      : "all";
+    const formattedBhk = bhk ? `${bhk}-bhk` : "all";
+    const formattedTab = tab ? tab.toLowerCase() : "all";
+    const newUrl = `/listings/${formattedCity}/${formattedLocation}/${formattedType}/${formattedBhk}/${formattedTab}`;
+    router.replace(newUrl, { scroll: false });
   }, [router, searchData, pathname]);
-
   useEffect(() => {
     updateUrlWithSearchData();
   }, [searchData, updateUrlWithSearchData]);
-
   useEffect(() => {
     if (
       ["Plot", "Land"].includes(selectedFilters.subType) &&
@@ -209,7 +196,6 @@ const PropertyHeader = () => {
       dispatch(setOccupancy(""));
     }
   }, [selectedFilters, dispatch]);
-
   const dropdownOptions = useMemo(
     () => ({
       Buy: ["Buy", "Rent"],
@@ -238,7 +224,6 @@ const PropertyHeader = () => {
     }),
     [selectedFilters.propertyIn, selectedFilters.subType]
   );
-
   const activeFilters = useMemo(() => {
     const filters = [];
     if (selectedFilters.bhk) filters.push(`${selectedFilters.bhk} BHK`);
@@ -263,7 +248,6 @@ const PropertyHeader = () => {
     if (selectedFilters.occupancy) filters.push(selectedFilters.occupancy);
     return filters;
   }, [selectedFilters, dropdownOptions]);
-
   const handleUserSearched = useCallback(
     async (searchValue) => {
       let userDetails = null;
@@ -299,12 +283,10 @@ const PropertyHeader = () => {
     },
     [city, selectedFilters]
   );
-
   const debouncedUserActivity = useCallback(
     debounce(handleUserSearched, 1000),
     [handleUserSearched]
   );
-
   const handleValueChange = useCallback(
     (value) => {
       setSearchInput(value);
@@ -313,7 +295,6 @@ const PropertyHeader = () => {
     },
     [dispatch, debouncedUserActivity]
   );
-
   const handleClear = useCallback(() => {
     setSearchInput("");
     dispatch(setSearchData({ location: "" }));
@@ -323,7 +304,6 @@ const PropertyHeader = () => {
       router.replace("/listings", { scroll: false });
     }
   }, [dispatch, debouncedUserActivity, pathname, router]);
-
   const clearFilter = useCallback(
     (filterText) => {
       if (filterText.includes("BHK")) {
@@ -349,27 +329,28 @@ const PropertyHeader = () => {
     },
     [dispatch, dropdownOptions]
   );
-
+  const slugify = (value) => {
+    return (
+      value
+        ?.toString()
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "") || ""
+    );
+  };
+  const buildListingsSeoUrl = (data) => {
+    const city = slugify(data.city || "all");
+    const location = slugify(data.location || "all");
+    const propertyIn = slugify(data.property_in || "all");
+    const bhk = data.bhk ? `${data.bhk}-bhk` : "all";
+    const forType = data.tab ? slugify(data.tab) : "all";
+    return `/listings/${city}/${location}/${propertyIn}/${bhk}/${forType}`;
+  };
   const handleRouteListings = useCallback(() => {
-  const queryParts = Object.entries(searchData)
-    .filter(
-      ([key, value]) =>
-        ![
-          "loading",
-          "error",
-          "userCity",
-          "plot_subType",
-          "commercial_subType",
-        ].includes(key) &&
-        value !== null &&
-        value !== "" &&
-        value !== undefined
-    )
-    .map(([key, value]) => `${key}-${encodeURIComponent(value)}`);
-  const queryString = queryParts.join("&");
-  router.push(`/listings?${queryString}`);
-}, [router, searchData]);
-
+    const cleanSeoUrl = buildListingsSeoUrl(searchData);
+    router.push(cleanSeoUrl);
+  }, [router, searchData]);
   const clearAllFilters = useCallback(() => {
     dispatch(clearSearch());
     setSearchInput("");
@@ -380,7 +361,6 @@ const PropertyHeader = () => {
       router.replace("/listings", { scroll: false });
     }
   }, [dispatch, debouncedUserActivity, pathname, router]);
-
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -395,20 +375,16 @@ const PropertyHeader = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
   const handleRouteHome = useCallback(() => {
     router.push("/");
   }, [router]);
-
   const shouldShowFurnishing = !["Plot", "Land"].includes(
     selectedFilters.subType
   );
-
   const handleClose = () => {
     setIsCommandOpen(false);
     setIsFilterModalOpen(false);
   };
-
   return (
     <>
       <header className="sticky top-0 z-50 w-full border-b-2 border-[#F0AA00] bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
@@ -428,7 +404,6 @@ const PropertyHeader = () => {
                 />
               </div>
             </div>
-
             <div className="flex-1 w-full sm:max-w-4xl" ref={searchRef}>
               <div className="relative">
                 <div className="hidden md:flex flex-col sm:flex-row items-center bg-white rounded-xl border-2 border-gray-200 focus-within:border-blue-500 shadow-md hover:shadow-lg transition-all duration-200">
@@ -456,7 +431,6 @@ const PropertyHeader = () => {
                     orientation="vertical"
                     className="hidden sm:block h-8 mx-2"
                   />
-
                   <div className="flex-1 flex items-center px-2 sm:px-0">
                     <Search className="w-4 h-4 text-gray-400 ml-2 sm:ml-4" />
                     <Input
@@ -493,7 +467,6 @@ const PropertyHeader = () => {
                     orientation="vertical"
                     className="hidden sm:block h-8 mx-2"
                   />
-
                   <div className="flex items-center mr-2">
                     <MapPin className="w-4 h-4 text-red-500 mr-1 sm:mr-2" />
                     <Select
@@ -522,8 +495,7 @@ const PropertyHeader = () => {
                     </Select>
                   </div>
                 </div>
-
-                {/* Mobile Responsive Layout */}
+                {}
                 <div
                   className="flex md:hidden items-center space-x-2"
                   ref={searchRef}
@@ -542,7 +514,6 @@ const PropertyHeader = () => {
                       />
                     </div>
                   </div>
-
                   <div className="flex-1 flex items-center bg-white rounded-lg border border-gray-200 focus-within:border-blue-500 shadow-sm">
                     <Search className="w-4 h-4 text-gray-400 ml-3" />
                     <Input
@@ -574,7 +545,6 @@ const PropertyHeader = () => {
                       </>
                     )}
                   </div>
-
                   <div className="flex items-center bg-white rounded-lg border border-gray-200 px-3">
                     <MapPin className="w-3 h-3 text-red-500 mr-1" />
                     <Select
@@ -601,7 +571,6 @@ const PropertyHeader = () => {
                       </SelectContent>
                     </Select>
                   </div>
-
                   <Button
                     variant="outline"
                     size="sm"
@@ -616,7 +585,6 @@ const PropertyHeader = () => {
                     )}
                   </Button>
                 </div>
-
                 {showMobileSearch && localities.length > 0 && (
                   <div className="bg-white absolute w-full mt-2 rounded-lg border border-gray-200 shadow-lg max-h-[200px] overflow-y-auto">
                     {localities.slice(0, 4).map((locality) => (
@@ -1079,5 +1047,4 @@ const PropertyHeader = () => {
     </>
   );
 };
-
 export default PropertyHeader;

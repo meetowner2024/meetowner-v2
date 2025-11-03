@@ -49,7 +49,6 @@ import { toast } from "react-toastify";
 import config from "../utils/config";
 import useWhatsappHook from "../utils/useWhatsappHook";
 import CryptoJS from "crypto-js";
-
 const facilityIconMap = {
   Lift: <Building />,
   CCTV: <MonitorCheck />,
@@ -95,20 +94,16 @@ const getFallbackIcon = (name) => {
 const PropertyModal = React.memo(
   ({ property, onClose, handleNavigation }) => {
     const JWT_SECRET = process.env.NEXT_PUBLIC_ENCRYPTION_SECRET;
-
     const ENCRYPTION_KEY = CryptoJS.SHA256(JWT_SECRET).toString();
-
     function decrypt(encryptedText) {
       const [ivHex, encryptedHex] = encryptedText.split(":");
       const iv = CryptoJS.enc.Hex.parse(ivHex);
       const encrypted = CryptoJS.enc.Hex.parse(encryptedHex);
-
       const decrypted = CryptoJS.AES.decrypt(
         { ciphertext: encrypted },
         CryptoJS.enc.Hex.parse(ENCRYPTION_KEY),
         { iv }
       );
-
       return decrypted.toString(CryptoJS.enc.Utf8);
     }
     const { handleAPI } = useWhatsappHook();
@@ -125,7 +120,6 @@ const PropertyModal = React.memo(
       if (numValue >= 1000) return (numValue / 1000).toFixed(2) + " K";
       return numValue.toString();
     }, []);
-
     useEffect(() => {
       let isMounted = true;
       const fetchImages = async () => {
@@ -169,7 +163,10 @@ const PropertyModal = React.memo(
         e.stopPropagation();
         const data = localStorage.getItem("user");
         if (!data) {
-          toast.info("Please Login to Contact!", { autoClose: 3000 });
+          toast.info("Please Login to Contact!", {
+            position: "top-right",
+            autoClose: 3000,
+          });
           return;
         }
         const userData = JSON.parse(data);
@@ -186,28 +183,37 @@ const PropertyModal = React.memo(
           const name = sellerdata?.name || "";
           if (phone) {
             const propertyFor =
-              property.property_for === "Rent" ? "rent" : "buy";
-            const category =
-              property.sub_type === "Apartment" ||
-              property.sub_type === "Independent house"
-                ? `${property.bedrooms}BHK`
-                : property.sub_type === "Plot"
-                ? "Plot"
-                : "Property";
+              property.property_for === "Rent" ? "rent" : "sale";
             const propertyId = property.unique_property_id;
+            const bhkPart = property.bedrooms
+              ? `${property.bedrooms}-bhk-`
+              : "";
+            const subTypePart = property.sub_type
+              ? `${property.sub_type.toLowerCase().replace(/\s+/g, "-")}-`
+              : "";
             const propertyNameSlug = property.property_name
               .toLowerCase()
-              .replace(/[^a-z0-9]+/g, "_")
-              .replace(/(^-|-$)/g, "");
+              .replace(/[^a-z0-9]+/g, "-")
+              .replace(/^-+|-+$/g, "");
+            const builderNameSlug = property.builder_name
+              ? `-by-${property.builder_name
+                  .toLowerCase()
+                  .replace(/[^a-z0-9]+/g, "-")
+                  .replace(/^-+|-+$/g, "")}`
+              : "";
             const locationSlug = property.location_id
               .toLowerCase()
-              .replace(/[^a-z0-9]+/g, "_")
-              .replace(/(^-|-$)/g, "");
+              .replace(/[^a-z0-9]+/g, "-")
+              .replace(/^-+|-+$/g, "");
             const citySlug = property.city
-              ? property.city.toLowerCase().replace(/[^a-z0-9]+/g, "_")
+              ? property.city
+                  .toLowerCase()
+                  .replace(/[^a-z0-9]+/g, "-")
+                  .replace(/^-+|-+$/g, "")
               : "hyderabad";
-            const seoUrl = `${propertyFor}_${category}_${property.sub_type}_${propertyNameSlug}_in_${locationSlug}_${citySlug}_Id_${propertyId}`;
-            const fullUrl = `${window.location.origin}/property?${seoUrl}`;
+            const forPart = `for-${propertyFor}-`;
+            const seoSlug = `${bhkPart}${subTypePart}${propertyNameSlug}${builderNameSlug}-${forPart}in-${locationSlug}-${citySlug}`;
+            const fullUrl = `${window.location.origin}/property/${seoSlug}/${propertyId}`;
             const encodedMessage = encodeURIComponent(
               `Hi ${name},\nI'm interested in this property: ${property.property_name}.\n${fullUrl}\nPlease get in touch with me at ${userData.mobile}.`
             );
@@ -225,11 +231,13 @@ const PropertyModal = React.memo(
             await handleAPI(property);
           } else {
             toast.error("Owner's phone number is not available.", {
+              position: "top-right",
               autoClose: 3000,
             });
           }
         } catch (error) {
           toast.error("Failed to get owner's contact details.", {
+            position: "top-right",
             autoClose: 3000,
           });
         }

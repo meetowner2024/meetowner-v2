@@ -5,7 +5,7 @@ import noPropertiesFound from "../../app/assets/Images/14099.jpg";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import {
   List,
@@ -40,7 +40,7 @@ const cache = new CellMeasurerCache({
   defaultHeight: 350,
   minHeight: 300,
 });
-function ListingsBody({ setShowLoginModal }) {
+function ListingsBody({ setShowLoginModal, initialized = false }) {
   const JWT_SECRET = process.env.NEXT_PUBLIC_ENCRYPTION_SECRET;
   const ENCRYPTION_KEY = CryptoJS.SHA256(JWT_SECRET);
   function decrypt(encryptedText) {
@@ -68,6 +68,63 @@ function ListingsBody({ setShowLoginModal }) {
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState("Relevance");
   const router = useRouter();
+  const pathname = usePathname();
+  const seoSlug = useMemo(() => {
+    const { bhk, property_in, sub_type, tab, location, city } = searchData;
+    if (!city) return null;
+    if (
+      !bhk &&
+      !sub_type &&
+      !location &&
+      property_in === "Residential" &&
+      tab === "Buy"
+    ) {
+      return "/listings";
+    }
+    const slugify = (text) => {
+      if (!text) return "";
+      return text
+        .toString()
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-+|-+$/g, "");
+    };
+    const bhkPart = bhk ? `${bhk}-bhk` : "";
+    const propertyInPart =
+      property_in?.toLowerCase() === "commercial"
+        ? "commercial"
+        : property_in?.toLowerCase() === "plot"
+        ? "plot"
+        : "residential";
+    const subTypePart = sub_type ? slugify(sub_type) : "";
+    const propertyForPart = tab === "Rent" ? "rent" : "sale";
+    const locationPart = location ? slugify(location) : "";
+    const cityPart = slugify(city);
+    const parts = [
+      bhkPart,
+      propertyInPart,
+      subTypePart,
+      `for-${propertyForPart}`,
+    ].filter(Boolean);
+    const locationSegment = locationPart
+      ? `in-${locationPart}-${cityPart}`
+      : `in-${cityPart}`;
+    return `/listings/${parts.join("-")}-${locationSegment}`;
+  }, [
+    searchData.bhk,
+    searchData.property_in,
+    searchData.sub_type,
+    searchData.tab,
+    searchData.location,
+    searchData.city,
+  ]);
+  useEffect(() => {
+    if (!initialized || !seoSlug || seoSlug === pathname) return;
+    router.replace(seoSlug, { scroll: false });
+  }, [seoSlug, pathname, router, initialized]);
   const options = [
     "Relevance",
     "Price: Low to High",
@@ -132,7 +189,23 @@ function ListingsBody({ setShowLoginModal }) {
     };
     fetchLikedProperties();
   }, []);
-
+  const slugify = (value) => {
+    return (
+      value
+        ?.toString()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "") || "all"
+    );
+  };
+  const buildListingsSeoUrl = (data) => {
+    const city = slugify(data.city);
+    const location = slugify(data.location || "all");
+    const propertyType = slugify(data.property_in || "all");
+    const bhk = data.bhk ? `${data.bhk}-bhk` : "all";
+    const forType = data.tab ? slugify(data.tab) : "all";
+    return `/listings/${city}/${location}/${propertyType}/${bhk}/${forType}`;
+  };
   const fetchProperties = useCallback(
     async (currentPage = 1, reset = false) => {
       let apiUrl;
@@ -140,66 +213,37 @@ function ListingsBody({ setShowLoginModal }) {
         setLoading(true);
         await new Promise((resolve) => setTimeout(resolve, 1000));
         handleUserSearched();
-
         const validPropertyIn = ["Residential", "Commercial", "Plot"];
         if (
           searchData?.property_in &&
           !validPropertyIn.includes(searchData.property_in)
         ) {
-          console.warn(
-            "Invalid property_in in searchData:",
-            searchData.property_in
+          toast.error("Invalid property type provided");
+          router.push(
+            buildListingsSeoUrl({
+              ...searchData,
+              property_in: "Residential",
+              location: "",
+            })
           );
-          toast.error("Invalid property type provided", {
-            position: "top-right",
-            autoClose: 3000,
-          });
-          const currentParams = {
-            city: searchData.city,
-            property_for: searchData.property_for || "Sell",
-            tab: searchData.tab || "Buy",
-            property_status: "1",
-
-            property_in: "Residential",
-            location: searchData.location || "",
-          };
-          const queryString = new URLSearchParams(
-            Object.entries(currentParams)
-              .filter(([_, value]) => value !== "" && value !== undefined)
-              .map(([key, value]) => [`${key}-${value}`, ""])
-          ).toString();
-          router.push(`/listings?${queryString}`);
           return;
         }
-
         if (
           searchData?.location &&
           !/^[a-zA-Z\s]+$/.test(searchData.location)
         ) {
-          console.warn("Invalid location in searchData:", searchData.location);
-
-          const currentParams = {
-            city: searchData.city,
-            property_for: searchData.property_for || "Sell",
-            tab: searchData.tab || "Buy",
-            property_status: "1",
-            property_in: searchData.property_in || "Residential",
-            location: "",
-          };
-          const queryString = new URLSearchParams(
-            Object.entries(currentParams)
-              .filter(([_, value]) => value !== "" && value !== undefined)
-              .map(([key, value]) => [`${key}-${value}`, ""])
-          ).toString();
-          router.push(`/listings?${queryString}`);
+          router.push(
+            buildListingsSeoUrl({
+              ...searchData,
+              location: "",
+            })
+          );
           return;
         }
-
         const isPlot = searchData?.sub_type === "Plot";
         const statusParam = isPlot
           ? `possession_status=${searchData?.possession_status || ""}`
           : `occupancy=${searchData?.occupancy || ""}`;
-
         const queryParams = {
           page: currentPage,
           limit: 70,
@@ -225,7 +269,6 @@ function ListingsBody({ setShowLoginModal }) {
           furnished_status: searchData?.furnished_status || "",
           extra_filters: searchData?.tab === "New Launch" ? "new_launches" : "",
         };
-
         const queryString =
           new URLSearchParams(
             Object.entries(queryParams).filter(
@@ -233,14 +276,11 @@ function ListingsBody({ setShowLoginModal }) {
             )
           ).toString() + (isPlot ? `&${statusParam}` : `&${statusParam}`);
         apiUrl = `${config.awsApiUrl}/listings/v1/gapbType?${queryString}`;
-
         const response = await fetch(apiUrl);
-
         if (!response.ok) {
           throw new Error(`API request failed with status ${response.status}`);
         }
         const res = await response.json();
-
         if (!res.data) {
           setHasMore(false);
           return;
@@ -265,7 +305,6 @@ function ListingsBody({ setShowLoginModal }) {
           throw new Error("Invalid decrypted JSON");
         }
         const newData = parsed.properties || [];
-
         setData((prevData) => {
           if (reset) {
             return newData.slice(0, maxLimit);
@@ -330,7 +369,6 @@ function ListingsBody({ setShowLoginModal }) {
     searchData?.sub_type,
     searchData?.budget,
     searchData?.furnished_status,
-    // searchData?.property_status,
     searchData?.occupancy,
     searchData?.possession_status,
     selected,
@@ -386,25 +424,34 @@ function ListingsBody({ setShowLoginModal }) {
             property,
           })
         );
-        const propertyFor = property?.property_for === "Rent" ? "Rent" : "Buy";
+        const propertyFor = property?.property_for === "Rent" ? "rent" : "sale";
         const propertyId = property?.unique_property_id || "N/A";
-        const bedrooms = property?.bedrooms || "N/A";
+        const bhkPart = property?.bedrooms ? `${property.bedrooms}-bhk-` : "";
+        const subTypePart = property?.sub_type
+          ? `${property.sub_type.toLowerCase().replace(/\s+/g, "-")}-`
+          : "";
         const propertyNameSlug = (property?.property_name || "unknown")
           .toLowerCase()
-          .replace(/[^a-z0-9]+/g, "_")
-          .replace(/(^-|-$)/g, "");
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "");
+        const builderNameSlug = property.builder_name
+          ? `-by-${property.builder_name
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, "-")
+              .replace(/^-+|-+$/g, "")}`
+          : "";
         const locationSlug = (property?.location_id || "unknown")
           .toLowerCase()
-          .replace(/[^a-z0-9]+/g, "_")
-          .replace(/(^-|-$)/g, "");
-        const typeSegment =
-          property?.sub_type === "Apartment"
-            ? `${bedrooms}_BHK_${property.sub_type}`
-            : property?.sub_type || "";
-        const seoUrl = `${propertyFor}_${typeSegment}_${propertyNameSlug}_in_${locationSlug}_${
-          searchData?.city || "unknown"
-        }_Id_${propertyId}`;
-        router.push(`/property?${seoUrl}`, { state: property });
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "");
+        const citySlug = (searchData?.city || "hyderabad")
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "");
+        const forPart = `for-${propertyFor}-`;
+        const seoSlug = `${bhkPart}${subTypePart}${propertyNameSlug}${builderNameSlug}-${forPart}in-${locationSlug}-${citySlug}`;
+        const cleanSeoUrl = `/property/${seoSlug}/${propertyId}`;
+        router.push(cleanSeoUrl, { state: property });
       } catch (navError) {
         console.error("Navigation error:", navError);
       }

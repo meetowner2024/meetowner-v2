@@ -1,11 +1,9 @@
 "use client";
 import dynamic from "next/dynamic";
 import { ToastContainer } from "react-toastify";
-import { useEffect, useRef, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState, memo } from "react";
+import { useDispatch } from "react-redux";
 import { setSearchData } from "../../components/store/slices/searchSlice";
-
 const ListingHeader = dynamic(
   () => import("../../components/listings/ListingHeader"),
   { ssr: true }
@@ -21,135 +19,107 @@ const ListingAds = dynamic(
 const LoginModal = dynamic(() => import("../../components/utils/LoginModal"), {
   ssr: false,
 });
-
-export default function ListingsPageClient() {
+const ListingsPageClient = memo(function ListingsPageClient({ initialParams }) {
   const dispatch = useDispatch();
-  const searchParams = useSearchParams();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [ads, setAds] = useState([]);
+  const [initialized, setInitialized] = useState(false);
   const modalRef = useRef(null);
-  const currentSearchData = useSelector((state) => state.search);
-  const handleClose = () => setShowLoginModal(false);
-
+  const parseSEOParams = (slugArray) => {
+    if (!slugArray.length) return {};
+    const fullSlug = slugArray.join("-");
+    const lower = fullSlug.toLowerCase();
+    const data = {
+      bhk: "",
+      property_in: "",
+      sub_type: "",
+      property_for: "",
+      location: "",
+      city: "Hyderabad",
+      tab: "Buy",
+    };
+    const bhkMatch = lower.match(/(\d+)[-]?bhk/);
+    if (bhkMatch) data.bhk = bhkMatch[1];
+    if (lower.includes("-sale-") || lower.endsWith("-sale")) {
+      data.property_for = "Sell";
+      data.tab = "Buy";
+    } else if (lower.includes("-rent-") || lower.endsWith("-rent")) {
+      data.property_for = "Rent";
+      data.tab = "Rent";
+    }
+    if (lower.includes("residential")) data.property_in = "Residential";
+    else if (lower.includes("commercial")) data.property_in = "Commercial";
+    else if (lower.includes("plot")) data.property_in = "Plot";
+    const subTypes = [
+      "apartment",
+      "independent-house",
+      "independent-villa",
+      "plot",
+      "land",
+      "office",
+      "retail-shop",
+      "show-room",
+      "warehouse",
+    ];
+    const found = subTypes.find((s) => lower.includes(s));
+    if (found) {
+      data.sub_type = found
+        .replace(/-/g, " ")
+        .replace(/\b\w/g, (c) => c.toUpperCase());
+    }
+    const parts = fullSlug.split("-");
+    const saleIdx = parts.indexOf("sale");
+    const rentIdx = parts.indexOf("rent");
+    const markerIdx = saleIdx !== -1 ? saleIdx : rentIdx;
+    if (markerIdx !== -1 && parts.length > markerIdx + 1) {
+      const after = parts.slice(markerIdx + 1).filter((p) => p !== "in");
+      if (after.length >= 1) {
+        data.city = after[after.length - 1]
+          .replace(/-/g, " ")
+          .replace(/\b\w/g, (c) => c.toUpperCase());
+        const locationParts = after.slice(0, -1);
+        data.location =
+          locationParts.length > 0
+            ? locationParts
+                .join(" ")
+                .replace(/-/g, " ")
+                .replace(/\b\w/g, (c) => c.toUpperCase())
+            : "";
+      }
+    }
+    return data;
+  };
   useEffect(() => {
-    async function fetchAds() {
+    const defaults = {
+      bhk: "",
+      property_in: "Residential",
+      sub_type: "",
+      tab: "Buy",
+      location: "",
+      city: "Hyderabad",
+    };
+    let parsed;
+    if (initialParams.length > 0) {
+      parsed = parseSEOParams(initialParams);
+    }
+    const initialData = { ...defaults, ...parsed };
+    dispatch(setSearchData(initialData));
+    setInitialized(true);
+  }, [initialParams, dispatch]);
+  const adsFetched = useRef(false);
+  useEffect(() => {
+    if (adsFetched.current) return;
+    adsFetched.current = true;
+    (async () => {
       try {
         const res = await fetch("/api/getAllAds", { cache: "force-cache" });
-        const data = await res.json();
-        setAds(data.results || []);
-      } catch (err) {
-        console.error("Failed to fetch ads:", err);
+        const { results = [] } = await res.json();
+        setAds(results);
+      } catch (e) {
+        console.error("Failed to fetch ads:", e);
       }
-    }
-    fetchAds();
+    })();
   }, []);
- useEffect(() => {
-  const queryParams = {};
-  const keys = Array.from(searchParams.keys());
-  const bhkKey = keys.find((key) => key.startsWith("bhk-"));
-  let bhk = "";
-  if (bhkKey) bhk = bhkKey.split("-")[1] || "";
-
-   const seoKey = keys.find((key) =>
-    /(plot|land|apartment|villa|house|independent|shop|office|retail|commercial).*(for-sale|forrent|for-rent|for-sale-in)/i.test(
-      key
-    )
-  );
-
-  if (seoKey) {
-    const parts = seoKey.split("-");
-
-    const forIndex = parts.indexOf("for");
-    let sub_type = "";
-    if (forIndex > 0) {
-      const subtypeParts = parts.slice(0, forIndex);
-      sub_type = subtypeParts
-        .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
-        .join("");
-    }
-
-    const property_for = /(sale|sell|for-sale|buy|for-sale-in)/i.test(seoKey)
-      ? "Sell"
-      : "Rent";
-
-    let property_in = "Residential";
-    if (
-      /(plot|commercial|shop|office|retail)/i.test(seoKey)
-    ) {
-      property_in = "Commercial";
-    } else if (/villa|apartment/i.test(seoKey)) {
-      property_in = "Residential";
-    }
-
-
-    const indiaIndex = parts.indexOf("india");
-    let city = "Hyderabad";
-    if (indiaIndex !== -1 && parts[indiaIndex + 1]) {
-      city = parts[indiaIndex + 1];
-    } else {
-      city = parts[parts.length - 1];
-    }
-    city = city.charAt(0).toUpperCase() + city.slice(1).toLowerCase();
-
-
-    const inIndex = parts.indexOf("in");
-    let location = "";
-    if (inIndex !== -1 && parts.length > inIndex + 1) {
-      location = parts[inIndex + 1];
-    }
-    location = location.charAt(0).toUpperCase() + location.slice(1).toLowerCase();
-
-    const tab = property_for === "Sell" ? "Buy" : "Rent";
-    queryParams.city = decodeURIComponent(city);
-    queryParams.location = decodeURIComponent(location);
-    queryParams.property_in = property_in;
-    queryParams.property_for = property_for;
-    queryParams.tab = tab;
-    queryParams.sub_type = sub_type;
-    queryParams.bhk = bhk;
-  } else {
-    for (const key of keys) {
-      const [paramKey, ...rest] = key.split("-");
-      const paramValue = rest.join("-");
-      if (paramKey && paramValue !== undefined) {
-        queryParams[paramKey] = decodeURIComponent(
-          paramValue.replace(/\+/g, " ")
-        );
-      }
-    }
-    if (bhk) queryParams.bhk = bhk;
-  }
-
-
-  const normalizedParams = {
-    city: queryParams.city || currentSearchData.city || "Hyderabad",
-    property_for:
-      queryParams.property_for || currentSearchData.property_for || "Sell",
-    tab: queryParams.tab || currentSearchData.tab || "Buy",
-    property_in:
-      queryParams.property_in === "Residential or Commercial" ||
-      !["Residential", "Commercial", "Plot"].includes(queryParams.property_in)
-        ? currentSearchData.property_in || "Residential"
-        : queryParams.property_in,
-    sub_type: queryParams.sub_type || currentSearchData.sub_type || "",
-    bhk: queryParams.bhk || currentSearchData.bhk || "",
-    location: queryParams.location || currentSearchData.location || "",
-  };
-
-  const prev = currentSearchData;
-  if (
-    prev.city !== normalizedParams.city ||
-    prev.property_for !== normalizedParams.property_for ||
-    prev.tab !== normalizedParams.tab ||
-    prev.property_in !== normalizedParams.property_in ||
-    prev.sub_type !== normalizedParams.sub_type ||
-    prev.bhk !== normalizedParams.bhk ||
-    prev.location !== normalizedParams.location
-  ) {
-    dispatch(setSearchData(normalizedParams));
-  }
-}, [searchParams, dispatch]);
-
   return (
     <>
       <ListingHeader
@@ -161,9 +131,9 @@ export default function ListingsPageClient() {
         <div className="flex w-full max-w-[1400px] flex-col md:flex-row gap-6">
           <div className="w-full md:w-[70%]">
             <ListingsBody
-              key={searchParams.toString()}
               showLoginModal={showLoginModal}
               setShowLoginModal={setShowLoginModal}
+              initialized={initialized}
             />
           </div>
           <div className="hidden md:block z-0 w-full md:w-[30%]">
@@ -174,10 +144,11 @@ export default function ListingsPageClient() {
       <LoginModal
         showLoginModal={showLoginModal}
         setShowLoginModal={setShowLoginModal}
-        onClose={handleClose}
+        onClose={() => setShowLoginModal(false)}
         modalRef={modalRef}
       />
       <ToastContainer />
     </>
   );
-}
+});
+export default ListingsPageClient;

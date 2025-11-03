@@ -59,31 +59,34 @@ const PropertyCard = memo(
         const phone = sellerData?.mobile || sellerData?.phone;
         const name = sellerData?.name || "";
         if (phone) {
-          const propertyFor = property.property_for === "Rent" ? "rent" : "buy";
-          const category =
-            property.sub_type === "Apartment" ||
-            property.sub_type === "Individual house"
-              ? `${property.bedrooms}BHK`
-              : property.sub_type === "Plot"
-              ? "Plot"
-              : "Property";
+          const propertyFor =
+            property.property_for === "Rent" ? "rent" : "sale";
           const propertyId = property.unique_property_id;
+          const bhkPart = property.bedrooms ? `${property.bedrooms}-bhk-` : "";
+          const subTypePart = property.sub_type ? `${property.sub_type}-` : "";
           const propertyNameSlug = property.property_name
             .toLowerCase()
-            .replace(/[^a-z0-9]+/g, "_")
-            .replace(/(^-|-$)/g, "");
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-+|-+$/g, "");
+          const builderNameSlug = property.builder_name
+            ? `-by-${property.builder_name
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, "-")
+                .replace(/^-+|-+$/g, "")}`
+            : "";
           const locationSlug = property.location_id
             .toLowerCase()
-            .replace(/[^a-z0-9]+/g, "_")
-            .replace(/(^-|-$)/g, "");
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-+|-+$/g, "");
           const citySlug = property.city
             ? property.city
                 .toLowerCase()
-                .replace(/[^a-z0-9]+/g, "_")
-                .replace(/(^-|-$)/g, "")
+                .replace(/[^a-z0-9]+/g, "-")
+                .replace(/^-+|-+$/g, "")
             : "hyderabad";
-          const seoUrl = `${propertyFor}_${category}_${property.sub_type}_${propertyNameSlug}_in_${locationSlug}_${citySlug}_Id_${propertyId}`;
-          const fullUrl = `${window.location.origin}/property?${seoUrl}`;
+          const forPart = `for-${propertyFor}-`;
+          const seoSlug = `${bhkPart}${subTypePart}${propertyNameSlug}${builderNameSlug}-${forPart}in-${locationSlug}-${citySlug}`;
+          const fullUrl = `${window.location.origin}/property/${seoSlug}/${propertyId}`;
           const encodedMessage = encodeURIComponent(
             `Hi ${name},\nI'm interested in this property: ${property.property_name}.\n${fullUrl}\nI look forward to your assistance in the home search. Please get in touch with me at ${userData.mobile} to initiate the process.`
           );
@@ -410,24 +413,33 @@ const Favourites = () => {
         }
       }
       try {
-        dispatch(setPropertyDetails(property));
-        const propertyFor = property?.property_for === "Rent" ? "Rent" : "Buy";
+        dispatch(setPropertyDetails({ property }));
+        const propertyFor = property?.property_for === "Rent" ? "rent" : "sale";
         const propertyId = property?.unique_property_id || "N/A";
-        const bedrooms = property?.bedrooms || "N/A";
+        const bhkPart = property.bedrooms ? `${property.bedrooms}-bhk-` : "";
+        const subTypePart = property.sub_type ? `${property.sub_type}-` : "";
         const propertyNameSlug = (property?.property_name || "unknown")
           .toLowerCase()
-          .replace(/[^a-z0-9]+/g, "_")
-          .replace(/(^-|-$)/g, "");
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "");
+        const builderNameSlug = property.builder_name
+          ? `-by-${property.builder_name
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, "-")
+              .replace(/^-+|-+$/g, "")}`
+          : "";
         const locationSlug = (property?.location_id || "unknown")
           .toLowerCase()
-          .replace(/[^a-z0-9]+/g, "_")
-          .replace(/(^-|-$)/g, "");
-        const typeSegment =
-          property?.sub_type === "Apartment"
-            ? `${bedrooms}_BHK_${property.sub_type}`
-            : property?.sub_type || "";
-        const seoUrl = `${propertyFor}_${typeSegment}_${propertyNameSlug}_in_${locationSlug}_Id_${propertyId}`;
-        router.push(`/property?${seoUrl}`, { state: property });
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "");
+        const citySlug = (property?.city_id || "hyderabad")
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "");
+        const forPart = `for-${propertyFor}-`;
+        const seoSlug = `${bhkPart}${subTypePart}${propertyNameSlug}${builderNameSlug}-${forPart}in-${locationSlug}-${citySlug}`;
+        const cleanSeoUrl = `/property/${seoSlug}/${propertyId}`;
+        router.push(cleanSeoUrl, { state: property });
       } catch (navError) {
         console.error("Navigation error:", navError);
       }

@@ -12,7 +12,6 @@ import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import Image from "next/image";
 import theme from "../utils/theme.json";
-
 const ExclussiveCards = ({ meetownerExclusive }) => {
   const [property] = useState(meetownerExclusive || []);
   const router = useRouter();
@@ -20,7 +19,6 @@ const ExclussiveCards = ({ meetownerExclusive }) => {
   const searchData = useSelector((state) => state.search);
   const ref = useRef(null);
   const [visible, setVisible] = useState(false);
-
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -30,11 +28,9 @@ const ExclussiveCards = ({ meetownerExclusive }) => {
       },
       { threshold: 0.3 }
     );
-
     if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
   }, []);
-
   const handleNavigation = useCallback(
     async (property) => {
       let userDetails = null;
@@ -75,23 +71,35 @@ const ExclussiveCards = ({ meetownerExclusive }) => {
           property,
         })
       );
-      const propertyFor = property?.property_for === "Rent" ? "rent" : "buy";
-
+      const propertyFor = property?.property_for === "Rent" ? "rent" : "sale";
       const propertyId = property.unique_property_id;
+      const bhkPart = property.bedrooms ? `${property.bedrooms}-bhk-` : "";
+      const subTypePart = property.sub_type ? `${property.sub_type}-` : "";
       const propertyNameSlug = property.property_name
         .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "_")
-        .replace(/(^-|-$)/g, "");
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+      const builderNameSlug = property.builder_name
+        ? `-by-${property.builder_name
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-+|-+$/g, "")}`
+        : "";
       const locationSlug = property.location_id
         .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "_")
-        .replace(/(^-|-$)/g, "");
-      const seoUrl = `${propertyFor}_${property.sub_type}_${propertyNameSlug}_in_${locationSlug}_${searchData?.city}_Id_${propertyId}`;
-      router.push(`/property?${seoUrl}`, { state: property });
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+      const citySlug = (searchData?.city || "hyderabad")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+      const forPart = `for-${propertyFor}-`;
+      const seoSlug = `${bhkPart}${subTypePart}${propertyNameSlug}${builderNameSlug}-${forPart}in-${locationSlug}-${citySlug}`;
+      const cleanSeoUrl = `/property/${seoSlug}/${propertyId}`;
+      router.push(cleanSeoUrl, { state: property });
     },
     [router, dispatch, searchData]
   );
-
   return (
     <div className="mx-auto px-4 py-2">
       <div ref={ref} className="relative overflow-hidden">
@@ -100,7 +108,6 @@ const ExclussiveCards = ({ meetownerExclusive }) => {
           ${visible ? "animate-rise" : "opacity-0 translate-y-10"}`}
         >
           <span> Meet Owner Exclusive</span>
-
           <svg
             viewBox="0 0 120 10"
             fill="none"
@@ -118,7 +125,6 @@ const ExclussiveCards = ({ meetownerExclusive }) => {
           </svg>
         </h2>
       </div>
-
       <Swiper
         modules={[Navigation, Pagination]}
         navigation={{
@@ -159,7 +165,6 @@ const ExclussiveCards = ({ meetownerExclusive }) => {
                   }`;
                 }}
               />
-
               <div className="absolute inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 <button
                   aria-label="View Details"

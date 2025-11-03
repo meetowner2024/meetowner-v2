@@ -64,31 +64,38 @@ const PropertyCard = memo(
           const name = sellerData?.name || "";
           if (phone) {
             const propertyFor =
-              property?.property_for === "Rent" ? "rent" : "buy";
-            const category =
-              property?.sub_type === "Apartment" ||
-              property?.sub_type === "Individual house"
-                ? `${property?.bedrooms}BHK`
-                : property?.sub_type === "Plot"
-                ? "Plot"
-                : "Property";
+              property?.property_for === "Rent" ? "rent" : "sale";
             const propertyId = property?.unique_property_id;
-            const propertyNameSlug = property?.property_name
-              .toLowerCase()
-              .replace(/[^a-z0-9]+/g, "_")
-              .replace(/(^-|-$)/g, "");
-            const locationSlug = property?.location_id
-              .toLowerCase()
-              .replace(/[^a-z0-9]+/g, "_")
-              .replace(/(^-|-$)/g, "");
-            const citySlug = property?.city
-              ? property?.city
-                  .toLowerCase()
-                  .replace(/[^a-z0-9]+/g, "_")
-                  .replace(/(^-|-$)/g, "")
+            const bhkPart = property?.bedrooms
+              ? `${property.bedrooms}-bhk-`
               : "";
-            const seoUrl = `${propertyFor}_${category}_${property?.sub_type}_${propertyNameSlug}_in_${locationSlug}_${citySlug}_Id_${propertyId}`;
-            const fullUrl = `${window.location.origin}/property?${seoUrl}`;
+            const subTypePart = property?.sub_type
+              ? `${property.sub_type.toLowerCase().replace(/\s+/g, "-")}-`
+              : "";
+            const propertyNameSlug =
+              property?.property_name
+                ?.toLowerCase()
+                .replace(/[^a-z0-9]+/g, "-")
+                .replace(/^-+|-+$/g, "") || "unknown";
+            const builderNameSlug = property?.builder_name
+              ? `-by-${property.builder_name
+                  .toLowerCase()
+                  .replace(/[^a-z0-9]+/g, "-")
+                  .replace(/^-+|-+$/g, "")}`
+              : "";
+            const locationSlug =
+              property?.location_id
+                ?.toLowerCase()
+                .replace(/[^a-z0-9]+/g, "-")
+                .replace(/^-+|-+$/g, "") || "unknown";
+            const citySlug =
+              property?.city
+                ?.toLowerCase()
+                .replace(/[^a-z0-9]+/g, "-")
+                .replace(/^-+|-+$/g, "") || "hyderabad";
+            const forPart = `for-${propertyFor}-`;
+            const seoSlug = `${bhkPart}${subTypePart}${propertyNameSlug}${builderNameSlug}-${forPart}in-${locationSlug}-${citySlug}`;
+            const fullUrl = `${window.location.origin}/property/${seoSlug}/${propertyId}`;
             const encodedMessage = encodeURIComponent(
               `Hi ${name},\nI'm interested in this property: ${property?.property_name}.\n${fullUrl}\nI look forward to your assistance in the home search. Please get in touch with me at ${userData?.mobile} to initiate the process.`
             );

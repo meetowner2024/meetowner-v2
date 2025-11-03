@@ -26,18 +26,23 @@ export default async function SubTypeSitemap({ params }) {
     }
     locationData.properties.forEach((property) => {
       const isApartment = property.sub_type?.toLowerCase() === "apartment";
-      const bedroomsText =
-        isApartment && property.bhk ? `${property.bhk}-bhk-` : "";
+      const bhkPart = isApartment && property.bhk ? `${property.bhk}-bhk-` : "";
+      const subTypePart = property.sub_type
+        ? `${slugify(property.sub_type)}-`
+        : "";
+      const propertyNameSlug = slugify(property.property_name);
+      const builderNameSlug = property.builder_name
+        ? `-by-${slugify(property.builder_name)}`
+        : "";
       const facingText = property.facing
         ? `${slugify(property.facing)}-facing-`
         : "";
-      const propertyType = slugify(property.sub_type);
       const propertyForSlug =
         property.property_for === "Sell" ? "sale" : "rent";
-      const seoSlug = `${bedroomsText}${propertyType}-${facingText}for-${propertyForSlug}-in-${locationSlug}-${slugify(
-        property.property_name
-      )}`;
-      const url = `/property?${seoSlug}_Id_${property.unique_property_id}`;
+      const forPart = `for-${propertyForSlug}-`;
+      const citySlug = slugify(city);
+      const seoSlug = `${bhkPart}${subTypePart}${propertyNameSlug}${builderNameSlug}-${forPart}${facingText}in-${locationSlug}-${citySlug}`;
+      const url = `/property/${seoSlug}/${property.unique_property_id}`;
       if (
         !uniquePropertiesByLocation[locationSlug].some((p) => p.url === url)
       ) {

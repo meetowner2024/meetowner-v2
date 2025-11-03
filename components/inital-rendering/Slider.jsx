@@ -87,7 +87,6 @@ const PropertyListing = ({
       })
     );
   }, [activeTab, dispatch, isHomePageMode]);
-
   const fetchLatestProperties = useCallback(async () => {
     setLoading(true);
     setProperty([]);
@@ -277,37 +276,67 @@ const PropertyListing = ({
           property,
         })
       );
-      const propertyFor = property?.property_for === "Rent" ? "rent" : "buy";
+      const propertyFor = property?.property_for === "Rent" ? "rent" : "sale";
       const propertyId = property.unique_property_id;
+      const bhkPart = property.bedrooms ? `${property.bedrooms}-bhk-` : "";
+      const subTypePart = property.sub_type ? `${property.sub_type}-` : "";
       const propertyNameSlug = property.property_name
         .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "_")
-        .replace(/(^-|-$)/g, "");
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+      const builderNameSlug = property.builder_name
+        ? `-by-${property.builder_name
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-+|-+$/g, "")}`
+        : "";
       const locationSlug = property.location_id
         .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "_")
-        .replace(/(^-|-$)/g, "");
-      const seoUrl = `${propertyFor}_${property.sub_type}_${propertyNameSlug}_in_${locationSlug}_${searchData?.city}_Id_${propertyId}`;
-      router.push(`/property?${seoUrl}`, { state: property });
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+      const citySlug = (searchData?.city || "hyderabad")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+      const forPart = `for-${propertyFor}-`;
+      const seoSlug = `${bhkPart}${subTypePart}${propertyNameSlug}${builderNameSlug}-${forPart}in-${locationSlug}-${citySlug}`;
+      const cleanSeoUrl = `/property/${seoSlug}/${propertyId}`;
+      router.push(cleanSeoUrl, { state: property });
     },
     [router, dispatch, searchData]
   );
   const handleShare = useCallback(
     (property) => {
-      const propertyFor = property?.property_for === "Rent" ? "rent" : "buy";
+      const propertyFor = property?.property_for === "Rent" ? "rent" : "sale";
       const propertyId = property.unique_property_id;
+      const bhkPart = property.bedrooms ? `${property.bedrooms}-bhk-` : "";
+      const subTypePart = property.sub_type ? `${property.sub_type}-` : "";
       const propertyNameSlug = property.property_name
         .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "_")
-        .replace(/(^-|-$)/g, "");
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+      const builderNameSlug = property.builder_name
+        ? `-by-${property.builder_name
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-+|-+$/g, "")}`
+        : "";
       const locationSlug = property.location_id
         .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "_")
-        .replace(/(^-|-$)/g, "");
-      const seoUrl = `/property?${propertyFor}_${property.sub_type}_${propertyNameSlug}_in_${locationSlug}_${searchData?.city}_Id_${propertyId}`;
-      const fullUrl = `${window.location.origin}${seoUrl}`;
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+      const citySlug = (searchData?.city || "hyderabad")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+      const forPart = `for-${propertyFor}-`;
+      const seoSlug = `${bhkPart}${subTypePart}${propertyNameSlug}${builderNameSlug}-${forPart}in-${locationSlug}-${citySlug}`;
+      const cleanSeoUrl = `/property/${seoSlug}/${propertyId}`;
+      const fullUrl = `${window.location.origin}${cleanSeoUrl}`;
       const shareData = {
-        title: `${property.property_name} - ${property.location_id}`,
+        title: `${property.property_name}${
+          property.builder_name ? ` by ${property.builder_name}` : ""
+        } - ${property.location_id}`,
         text: `Check out this ${property.bedrooms || ""} BHK ${
           property.sub_type
         } for ${propertyFor} in ${property.location_id}! Price: ₹${
@@ -361,16 +390,16 @@ const PropertyListing = ({
     })();
     const citySlug = searchData.location
       ?.toLowerCase()
-      .replace(/[^a-z0-9]+/g, "_")
-      .replace(/(^_|_$)/g, "");
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
     const locationSlug = searchData.city
       ? searchData.city
           .toLowerCase()
-          .replace(/[^a-z0-9]+/g, "_")
-          .replace(/(^_|_$)/g, "")
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/(^-|-$)/g, "")
       : "";
-    return `/listings?${propertyType}_for_${propertyFor}_in_${citySlug}${
-      locationSlug ? `_${locationSlug}` : ""
+    return `/listings/${propertyType}-for-${propertyFor}-in-${citySlug}${
+      locationSlug ? `-${locationSlug}` : ""
     }`;
   };
   return (

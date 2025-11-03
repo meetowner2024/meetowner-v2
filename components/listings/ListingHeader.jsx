@@ -78,10 +78,29 @@ const ListingHeader = ({ setShowLoginModal, ads }) => {
   const searchRef = useRef(null);
   const commandRef = useRef(null);
   const [localStorageUser, setLocalStorageUser] = useState(null);
+  const [localSearchInput, setLocalSearchInput] = useState(
+    searchData.location || ""
+  );
+  const [isLoading, setIsLoading] = useState(false);
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
     setLocalStorageUser(user);
   }, []);
+  useEffect(() => {
+    if (citiesList.length === 0 || !searchData.city) return;
+    const urlCitySlug = window.location.pathname
+      .split("/")
+      .pop()
+      ?.split("-")
+      .pop();
+    if (!urlCitySlug) return;
+    const matchedCity = citiesList.find(
+      (city) => city.toLowerCase() === urlCitySlug.toLowerCase()
+    );
+    if (matchedCity && searchData.city !== matchedCity) {
+      dispatch(setSearchData({ city: matchedCity }));
+    }
+  }, [citiesList, searchData.city, dispatch]);
   const handleNavigation = useCallback(
     async (property) => {
       let userDetails = null;
@@ -123,25 +142,34 @@ const ListingHeader = ({ setShowLoginModal, ads }) => {
             property,
           })
         );
-        const propertyFor = property?.property_for === "Rent" ? "Rent" : "Buy";
+        const propertyFor = property?.property_for === "Rent" ? "rent" : "sale";
         const propertyId = property?.unique_property_id || "N/A";
-        const bedrooms = property?.bedrooms || "N/A";
+        const bhkPart = property?.bedrooms ? `${property.bedrooms}-bhk-` : "";
+        const subTypePart = property?.sub_type
+          ? `${property.sub_type.toLowerCase().replace(/\s+/g, "-")}-`
+          : "";
         const propertyNameSlug = (property?.property_name || "unknown")
           .toLowerCase()
-          .replace(/[^a-z0-9]+/g, "_")
-          .replace(/(^-|-$)/g, "");
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "");
+        const builderNameSlug = property.builder_name
+          ? `-by-${property.builder_name
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, "-")
+              .replace(/^-+|-+$/g, "")}`
+          : "";
         const locationSlug = (property?.location_id || "unknown")
           .toLowerCase()
-          .replace(/[^a-z0-9]+/g, "_")
-          .replace(/(^-|-$)/g, "");
-        const typeSegment =
-          property?.sub_type === "Apartment"
-            ? `${bedrooms}_BHK_${property.sub_type}`
-            : property?.sub_type || "";
-        const seoUrl = `${propertyFor}_${typeSegment}_${propertyNameSlug}_in_${locationSlug}_${
-          searchData?.city || "unknown"
-        }_Id_${propertyId}`;
-        router.push(`/property?${seoUrl}`, { state: property });
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "");
+        const citySlug = (searchData?.city || "hyderabad")
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "");
+        const forPart = `for-${propertyFor}-`;
+        const seoSlug = `${bhkPart}${subTypePart}${propertyNameSlug}${builderNameSlug}-${forPart}in-${locationSlug}-${citySlug}`;
+        const cleanSeoUrl = `/property/${seoSlug}/${propertyId}`;
+        router.push(cleanSeoUrl, { state: property });
       } catch (navError) {
         console.error("Navigation error:", navError);
       }
@@ -168,9 +196,8 @@ const ListingHeader = ({ setShowLoginModal, ads }) => {
     searchData.commercial_subType,
     dispatch,
   ]);
-
   useEffect(() => {
-    setSearchInput(searchData.location || "");
+    setLocalSearchInput(searchData.location || "");
   }, [searchData.location]);
   const selectedFilters = useMemo(
     () => ({
@@ -221,39 +248,12 @@ const ListingHeader = ({ setShowLoginModal, ads }) => {
     []
   );
   useEffect(() => {
-    fetchLocalities(city, searchInput);
-  }, [searchInput, city, fetchLocalities]);
-  const updateUrlWithSearchData = useCallback(() => {
-    if (pathname !== "/listings") return;
-    const validPropertyIn = ["Residential", "Commercial", "Plot"];
-    const normalizedSearchData = {
-      ...searchData,
-      property_in: validPropertyIn.includes(searchData.property_in)
-        ? searchData.property_in
-        : "Residential",
-      location: searchData.location || "",
-    };
-    const queryParts = Object.entries(normalizedSearchData)
-      .filter(
-        ([key, value]) =>
-          ![
-            "loading",
-            "error",
-            "userCity",
-            "plot_subType",
-            "commercial_subType",
-          ].includes(key) &&
-          value !== null &&
-          value !== "" &&
-          value !== undefined
-      )
-      .map(([key, value]) => `${key}-${encodeURIComponent(value)}`);
-    const queryString = queryParts.join("&");
-    router.replace(`/listings?${queryString}`, { scroll: false });
-  }, [router, searchData, pathname]);
-  useEffect(() => {
-    updateUrlWithSearchData();
-  }, [searchData, updateUrlWithSearchData]);
+    if (!localSearchInput.trim()) {
+      setLocalities([]);
+      return;
+    }
+    fetchLocalities(city, localSearchInput);
+  }, [localSearchInput, city, fetchLocalities]);
   useEffect(() => {
     if (
       ["Plot", "Land"].includes(selectedFilters.subType) &&
@@ -386,23 +386,40 @@ const ListingHeader = ({ setShowLoginModal, ads }) => {
     debounce(handleUserSearched, 1000),
     [handleUserSearched]
   );
-  const handleValueChange = useCallback(
-    (value) => {
-      setSearchInput(value);
-      dispatch(setSearchData({ location: value }));
-      debouncedUserActivity(value);
-    },
-    [dispatch, debouncedUserActivity]
-  );
+  const performSearch = useCallback(async () => {
+    if (!city) {
+      toast.error("Please select a city first");
+      return;
+    }
+    if (!localSearchInput.trim()) {
+      setLocalities([]);
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const response = await fetch(
+        `${config.awsApiUrl}/api/v1/search?city=${city}&query=${localSearchInput}`
+      );
+      const data = await response.json();
+      setLocalities(data);
+    } catch (err) {
+      console.error(err);
+      setLocalities([]);
+      toast.error("Failed to fetch locations");
+    } finally {
+      setIsLoading(false);
+    }
+    dispatch(setSearchData({ location: localSearchInput }));
+    debouncedUserActivity(localSearchInput);
+  }, [city, localSearchInput, dispatch, debouncedUserActivity]);
   const handleClear = useCallback(() => {
     setSearchInput("");
     dispatch(setSearchData({ location: "" }));
     setLocalities([]);
-    debouncedUserActivity("");
     if (pathname === "/listings") {
       router.replace("/listings", { scroll: false });
     }
-  }, [dispatch, debouncedUserActivity, pathname, router]);
+  }, [dispatch, pathname, router]);
   const clearFilter = useCallback(
     (filterText) => {
       if (filterText.includes("BHK")) {
@@ -520,8 +537,20 @@ const ListingHeader = ({ setShowLoginModal, ads }) => {
                     <Search className="w-5 h-5 text-gray-400 ml-4" />
                     <Input
                       placeholder="Search localities, landmarks, projects..."
-                      value={searchInput}
-                      onChange={(e) => handleValueChange(e.target.value)}
+                      value={localSearchInput}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setLocalSearchInput(value);
+                        if (value.length > 0) {
+                          setIsCommandOpen(true);
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          performSearch();
+                          setIsCommandOpen(false);
+                        }
+                      }}
                       onFocus={() => setIsCommandOpen(true)}
                       className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-base placeholder:text-gray-500 px-3"
                       aria-label="Search properties"
@@ -537,6 +566,19 @@ const ListingHeader = ({ setShowLoginModal, ads }) => {
                         <X className="h-4 w-4" />
                       </Button>
                     )}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={performSearch}
+                      disabled={isLoading}
+                      className="mr-2"
+                    >
+                      {isLoading ? (
+                        <div className="w-4 h-4 border-2 border-t-transparent border-gray-400 rounded-full animate-spin" />
+                      ) : (
+                        <Search className="h-4 w-4" />
+                      )}
+                    </Button>
                   </div>
                   <Separator orientation="vertical" className="h-8 mx-2" />
                   <div className="flex items-center mr-3">
@@ -896,21 +938,49 @@ const ListingHeader = ({ setShowLoginModal, ads }) => {
                   <Search className="w-4 h-4 text-gray-400 ml-3" />
                   <Input
                     placeholder="Search localities..."
-                    value={searchInput}
-                    onChange={(e) => handleValueChange(e.target.value)}
+                    value={localSearchInput}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setLocalSearchInput(value);
+                      if (value.length > 0) {
+                        setShowMobileSearch(true);
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        performSearch();
+                        setShowMobileSearch(false);
+                      }
+                    }}
                     onFocus={() => setShowMobileSearch(true)}
                     className="border-0 bg-transparent focus-visible:ring-0 text-sm placeholder:text-gray-500 px-2"
                   />
-                  {searchInput && (
+                  {localSearchInput && (
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={handleClear}
+                      onClick={() => {
+                        setLocalSearchInput("");
+                        setLocalities([]);
+                      }}
                       className="h-6 w-6 p-0 mr-2"
                     >
                       <X className="h-3 w-3" />
                     </Button>
                   )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={performSearch}
+                    disabled={isLoading}
+                    className="mr-2"
+                  >
+                    {isLoading ? (
+                      <div className="w-4 h-4 border-2 border-t-transparent border-gray-400 rounded-full animate-spin" />
+                    ) : (
+                      <Search className="h-4 w-4" />
+                    )}
+                  </Button>
                 </div>
                 <div className="flex items-center bg-white rounded-lg border border-gray-200 px-3">
                   <MapPin className="w-3 h-3 text-red-500 mr-1" />

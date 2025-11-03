@@ -61,7 +61,7 @@ const DealProperties = ({ bestDealProperties, contacted, setContacted }) => {
           });
           return;
         }
-        setSelectedProperty(property); // Set selected property for WhatsApp hook
+        setSelectedProperty(property);
         const payload = {
           property_id: property.unique_property_id,
           user_id: userDetails.user_id,
@@ -78,13 +78,11 @@ const DealProperties = ({ bestDealProperties, contacted, setContacted }) => {
           mobile: userDetails.mobile || "N/A",
           email: userDetails.email || "N/A",
         };
-        // Make API calls concurrently
         await Promise.all([
           axios.post(`${config.awsApiUrl}/enquiry/v1/contactSeller`, payload1),
           axios.post(`${config.awsApiUrl}/enquiry/v1/postEnquiry`, payload),
           handleAPI(property),
         ]);
-        // Update state after successful API calls
         setSubmittedStates((prev) => ({
           ...prev,
           [property.unique_property_id]: {
@@ -163,18 +161,32 @@ const DealProperties = ({ bestDealProperties, contacted, setContacted }) => {
           property,
         })
       );
-      const propertyFor = property?.property_for === "Rent" ? "rent" : "buy";
+      const propertyFor = property?.property_for === "Rent" ? "rent" : "sale";
       const propertyId = property.unique_property_id;
+      const bhkPart = property.bedrooms ? `${property.bedrooms}-bhk-` : "";
+      const subTypePart = property.sub_type ? `${property.sub_type}-` : "";
       const propertyNameSlug = property.property_name
         .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "_")
-        .replace(/(^-|-$)/g, "");
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+      const builderNameSlug = property.builder_name
+        ? `-by-${property.builder_name
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-+|-+$/g, "")}`
+        : "";
       const locationSlug = property.location_id
         .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "_")
-        .replace(/(^-|-$)/g, "");
-      const seoUrl = `${propertyFor}_${property.sub_type}_${propertyNameSlug}_in_${locationSlug}_${searchData?.city}_Id_${propertyId}`;
-      router.push(`/property?${seoUrl}`, { state: property });
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+      const citySlug = (searchData?.city || "hyderabad")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+      const forPart = `for-${propertyFor}-`;
+      const seoSlug = `${bhkPart}${subTypePart}${propertyNameSlug}${builderNameSlug}-${forPart}in-${locationSlug}-${citySlug}`;
+      const cleanSeoUrl = `/property/${seoSlug}/${propertyId}`;
+      router.push(cleanSeoUrl, { state: property });
     },
     [router, dispatch, searchData]
   );

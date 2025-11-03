@@ -1,10 +1,9 @@
-
 import { usePathname } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 import { useSelector } from "react-redux";
-import Link from 'next/link'
+import Link from "next/link";
 const Breadcrumb = () => {
-  const pathname=usePathname()
+  const pathname = usePathname();
   const pathnames = pathname.split("/").filter((x) => x);
   const propertyData = useSelector((state) => state.property);
   const searchData = useSelector((state) => state.search);
@@ -20,46 +19,64 @@ const Breadcrumb = () => {
     profile: "Profile",
   };
   let crumbs = [];
+  const slugify = (value) =>
+    value
+      ?.toString()
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "") || "";
+  const buildListingsSeoUrl = (data) => {
+    const city = slugify(data.city || "all");
+    const location = slugify(data.location || "all");
+    const propertyIn = slugify(data.property_in || "all");
+    const bhk = data.bhk ? `${data.bhk}-bhk` : "all";
+    const forType = data.tab?.toLowerCase() === "rent" ? "rent" : "sale";
+    return `/listings/${city}/${location}/${propertyIn}/${bhk}/${forType}`;
+  };
   const hasPropertyData = propertyData?.location && propertyData?.propertyName;
   if (pathnames.includes("property") && hasPropertyData) {
+    const citySlug = slugify(propertyData.city || searchData?.city);
+    const locationSlug = slugify(propertyData.location);
+    const propertyUrl = buildListingsSeoUrl({
+      city: propertyData.city,
+      location: propertyData.location,
+      property_in: propertyData.property_in,
+      bhk: propertyData.bedrooms,
+      tab: propertyData.property_for === "Rent" ? "Rent" : "Buy",
+    });
     crumbs = [
       { name: "Home", path: "/" },
       { name: "Properties", path: "/listings" },
+      { name: propertyData.city, path: `/listings/${citySlug}` },
       {
         name: propertyData.location,
-        path: `/listings?city=${encodeURIComponent(propertyData.location)}`,
+        path: `/listings/${citySlug}/${locationSlug}`,
       },
-      {
-        name: propertyData.propertyName,
-        path: pathname,
-      },
+      { name: propertyData.propertyName, path: pathname },
     ];
   } else if (pathnames.includes("property")) {
+    const citySlug = slugify(searchData?.city);
     crumbs = [
       { name: "Home", path: "/" },
       { name: "Properties", path: "/listings" },
-      {
-        name: searchData?.city || "",
-        path: `/listings?city=${encodeURIComponent(searchData?.city || "")}`,
-      },
-      {
-        name: "Property",
-        path: pathname,
-      },
+      { name: searchData?.city || "", path: `/listings/${citySlug}` },
+      { name: "Property", path: pathname },
     ];
   } else if (pathnames.includes("listings")) {
+    const citySlug = slugify(searchData?.city);
+    const locationSlug = slugify(searchData?.location);
     crumbs = [
       { name: "Home", path: "/" },
       { name: "Properties", path: "/listings" },
-      {
-        name: searchData?.city || "",
-        path: `/listings?city=${encodeURIComponent(searchData?.city || "")}`,
-      },
-      {
-        name: searchData?.location || "",
-        path: searchData?.location || "",
-      },
-    ];
+      { name: searchData?.city || "", path: `/listings/${citySlug}` },
+      searchData?.location
+        ? {
+            name: searchData.location,
+            path: `/listings/${citySlug}/${locationSlug}`,
+          }
+        : null,
+    ].filter(Boolean);
   } else {
     crumbs = [
       { name: "Home", path: "/" },

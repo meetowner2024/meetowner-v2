@@ -11,7 +11,6 @@ export default async function SitemapPage() {
   const { sitemap } = response.ok ? await response.json() : { sitemap: [] };
   return (
     <div className="space-y-2">
-      {}
       <section className="py-2">
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">
           Static Pages
@@ -39,7 +38,6 @@ export default async function SitemapPage() {
         </div>
       </section>
       <Separator />
-      {}
       <section>
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">
           Properties for Rent
@@ -82,7 +80,6 @@ export default async function SitemapPage() {
         </div>
       </section>
       <Separator />
-      {}
       <section>
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">
           Properties for Sale

@@ -76,8 +76,8 @@ import Image from "next/image";
 import AmenitiesColor from "../utils/dynamic-colors/AmenitiesColor.json";
 import AroundTheme from "../utils/dynamic-colors/AroundProperty.json";
 import PropertyDetails from "./PropertyDetails";
-const PropertyBody = ({ handleLoading ,propertyDataDetails }) => {
- const [property, setProperty] = useState(propertyDataDetails); 
+const PropertyBody = ({ handleLoading, propertyDataDetails }) => {
+  const [property, setProperty] = useState(propertyDataDetails);
   const modalRef = useRef(null);
   const maplocation = `${property?.location_id},${property?.city_id},${property?.state_id}`;
   const [error, setError] = useState(null);
@@ -89,14 +89,12 @@ const PropertyBody = ({ handleLoading ,propertyDataDetails }) => {
   const [aroundProperty, setAroundProperty] = useState("");
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [loading, setLoading] = useState(true);
-   useEffect(() => {
+  useEffect(() => {
     setProperty(propertyDataDetails);
   }, [propertyDataDetails]);
-
- 
   useEffect(() => {
     if (property) {
-      handleLoading(false); 
+      handleLoading(false);
     }
   }, [property, handleLoading]);
   useEffect(() => {
@@ -128,7 +126,7 @@ const PropertyBody = ({ handleLoading ,propertyDataDetails }) => {
       }
     };
     fetchPropertyData();
-  }, [property?.unique_property_id,propertyDataDetails]);
+  }, [property?.unique_property_id, propertyDataDetails]);
   useEffect(() => {
     const handleScroll = () => {
       setShowScrollTop(window.scrollY > 200);
@@ -246,7 +244,6 @@ const PropertyBody = ({ handleLoading ,propertyDataDetails }) => {
   const propertySubtype = property?.sub_type;
   const isUnderConstruction = property?.occupancy === "Under Construction";
   const isFuture = property?.possession_status === "Future";
-
   const fieldVisibility = useMemo(
     () => ({
       ...(isResidential &&
@@ -1373,7 +1370,7 @@ const PropertyBody = ({ handleLoading ,propertyDataDetails }) => {
           )}
         </p>
         <div className=" w-[100%]  block lg:hidden">
-          <PropertyDetails  propertyDataDetails={property} />
+          <PropertyDetails propertyDataDetails={property} />
         </div>
       </div>
       {floorplan?.image && (
@@ -1548,7 +1545,6 @@ const PropertyBody = ({ handleLoading ,propertyDataDetails }) => {
                         {place.title}
                       </span>
                     </div>
-
                     <span
                       style={{
                         background: AroundTheme.badge.background,
@@ -1562,7 +1558,6 @@ const PropertyBody = ({ handleLoading ,propertyDataDetails }) => {
                 </div>
               ))}
             </div>
-
             <div
               style={{
                 backgroundColor: AroundTheme.decor.background,

@@ -14,23 +14,18 @@ import Login from "../auth/Login";
 import Image from "next/image";
 import CryptoJS from "crypto-js";
 import Link from "next/link";
-
 const HousingPicks = ({ bestMeetownerProperties }) => {
   const JWT_SECRET = process.env.NEXT_PUBLIC_ENCRYPTION_SECRET;
-
   const ENCRYPTION_KEY = CryptoJS.SHA256(JWT_SECRET).toString();
-
   function decrypt(encryptedText) {
     const [ivHex, encryptedHex] = encryptedText.split(":");
     const iv = CryptoJS.enc.Hex.parse(ivHex);
     const encrypted = CryptoJS.enc.Hex.parse(encryptedHex);
-
     const decrypted = CryptoJS.AES.decrypt(
       { ciphertext: encrypted },
       CryptoJS.enc.Hex.parse(ENCRYPTION_KEY),
       { iv }
     );
-
     return decrypted.toString(CryptoJS.enc.Utf8);
   }
   const [progress, setProgress] = useState(0);
@@ -51,10 +46,8 @@ const HousingPicks = ({ bestMeetownerProperties }) => {
     }
     return () => clearInterval(timer);
   }, []);
-
   const ref = useRef(null);
   const [visible, setVisible] = useState(false);
-
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -64,7 +57,6 @@ const HousingPicks = ({ bestMeetownerProperties }) => {
       },
       { threshold: 0.3 }
     );
-
     if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
   }, []);
@@ -77,11 +69,39 @@ const HousingPicks = ({ bestMeetownerProperties }) => {
     return price.toLocaleString();
   };
   const [property] = useState(bestMeetownerProperties || []);
-
   const router = useRouter();
   const dispatch = useDispatch();
   const searchData = useSelector((state) => state.search);
-
+  const generatePropertyUrl = (property, searchData) => {
+    const propertyFor = property?.property_for === "Rent" ? "rent" : "sale";
+    const propertyId = property?.unique_property_id || "N/A";
+    const bhkPart = property.bedrooms ? `${property.bedrooms}-bhk-` : "";
+    const subTypePart = property.sub_type
+      ? `${property.sub_type.toLowerCase().replace(/\s+/g, "-")}-`
+      : "";
+    const propertyNameSlug = property.property_name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    const builderNameSlug = property.builder_name
+      ? `-by-${property.builder_name
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "")}`
+      : "";
+    const locationSlug =
+      property?.location_id
+        ?.toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "") || "unknown";
+    const citySlug = (searchData?.city || "hyderabad")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    const forPart = `for-${propertyFor}-`;
+    const seoSlug = `${bhkPart}${subTypePart}${propertyNameSlug}${builderNameSlug}-${forPart}in-${locationSlug}-${citySlug}`;
+    return `/property/${seoSlug}/${propertyId}`;
+  };
   const handleNavigation = useCallback(
     async (property) => {
       let userDetails = null;
@@ -122,19 +142,8 @@ const HousingPicks = ({ bestMeetownerProperties }) => {
           property,
         })
       );
-      const propertyFor = property?.property_for === "Rent" ? "rent" : "buy";
-
-      const propertyId = property.unique_property_id;
-      const propertyNameSlug = property.property_name
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "_")
-        .replace(/(^-|-$)/g, "");
-      const locationSlug = property.location_id
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "_")
-        .replace(/(^-|-$)/g, "");
-      const seoUrl = `${propertyFor}_${property.sub_type}_${propertyNameSlug}_in_${locationSlug}_${searchData?.city}_Id_${propertyId}`;
-      router.push(`/property?${seoUrl}`, { state: property });
+      const cleanSeoUrl = generatePropertyUrl(property);
+      router.push(cleanSeoUrl, { state: property });
     },
     [router, dispatch, searchData]
   );
@@ -166,7 +175,6 @@ const HousingPicks = ({ bestMeetownerProperties }) => {
       throw err;
     }
   }, []);
-
   const handleContactSeller = async (property) => {
     try {
       const data = localStorage.getItem("user");
@@ -180,7 +188,6 @@ const HousingPicks = ({ bestMeetownerProperties }) => {
       }
       const userDetails = JSON.parse(data);
       const sellerData = await getOwnerDetails(property);
-
       const payload = {
         unique_property_id: property.unique_property_id,
         user_id: userDetails.user_id,
@@ -200,7 +207,6 @@ const HousingPicks = ({ bestMeetownerProperties }) => {
         property_cost: formatToIndianCurrency(property?.property_cost),
         ownerMobile: sellerData?.mobile || sellerData?.phone || "N/A",
       };
-
       await axios.post(
         `${config.awsApiUrl}/enquiry/v1/sendLeadTextMessage`,
         smspayload
@@ -215,7 +221,6 @@ const HousingPicks = ({ bestMeetownerProperties }) => {
   const handleClose = () => {
     setShowLoginModal(false);
   };
-
   return (
     <div className="mx-auto px-4  py-2">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
@@ -225,7 +230,6 @@ const HousingPicks = ({ bestMeetownerProperties }) => {
           ${visible ? "animate-rise" : "opacity-0 translate-y-10"}`}
           >
             <span> Best of Meetowner</span>
-
             <svg
               viewBox="0 0 120 10"
               fill="none"
@@ -355,7 +359,7 @@ const HousingPicks = ({ bestMeetownerProperties }) => {
                       }}
                     />
                     <Link
-                      href={`/property?${property.property_for}_${property.sub_type}_${property.property_name}_in_${property?.location_id}_${searchData?.city}_Id_${property.unique_property_id}`}
+                      href={`${generatePropertyUrl(property)}`}
                       onClick={() => handleNavigation(property)}
                       className={`absolute top-4 right-4 cursor-pointer text-white font-bold transition-colors`}
                     >

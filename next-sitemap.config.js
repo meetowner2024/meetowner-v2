@@ -106,7 +106,6 @@ module.exports = {
         priority: 0.65,
       }));
       let propertyRoutes = [];
-
       const propertyResponse = await fetch(
         "https://api.meetowner.in/listings/v1/getAllPropertiesLinks"
       );
@@ -124,7 +123,6 @@ module.exports = {
           priority: 0.7,
         }));
       }
-
       return [
         ...staticRoutes,
         ...propertyRoutes,

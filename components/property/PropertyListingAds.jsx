@@ -2,9 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { toast } from "react-toastify";
-import {
-  setPropertyDetails
-} from "../store/slices/propertyDetails";
+import { setPropertyDetails } from "../store/slices/propertyDetails";
 import { useDispatch, useSelector } from "react-redux";
 import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -16,7 +14,6 @@ import config from "../utils/config";
 import Login from "../auth/Login";
 import noPropertiesFound from "../../app/assets/Images/urban-planning_10891692.png";
 import theme from "../utils/theme.json";
-
 function PropertyCardSkeleton() {
   return (
     <div className="relative rounded-xl shadow-lg overflow-hidden bg-white">
@@ -29,7 +26,6 @@ function PropertyCardSkeleton() {
     </div>
   );
 }
-
 function FeaturedPropertySkeleton() {
   return (
     <div className="relative rounded-xl overflow-hidden">
@@ -41,7 +37,6 @@ function FeaturedPropertySkeleton() {
     </div>
   );
 }
-
 const PropertyListingAds = () => {
   const [property, setProperty] = useState([]);
   const searchData = useSelector((state) => state.search);
@@ -51,8 +46,6 @@ const PropertyListingAds = () => {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const modalRef = useRef(null);
   const swiperRef = useRef(null);
-
-
   const fetchLatestProperties = async () => {
     setProperty([]);
     try {
@@ -61,7 +54,7 @@ const PropertyListingAds = () => {
       );
       const data = await response.json();
       const validProperties = data.ads.filter(
-        (item) => item.property_data?.image && item.property_data?.property_name 
+        (item) => item.property_data?.image && item.property_data?.property_name
       );
       setProperty(validProperties);
     } catch (err) {
@@ -70,11 +63,9 @@ const PropertyListingAds = () => {
       setLoading(false);
     }
   };
-
   useEffect(() => {
     fetchLatestProperties();
   }, []);
-
   const handleNavigation = useCallback(
     async (property) => {
       let userDetails = null;
@@ -115,22 +106,37 @@ const PropertyListingAds = () => {
           property,
         })
       );
-      const propertyFor = property?.property_for === "Rent" ? "rent" : "buy";
+      const propertyFor = property?.property_for === "Rent" ? "rent" : "sale";
       const propertyId = property.unique_property_id;
+      const bhkPart = property.bedrooms ? `${property.bedrooms}-bhk-` : "";
+      const subTypePart = property.sub_type
+        ? `${property.sub_type.toLowerCase().replace(/\s+/g, "-")}-`
+        : "";
       const propertyNameSlug = property.property_name
         .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "_")
-        .replace(/(^-|-$)/g, "");
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+      const builderNameSlug = property.builder_name
+        ? `-by-${property.builder_name
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-+|-+$/g, "")}`
+        : "";
       const locationSlug = property.location_id
         .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "_")
-        .replace(/(^-|-$)/g, "");
-      const seoUrl = `${propertyFor}_${property.sub_type}_${propertyNameSlug}_in_${locationSlug}_${searchData?.city}_Id_${propertyId}`;
-      router.push(`/property?${seoUrl}`, { state: property });
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+      const citySlug = (searchData?.city || "hyderabad")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+      const forPart = `for-${propertyFor}-`;
+      const seoSlug = `${bhkPart}${subTypePart}${propertyNameSlug}${builderNameSlug}-${forPart}in-${locationSlug}-${citySlug}`;
+      const cleanSeoUrl = `/property/${seoSlug}/${propertyId}`;
+      router.push(cleanSeoUrl, { state: property });
     },
     [router, dispatch, searchData]
   );
-
   const handleContactSeller = async (property) => {
     try {
       const data = localStorage.getItem("user");
@@ -152,11 +158,9 @@ const PropertyListingAds = () => {
       toast.error("Something went wrong while submitting enquiry");
     }
   };
-
   const handleClose = () => {
     setShowLoginModal(false);
   };
-
   const formatToIndianCurrency = (value) => {
     if (!value || isNaN(value)) return "N/A";
     const numValue = parseFloat(value);
@@ -165,7 +169,6 @@ const PropertyListingAds = () => {
     if (numValue >= 1000) return (numValue / 1000).toFixed(2) + " K";
     return numValue.toString();
   };
-
   if (loading) {
     return (
       <div className="sticky top-20 lg:block md:block z-20 bg-white p-4 rounded-2xl shadow-xl">
@@ -199,10 +202,9 @@ const PropertyListingAds = () => {
       </div>
     );
   }
-
   return (
     <div className="sticky top-20 lg:block md:block z-20  p-4 rounded-2xl shadow-xl">
-      {/* Featured Property */}
+      {}
       {property[2]?.property_data && (
         <div className="relative rounded-xl overflow-hidden cursor-pointer group">
           <div className="absolute top-4 left-4 z-10">
@@ -252,8 +254,6 @@ const PropertyListingAds = () => {
           </div>
         </div>
       )}
-
-    
       {property.length > 0 ? (
         <div className="mt-4 relative">
           <Swiper
@@ -334,15 +334,14 @@ const PropertyListingAds = () => {
             properties.
           </div>
           <button
-            onClick={() => router.push("/")} // Adjust to your reset filters route
+            onClick={() => router.push("/")}
             className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold px-4 py-2 rounded-full hover:from-teal-600 hover:to-cyan-600 transition-all duration-300"
           >
             Reset Filters
           </button>
         </div>
       )}
-
-      {/* Login Modal */}
+      {}
       {showLoginModal && (
         <div
           initial={{ opacity: 0 }}
@@ -368,5 +367,4 @@ const PropertyListingAds = () => {
     </div>
   );
 };
-
 export default PropertyListingAds;

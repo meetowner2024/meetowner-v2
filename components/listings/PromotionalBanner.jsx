@@ -58,6 +58,8 @@ import { toast } from "react-toastify";
 import config from "../utils/config";
 import useWhatsappHook from "../utils/useWhatsappHook";
 import CryptoJS from "crypto-js";
+const STORAGE_KEY = "promoBannerDismissedAt";
+const RE_SHOW_AFTER_MS = 4 * 60 * 60 * 1000;
 const gradients = [
   {
     bg: "bg-gradient-to-r from-indigo-400 to-blue-600",
@@ -153,8 +155,8 @@ const getFallbackIcon = (name) => {
 };
 const PromotionalBanner = ({
   ads,
-  showPromoBanner,
-  setShowPromoBanner,
+  showPromoBanner: externalShow,
+  setShowPromoBanner: setExternalShow,
   handleNavigation,
 }) => {
   const JWT_SECRET = process.env.NEXT_PUBLIC_ENCRYPTION_SECRET;
@@ -184,7 +186,6 @@ const PromotionalBanner = ({
   const abortControllerRef = useRef(null);
   const gradient = useMemo(() => getGradient(currentPromo), [currentPromo]);
   const currentProperty = useMemo(() => ads[currentPromo], [ads, currentPromo]);
-
   const imageUrl = useMemo(
     () =>
       currentProperty?.image
@@ -192,6 +193,35 @@ const PromotionalBanner = ({
         : "https://placehold.co/600x400?text=NotFound",
     [currentProperty]
   );
+  const [internalShow, setInternalShow] = useState(true);
+  const [isClient, setIsClient] = useState(false);
+  useEffect(() => {
+    setIsClient(true);
+    const checkShouldShow = () => {
+      if (typeof window === "undefined") return true;
+      try {
+        const dismissedAt = localStorage.getItem(STORAGE_KEY);
+        if (!dismissedAt) return true;
+        const elapsed = Date.now() - Number(dismissedAt);
+        return elapsed >= RE_SHOW_AFTER_MS;
+      } catch {
+        return true;
+      }
+    };
+    const shouldShow = checkShouldShow();
+    setInternalShow(shouldShow);
+    if (setExternalShow && externalShow !== shouldShow) {
+      setExternalShow(shouldShow);
+    }
+  }, [setExternalShow]);
+  const showPromoBanner = isClient && internalShow;
+  const handleClose = useCallback(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem(STORAGE_KEY, String(Date.now()));
+    }
+    setInternalShow(false);
+    setExternalShow?.(false);
+  }, [setExternalShow]);
   const handleMouseEnter = useCallback(() => {
     if (hoverTimeoutRef.current) {
       clearTimeout(hoverTimeoutRef.current);
@@ -245,34 +275,37 @@ const PromotionalBanner = ({
         const name = sellerdata?.name || "";
         if (phone) {
           const propertyFor =
-            currentProperty.property_for === "Rent" ? "rent" : "buy";
-          const category = useMemo(
-            () =>
-              currentProperty.sub_type === "Apartment" ||
-              currentProperty.sub_type === "Independent house"
-                ? `${currentProperty.bedrooms}BHK`
-                : currentProperty.sub_type === "Plot"
-                ? "Plot"
-                : "Property",
-            [currentProperty]
-          );
-          const propertyId = currentProperty.unique_property_id;
+            currentProperty.property_for === "Rent" ? "rent" : "sale";
+          const bhkPart = currentProperty.bedrooms
+            ? `${currentProperty.bedrooms}-bhk-`
+            : "";
+          const subTypePart = currentProperty.sub_type
+            ? `${currentProperty.sub_type.toLowerCase().replace(/\s+/g, "-")}-`
+            : "";
           const propertyNameSlug = currentProperty.property_name
             .toLowerCase()
-            .replace(/[^a-z0-9]+/g, "_")
-            .replace(/(^-|-$)/g, "");
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-+|-+$/g, "");
+          const builderNameSlug = currentProperty.builder_name
+            ? `-by-${currentProperty.builder_name
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, "-")
+                .replace(/^-+|-+$/g, "")}`
+            : "";
           const locationSlug = currentProperty.location_id
             .toLowerCase()
-            .replace(/[^a-z0-9]+/g, "_")
-            .replace(/(^-|-$)/g, "");
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-+|-+$/g, "");
           const citySlug = currentProperty.city
             ? currentProperty.city
                 .toLowerCase()
-                .replace(/[^a-z0-9]+/g, "_")
-                .replace(/(^-|-$)/g, "")
+                .replace(/[^a-z0-9]+/g, "-")
+                .replace(/^-+|-+$/g, "")
             : "hyderabad";
-          const seoUrl = `${propertyFor}_${category}_${currentProperty.sub_type}_${propertyNameSlug}_in_${locationSlug}_${citySlug}_Id_${propertyId}`;
-          const fullUrl = `${window.location.origin}/property?${seoUrl}`;
+          const forPart = `for-${propertyFor}-`;
+          const seoSlug = `${bhkPart}${subTypePart}${propertyNameSlug}${builderNameSlug}-${forPart}in-${locationSlug}-${citySlug}`;
+          const propertyId = currentProperty.unique_property_id;
+          const fullUrl = `${window.location.origin}/property/${seoSlug}/${propertyId}`;
           const encodedMessage = encodeURIComponent(
             `Hi ${name},\nI'm interested in this property: ${currentProperty.property_name}.\n${fullUrl}\nI look forward to your assistance in the home search. Please get in touch with me at ${userData.mobile} to initiate the process.`
           );
@@ -329,7 +362,6 @@ const PromotionalBanner = ({
       return () => clearInterval(interval);
     }
   }, [showPromoBanner, ads, isExpanded]);
-
   useEffect(() => {
     if (!ads[currentPromo]?.unique_property_id) return;
     const controller = new AbortController();
@@ -345,7 +377,6 @@ const PromotionalBanner = ({
       } catch (error) {
         if (error.name === "AbortError") return;
         console.error("Error fetching property images:", error);
-        
       }
     };
     fetchImages();
@@ -464,10 +495,7 @@ const PromotionalBanner = ({
             <Button
               variant="ghost"
               size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowPromoBanner(false);
-              }}
+              onClick={handleClose}
               className="text-white hover:bg-white/10 rounded-full p-1"
             >
               <X className="w-3 h-3" />

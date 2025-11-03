@@ -7,7 +7,6 @@ import "swiper/css";
 import "swiper/css/free-mode";
 import "swiper/css/pagination";
 import axios from "axios";
-
 import { toast } from "react-toastify";
 import { ArrowDownRight, LogOutIcon, User2Icon } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -74,40 +73,65 @@ const Sidebar = ({
       ?.toLowerCase()
       .replace(/[^a-z0-9]+/g, "_")
       .replace(/(^|$)/g, "");
-  const handleNavigation = useCallback(async (property) => {
-    const userDetails = getUserDetails();
-    if (!userDetails?.user_id) {
-      console.warn("User details are missing or invalid.");
-      return;
-    }
-    const viewData = {
-      user_id: userDetails.user_id,
-      property_id: property?.unique_property_id || "N/A",
-      name: userDetails?.name || "N/A",
-      mobile: userDetails?.mobile || "N/A",
-      email: userDetails?.email || "N/A",
-      property_name: property?.property_name || "N/A",
-    };
-    try {
-      await axios.post(
-        `${config.awsApiUrl}/listings/v1/propertyViewed`,
-        viewData
+  const handleNavigation = useCallback(
+    async (property) => {
+      const userDetails = getUserDetails();
+      if (!userDetails?.user_id) {
+        console.warn("User details are missing or invalid.");
+        return;
+      }
+      const viewData = {
+        user_id: userDetails.user_id,
+        property_id: property?.unique_property_id || "N/A",
+        name: userDetails?.name || "N/A",
+        mobile: userDetails?.mobile || "N/A",
+        email: userDetails?.email || "N/A",
+        property_name: property?.property_name || "N/A",
+      };
+      try {
+        await axios.post(
+          `${config.awsApiUrl}/listings/v1/propertyViewed`,
+          viewData
+        );
+      } catch (error) {
+        console.error("Failed to record property view:", error);
+      }
+      dispatch(
+        setPropertyDetails({
+          property,
+        })
       );
-    } catch (error) {
-      console.error("Failed to record property view:", error);
-    }
-    dispatch(
-      setPropertyDetails({
-        property,
-      })
-    );
-    const propertyFor = property?.property_for === "Rent" ? "rent" : "buy";
-    const propertyId = property.unique_property_id;
-    const propertyNameSlug = slugify(property.property_name);
-    const locationSlug = slugify(property.location_id);
-    const seoUrl = `${propertyFor}_${property.sub_type}_${propertyNameSlug}_in_${locationSlug}_${searchData?.city}_Id_${propertyId}`;
-    router.push(`/property?${seoUrl}`, { state: property });
-  }, []);
+      const propertyFor = property?.property_for === "Rent" ? "rent" : "sale";
+      const propertyId = property.unique_property_id;
+      const bhkPart = property.bedrooms ? `${property.bedrooms}-bhk-` : "";
+      const subTypePart = property.sub_type
+        ? `${property.sub_type.toLowerCase().replace(/\s+/g, "-")}-`
+        : "";
+      const propertyNameSlug = property.property_name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+      const builderNameSlug = property.builder_name
+        ? `-by-${property.builder_name
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-+|-+$/g, "")}`
+        : "";
+      const locationSlug = property.location_id
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+      const citySlug = (searchData?.city || "hyderabad")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+      const forPart = `for-${propertyFor}-`;
+      const seoSlug = `${bhkPart}${subTypePart}${propertyNameSlug}${builderNameSlug}-${forPart}in-${locationSlug}-${citySlug}`;
+      const cleanSeoUrl = `/property/${seoSlug}/${propertyId}`;
+      router.push(cleanSeoUrl, { state: property });
+    },
+    [router, dispatch, searchData]
+  );
   const [likedProperties, setLikedProperties] = useState([]);
   useEffect(() => {
     const liked = favourites;

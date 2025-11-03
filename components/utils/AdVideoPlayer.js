@@ -65,7 +65,6 @@ const AdVideoPlayer = ({ initialPosition = { x: 100, y: 100 } }) => {
         }
       );
       const data = await res.json();
-
       if (data?.data?.length > 0) {
         setVideoList(data.data);
         pickRandomVideo(data.data, []);
@@ -87,7 +86,6 @@ const AdVideoPlayer = ({ initialPosition = { x: 100, y: 100 } }) => {
     setIsOpen(true);
     setTriedVideos([...tried, randomVideo.video_url]);
   };
-
   const handleVideoError = () => {
     console.warn("Video failed to load, trying another...");
     if (videoList.length > 0) {
@@ -143,22 +141,37 @@ const AdVideoPlayer = ({ initialPosition = { x: 100, y: 100 } }) => {
           property,
         })
       );
-      const propertyFor = property?.property_for === "Rent" ? "rent" : "buy";
+      const propertyFor = property?.property_for === "Rent" ? "rent" : "sale";
       const propertyId = property?.property_id || property.unique_property_id;
+      const bhkPart = property.bedrooms ? `${property.bedrooms}-bhk-` : "";
+      const subTypePart = property.sub_type
+        ? `${property.sub_type.toLowerCase().replace(/\s+/g, "-")}-`
+        : "";
       const propertyNameSlug = property.property_name
         .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "_")
-        .replace(/(^-|-$)/g, "");
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+      const builderNameSlug = property.builder_name
+        ? `-by-${property.builder_name
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-+|-+$/g, "")}`
+        : "";
       const locationSlug = property.location_id
         .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "_")
-        .replace(/(^-|-$)/g, "");
-      const seoUrl = `${propertyFor}_${property.sub_type}_${propertyNameSlug}_in_${locationSlug}_Id_${propertyId}`;
-      router.push(`/property?${seoUrl}`, { state: property });
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+      const citySlug = (searchData?.city || "hyderabad")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+      const forPart = `for-${propertyFor}-`;
+      const seoSlug = `${bhkPart}${subTypePart}${propertyNameSlug}${builderNameSlug}-${forPart}in-${locationSlug}-${citySlug}`;
+      const cleanSeoUrl = `/property/${seoSlug}/${propertyId}`;
+      router.push(cleanSeoUrl, { state: property });
     },
-    [router, dispatch]
+    [router, dispatch, searchData]
   );
-
   if (isMobile || !isOpen || !videoData) return null;
   return (
     <Draggable
@@ -166,7 +179,7 @@ const AdVideoPlayer = ({ initialPosition = { x: 100, y: 100 } }) => {
       position={position}
       onDrag={handleDrag}
       bounds="body"
-       cancel=".no-drag" 
+      cancel=".no-drag"
     >
       <div
         ref={nodeRef}
@@ -228,7 +241,6 @@ const AdVideoPlayer = ({ initialPosition = { x: 100, y: 100 } }) => {
                     : videoData.sub_type || ""}
                 </span>
               </div>
-
               <div className="flex no-drag  items-center gap-2">
                 <Button
                   variant="ghost"

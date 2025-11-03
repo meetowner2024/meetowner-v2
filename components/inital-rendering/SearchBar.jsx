@@ -17,11 +17,9 @@ import ad1 from "../../app/assets/FAMILY MEETOWNER (1).jpg";
 import axios from "axios";
 import Image from "next/image";
 import theme from "../utils/theme.json";
-
 const isVideo = (url) => /\.(mp4|webm|ogg)$/i.test(url);
 const TABS = ["Buy", "Rent", "Plot", "Commercial"];
 const OPTIONS = ["Buy", "Rent"];
-
 const PrevArrow = (props) => {
   const { currentSlide, slideCount, ...rest } = props;
   return <FaAngleLeft {...rest} />;
@@ -30,7 +28,6 @@ const NextArrow = (props) => {
   const { currentSlide, slideCount, ...rest } = props;
   return <FaAngleRight {...rest} />;
 };
-
 export default function SearchBar() {
   const searchData = useSelector((state) => state.search);
   const [activeTab, setActiveTab] = useState(0);
@@ -92,7 +89,6 @@ export default function SearchBar() {
     }),
     []
   );
-
   const handleUserSearched = useCallback(async () => {
     let userDetails = null;
     try {
@@ -128,7 +124,6 @@ export default function SearchBar() {
       }
     }
   }, [searchInput, selected, location, searchData]);
-
   useEffect(() => {
     dispatch(
       setSearchData({
@@ -143,7 +138,7 @@ export default function SearchBar() {
             : TABS[activeTab] === "Commercial"
             ? "Others"
             : "Apartment",
-        location: searchInput, 
+        location: searchInput,
         plot_subType: plotSubType,
         commercial_subType: commercialSubType,
       })
@@ -157,7 +152,6 @@ export default function SearchBar() {
     commercialSubType,
     dispatch,
   ]);
-
   const fetchMedia = useCallback(async () => {
     try {
       const response = await fetch(
@@ -180,7 +174,6 @@ export default function SearchBar() {
       setIsError(true);
     }
   }, [location]);
-
   const fetchCities = useCallback(async () => {
     setIsLoadingCities(true);
     try {
@@ -199,7 +192,6 @@ export default function SearchBar() {
       setIsLoadingCities(false);
     }
   }, []);
-
   useEffect(() => {
     if (!location) return;
     const fetchLocalities = async () => {
@@ -216,7 +208,6 @@ export default function SearchBar() {
     };
     fetchLocalities();
   }, [searchInput, location]);
-
   useEffect(() => {
     fetchMedia();
     fetchCities();
@@ -233,7 +224,32 @@ export default function SearchBar() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [location, fetchMedia, fetchCities]);
-
+  const buildListingsUrl = () => {
+    const propertyFor = searchData?.tab === "Rent" ? "rent" : "sale";
+    const propertyType = (() => {
+      switch (searchData?.sub_type) {
+        case "Plot":
+          return "plots";
+        case "Commercial":
+          return "commercial-properties";
+        default:
+          return "apartments";
+      }
+    })();
+    const citySlug = searchData.location
+      ?.toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+    const locationSlug = searchData.city
+      ? searchData.city
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/(^-|-$)/g, "")
+      : "";
+    return `/listings/${propertyType}-for-${propertyFor}-in-${citySlug}${
+      locationSlug ? `-${locationSlug}` : ""
+    }`;
+  };
   const handleNavigation = useCallback(() => {
     if (!location) {
       alert("Please select a city");
@@ -257,25 +273,7 @@ export default function SearchBar() {
         commercial_subType: commercialSubType,
       })
     );
-    const params = {
-      city: location,
-      location: searchInput,
-      tab: TABS[activeTab],
-      property_for: TABS[activeTab] === "Rent" ? "Rent" : "Sell",
-      property_in:
-        TABS[activeTab] === "Commercial" ? "Commercial" : "Residential",
-      sub_type:
-        TABS[activeTab] === "Plot"
-          ? "Plot"
-          : TABS[activeTab] === "Commercial"
-          ? "Others"
-          : "Apartment",
-    };
-    const queryString = Object.entries(params)
-      .filter(([_, value]) => value !== "" && value !== undefined)
-      .map(([key, value]) => `${key}-${encodeURIComponent(value)}`)
-      .join("&");
-    router.push(`/listings?${queryString}`);
+    router.push(`${buildListingsUrl()}`);
     handleUserSearched();
   }, [
     activeTab,
@@ -288,7 +286,6 @@ export default function SearchBar() {
     handleUserSearched,
     router,
   ]);
-
   const getCurrentLocation = useCallback(() => {
     if (!navigator.geolocation) {
       alert("Geolocation is not supported by your browser.");
@@ -322,7 +319,6 @@ export default function SearchBar() {
       }
     );
   }, [dispatch]);
-
   return (
     <div
       className="w-full relative z-50 lg:h-[510px] md:h-[500px] sm:h-[200px]"
@@ -359,7 +355,6 @@ export default function SearchBar() {
           </div>
         ))}
       </Slider>
-
       <div className="relative bottom-15 sm:bottom-20 left-1/2 transform -translate-x-1/2 w-11/12 sm:w-10/12 md:w-3/4 lg:w-2/3">
         <div className="bg-white/30 flex justify-center rounded-t-2xl shadow-lg p-3 sm:p-4 border border-white/20">
           <div className="inline-flex flex-wrap justify-center bg-white rounded-full p-1 sm:p-2">
@@ -378,7 +373,6 @@ export default function SearchBar() {
             ))}
           </div>
         </div>
-
         <div className="flex items-center backdrop-blur-none justify-between space-x-1 bg-white p-2 sm:p-3 rounded-b-lg shadow-sm border border-white">
           <div className="flex items-center space-x-1 sm:space-x-2 w-full">
             <div className="relative w-auto inline-block">
@@ -391,7 +385,7 @@ export default function SearchBar() {
                       setCity(e.target.value);
                       dispatch(
                         setSearchData({
-                          city: e.target.value, 
+                          city: e.target.value,
                         })
                       );
                       if (!isLocationOpen) setIsLocationOpen(true);
@@ -436,7 +430,9 @@ export default function SearchBar() {
                   onWheel={(e) => e.stopPropagation()}
                 >
                   {isLoadingCities ? (
-                    <li className="px-3 py-2 text-gray-400 text-sm">Loading...</li>
+                    <li className="px-3 py-2 text-gray-400 text-sm">
+                      Loading...
+                    </li>
                   ) : filteredLocations.length > 0 ? (
                     filteredLocations.map((option) => (
                       <li
@@ -450,7 +446,7 @@ export default function SearchBar() {
                           dispatch(
                             setSearchData({
                               city: option,
-                              location: searchInput, 
+                              location: searchInput,
                             })
                           );
                         }}
@@ -460,7 +456,9 @@ export default function SearchBar() {
                       </li>
                     ))
                   ) : (
-                    <li className="px-3 py-2 text-gray-400 text-sm">No results found</li>
+                    <li className="px-3 py-2 text-gray-400 text-sm">
+                      No results found
+                    </li>
                   )}
                 </ul>
               )}
@@ -476,10 +474,12 @@ export default function SearchBar() {
                 onChange={(e) => {
                   const value = e.target.value;
                   setSearchInput(value);
-                  dispatch(setSearchData({ location: value }))
+                  dispatch(setSearchData({ location: value }));
                 }}
                 onFocus={() => setIsSearchDropdownOpen(true)}
-                onBlur={() => setTimeout(() => setIsSearchDropdownOpen(false), 200)}
+                onBlur={() =>
+                  setTimeout(() => setIsSearchDropdownOpen(false), 200)
+                }
                 className="w-full outline-none bg-transparent text-gray-800 placeholder-gray-500 text-sm sm:text-base px-2 py-1"
               />
               {searchInput && (
@@ -507,7 +507,9 @@ export default function SearchBar() {
                               if (isDisabled) return;
                               setSearchInput(item.locality);
                               setIsSearchDropdownOpen(false);
-                              dispatch(setSearchData({ location: item.locality }));
+                              dispatch(
+                                setSearchData({ location: item.locality })
+                              );
                             }}
                             className={`px-3 py-1 text-left rounded-md transition-all duration-200 ${
                               isDisabled
@@ -533,7 +535,9 @@ export default function SearchBar() {
                         );
                       })
                     ) : (
-                      <li className="px-3 py-1 text-gray-500">No matching localities</li>
+                      <li className="px-3 py-1 text-gray-500">
+                        No matching localities
+                      </li>
                     )
                   ) : localities.length > 0 ? (
                     localities.map((item) => (
@@ -548,11 +552,14 @@ export default function SearchBar() {
                         }}
                         className="px-3 flex flex-row justify-between py-1 text-left hover:bg-[#1D3A76] hover:text-white rounded-md cursor-pointer transition-all duration-200"
                       >
-                        {item.locality} <p className="text-sm text-gray-300">Locality</p>
+                        {item.locality}{" "}
+                        <p className="text-sm text-gray-300">Locality</p>
                       </li>
                     ))
                   ) : (
-                    <li className="px-3 py-1 text-gray-500">No matching localities</li>
+                    <li className="px-3 py-1 text-gray-500">
+                      No matching localities
+                    </li>
                   )}
                 </ul>
               )}
@@ -582,13 +589,16 @@ export default function SearchBar() {
                         key={option}
                         onClick={() => {
                           if (activeTab === 2) setPlotSubType(option);
-                          else if (activeTab === 3) setCommercialSubType(option);
+                          else if (activeTab === 3)
+                            setCommercialSubType(option);
                           setSelected(option);
                           setIsOpen(false);
                           dispatch(
                             setSearchData({
-                              plot_subType: activeTab === 2 ? option : plotSubType,
-                              commercial_subType: activeTab === 3 ? option : commercialSubType,
+                              plot_subType:
+                                activeTab === 2 ? option : plotSubType,
+                              commercial_subType:
+                                activeTab === 3 ? option : commercialSubType,
                             })
                           );
                         }}
