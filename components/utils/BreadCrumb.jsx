@@ -80,6 +80,12 @@ const Breadcrumb = ({ title }) => {
           }
         : null,
     ].filter(Boolean);
+} else if (pathnames[0] === "blogs" && pathnames[1] && title) {
+    crumbs = [
+      { name: "Home", path: "/" },
+      { name: "Blogs", path: "/blogs" },
+      { name: truncate(title), path: pathname },
+    ];
   } else {
     crumbs = [
       { name: "Home", path: "/" },
