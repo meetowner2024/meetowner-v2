@@ -2,7 +2,8 @@ import { usePathname } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 import { useSelector } from "react-redux";
 import Link from "next/link";
-const Breadcrumb = () => {
+
+const Breadcrumb = ({ title }) => {
   const pathname = usePathname();
   const pathnames = pathname.split("/").filter((x) => x);
   const propertyData = useSelector((state) => state.property);
@@ -18,6 +19,8 @@ const Breadcrumb = () => {
     privacy: "Privacy & Policies",
     profile: "Profile",
   };
+  const truncate = (str, max = 30) =>
+    str && str.length > max ? `${str.slice(0, max - 3)}...` : str;
   let crumbs = [];
   const slugify = (value) =>
     value
