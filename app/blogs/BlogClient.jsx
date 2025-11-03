@@ -6,6 +6,8 @@ import { Button } from "../../components/ui/button";
 import { ArrowLeft, Search } from "lucide-react";
 import { Input } from "../../components/ui/input";
 import { useRouter } from "next/navigation";
+import Header from "../../components/Header";
+import Breadcrumb from "../../components/utils/BreadCrumb";
 
 export default function BlogClient({ initialBlogs }) {
   const router = useRouter();
@@ -31,15 +33,7 @@ export default function BlogClient({ initialBlogs }) {
     <div className="min-h-screen bg-blog-gradient-subtle ">
       <section className="relative py-2 px-4 overflow-hidden">
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => router.push("/")}
-            className="bg-gray-200 hover:bg-gray-300 text-gray-800 sm:font-bold p-1 sm:py-2 sm:px-4 rounded"
-          >
-            <ArrowLeft />
-          </button>
-        </div>
-        <div className="flex justify-center">
-          <p className="text-4xl font-bold text-black">Meetowner</p>
+          <Header />
         </div>
       </section>
 
@@ -49,7 +43,9 @@ export default function BlogClient({ initialBlogs }) {
             <div className="text-center py-16">
               <div className="flex flex-col items-center gap-4">
                 <div className="w-16 h-16 border-4 border-blue-900 border-t-transparent rounded-full animate-spin" />
-                <p className="text-gray-400 text-lg font-medium">Loading Blogs...</p>
+                <p className="text-gray-400 text-lg font-medium">
+                  Loading Blogs...
+                </p>
               </div>
             </div>
           ) : error ? (
@@ -58,16 +54,20 @@ export default function BlogClient({ initialBlogs }) {
             </div>
           ) : (
             <>
-              <div className="flex flex-col md:flex-row gap-6 items-center justify-between mb-10">
+              <div className="flex flex-col md:flex-row gap-6  items-center justify-between mb-8">
                 <div className="flex flex-wrap gap-2">
                   {uniqueCategories.map((category) => (
                     <Button
                       key={category}
-                      variant={selectedCategory === category ? "default" : "outline"}
+                      variant={
+                        selectedCategory === category ? "default" : "outline"
+                      }
                       size="sm"
                       onClick={() => setSelectedCategory(category)}
                       className={`${
-                        selectedCategory === category ? "bg-blue-900 text-white" : ""
+                        selectedCategory === category
+                          ? "bg-blue-900 text-white"
+                          : ""
                       } transition-all duration-200`}
                     >
                       {category}
@@ -94,7 +94,9 @@ export default function BlogClient({ initialBlogs }) {
                   )}
                 </div>
               </div>
-
+              <div className="mb-4">
+                <Breadcrumb />
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-slide-up">
                 {filteredPosts.map((post) => (
                   <BlogCard key={post.id} post={post} />
@@ -106,7 +108,9 @@ export default function BlogClient({ initialBlogs }) {
                   <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
                     <Search className="w-8 h-8 text-muted-foreground" />
                   </div>
-                  <h3 className="text-xl font-semibold mb-2">No articles found</h3>
+                  <h3 className="text-xl font-semibold mb-2">
+                    No articles found
+                  </h3>
                   {searchQuery && (
                     <p className="text-muted-foreground">
                       No articles found for "{searchQuery}".

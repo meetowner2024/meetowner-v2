@@ -6,6 +6,8 @@ import { ArrowLeft, Calendar, User, Share2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { toast } from "react-toastify";
+import Header from "../../../components/Header";
+import Breadcrumb from "../../../components/utils/BreadCrumb";
 
 export default function ClientBlogPost({ initialPost }) {
   const post = initialPost;
@@ -26,17 +28,21 @@ export default function ClientBlogPost({ initialPost }) {
 
   return (
     <div className="min-h-screen bg-blog-gradient-subtle">
-      <div className="bg-background border-b">
-        <div className="container mx-auto px-4 py-6">
+      <div className="bg-background ">
+        {/* <div className="container mx-auto px-4 py-6">
           <Link href="/blogs">
             <Button variant="ghost" size="sm" className="mb-4">
               <ArrowLeft className="w-4 h-4 mr-2" /> Back to Blog
             </Button>
           </Link>
-        </div>
+        </div> */}
+        <Header/>
       </div>
 
-      <article className="container mx-auto px-4 py-12 max-w-4xl">
+      <article className="container mx-auto px-4 py-12 sm:max-w-6xl">
+         <div className="mb-2">
+           <Breadcrumb title={post.title}/>
+         </div>
         <div className="animate-fade-in">
           {post.image && (
             <div className="aspect-video rounded-lg overflow-hidden mb-8 shadow-blog-card">

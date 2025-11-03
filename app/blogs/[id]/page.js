@@ -93,6 +93,6 @@ async function getPost(id) {
 
 export default async function BlogPostPage({ params }) {
   const post = await getPost(params?.id);
-  if (!post) return <div className="p-8 text-red-500">Post not found.</div>;
+  if (!post) return <div className="p-8 text-red-500 text-2xl flex justify-center h-screen items-center">Post not found.</div>;
   return <ClientBlogPost initialPost={post} />;
 }

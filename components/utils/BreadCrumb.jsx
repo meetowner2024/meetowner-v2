@@ -1,10 +1,10 @@
-
 import { usePathname } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 import { useSelector } from "react-redux";
-import Link from 'next/link'
-const Breadcrumb = () => {
-  const pathname=usePathname()
+import Link from "next/link";
+
+const Breadcrumb = ({ title }) => {
+  const pathname = usePathname();
   const pathnames = pathname.split("/").filter((x) => x);
   const propertyData = useSelector((state) => state.property);
   const searchData = useSelector((state) => state.search);
@@ -19,6 +19,8 @@ const Breadcrumb = () => {
     privacy: "Privacy & Policies",
     profile: "Profile",
   };
+  const truncate = (str, max = 30) =>
+    str && str.length > max ? `${str.slice(0, max - 3)}...` : str;
   let crumbs = [];
   const hasPropertyData = propertyData?.location && propertyData?.propertyName;
   if (pathnames.includes("property") && hasPropertyData) {
@@ -59,6 +61,12 @@ const Breadcrumb = () => {
         name: searchData?.location || "",
         path: searchData?.location || "",
       },
+    ];
+  } else if (pathnames[0] === "blogs" && pathnames[1] && title) {
+    crumbs = [
+      { name: "Home", path: "/" },
+      { name: "Blogs", path: "/blogs" },
+      { name: truncate(title), path: pathname },
     ];
   } else {
     crumbs = [
