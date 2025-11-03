@@ -58,7 +58,8 @@ async function fetchProperty(propertyId) {
   const data = await response.json();
   const JWT_SECRET = process.env.NEXT_PUBLIC_ENCRYPTION_SECRET;
   const ENCRYPTION_KEY = CryptoJS.SHA256(JWT_SECRET).toString();
-  const [ivHex, encryptedHex] = data.property.split(":");
+  const [ivHex, encryptedHex] = data.property?.split(":");
+
   const iv = CryptoJS.enc.Hex.parse(ivHex);
   const encrypted = CryptoJS.enc.Hex.parse(encryptedHex);
   const decrypted = CryptoJS.AES.decrypt(
