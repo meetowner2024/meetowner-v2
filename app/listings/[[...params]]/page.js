@@ -139,7 +139,7 @@ export async function generateMetadata({ params, searchParams }) {
         siteName: "Meet Owner",
         images: [
           {
-            url: "/assets/Images/Favicon@10x.png",
+            url: "https://meetowner.in/favicon.ico",
             width: 600,
             height: 400,
           },
@@ -150,7 +150,7 @@ export async function generateMetadata({ params, searchParams }) {
         title: "Properties for Sale in Hyderabad | Meet Owner",
         description:
           "Explore residential and commercial properties for sale in Hyderabad.",
-        images: ["/assets/Images/Favicon@10x.png"],
+        images: ["https://meetowner.in/favicon.ico"],
       },
       alternates: {
         canonical: "https://www.meetowner.in/listings",
@@ -252,7 +252,7 @@ export async function generateMetadata({ params, searchParams }) {
       })) || [];
   if (featuredImages.length === 0) {
     featuredImages.push({
-      url: "https://placehold.co/600x400?text=Property+Image",
+      url: "https://meetowner.in/favicon.ico",
       width: 600,
       height: 400,
       alt: "Property Image Placeholder",
