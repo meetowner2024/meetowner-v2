@@ -19,7 +19,8 @@ const Breadcrumb = ({ title }) => {
     privacy: "Privacy & Policies",
     profile: "Profile",
   };
-
+  const truncate = (str, max = 30) =>
+    str && str.length > max ? `${str.slice(0, max - 3)}...` : str;
   let crumbs = [];
   const slugify = (value) => {
     return (
@@ -84,7 +85,7 @@ const Breadcrumb = ({ title }) => {
           }
         : null,
     ].filter(Boolean);
-} else if (pathnames[0] === "blogs" && pathnames[1] && title) {
+  } else if (pathnames[0] === "blogs" && pathnames[1] && title) {
     crumbs = [
       { name: "Home", path: "/" },
       { name: "Blogs", path: "/blogs" },
