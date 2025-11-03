@@ -1,4 +1,4 @@
-import { use, useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Play,
   Pause,
@@ -11,11 +11,10 @@ import {
   User,
   ArrowRight,
 } from "lucide-react";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import { setSearchData } from "../store/slices/searchSlice";
 import config from "../utils/config";
-import { usePathname, useRouter } from "next/navigation";
-import CryptoJS from "crypto-js";
+import { useRouter } from "next/navigation";
 import theme from "../utils/theme.json";
 import PropertyListingAds from "./PropertyListingAds";
 import Image from "next/image";

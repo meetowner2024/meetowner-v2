@@ -193,18 +193,21 @@ function ListingsBody({ setShowLoginModal, initialized = false }) {
     return (
       value
         ?.toString()
+        .trim()
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-+|-+$/g, "") || "all"
+        .replace(/^-+|-+$/g, "") || ""
     );
   };
   const buildListingsSeoUrl = (data) => {
-    const city = slugify(data.city);
-    const location = slugify(data.location || "all");
-    const propertyType = slugify(data.property_in || "all");
-    const bhk = data.bhk ? `${data.bhk}-bhk` : "all";
-    const forType = data.tab ? slugify(data.tab) : "all";
-    return `/listings/${city}/${location}/${propertyType}/${bhk}/${forType}`;
+    const citySlug = slugify(data.city || "hyderabad");
+    const locationSlug = slugify(data.location || "all");
+    const propertyInSlug = slugify(data.property_in || "residential");
+    const subType = slugify(data.sub_type || data.property_type || "");
+    const typePart = subType ? `${propertyInSlug}-${subType}` : propertyInSlug;
+    const propertyFor = data.property_for === "Rent" ? "rent" : "sale";
+    const seoSlug = `${typePart}-for-${propertyFor}-in-${locationSlug}-${citySlug}`;
+    return `/listings/${seoSlug}`;
   };
   const fetchProperties = useCallback(
     async (currentPage = 1, reset = false) => {
@@ -367,7 +370,7 @@ function ListingsBody({ setShowLoginModal, initialized = false }) {
     searchData?.tab,
     searchData?.occupancy,
     searchData?.sub_type,
-    
+
     searchData?.budget,
     searchData?.furnished_status,
     searchData?.occupancy,

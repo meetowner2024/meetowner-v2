@@ -2,68 +2,52 @@ import CryptoJS from "crypto-js";
 import config from "../../../components/utils/config";
 import PropertyClient from "../PropertyClient";
 function buildSeoContent(property, id) {
-  const bhkText = property.bedrooms ? `${property.bedrooms} BHK ` : "";
-  const subTypeText = property.sub_type || "";
-  const propertyInText =
-    property.property_in &&
-    !["other", "others"].includes(property.property_in.toLowerCase())
-      ? property.property_in
-      : "";
-  const locationText = property.location_id ? `${property.location_id} ` : "";
-  const cityText = property.city || "";
-  const forText = property.property_for === "Sell" ? "for Sale" : "for Rent";
-  const builderText = property.builder_name
-    ? `by ${property.builder_name} `
+  const slugify = (value) =>
+    value
+      ?.toString()
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  const bhk = property.bedrooms ? `${property.bedrooms} BHK` : "";
+  const subType = property.sub_type || "";
+  const propertyName = property.property_name || "";
+  const builderName = property.builder_name
+    ? `by ${property.builder_name}`
     : "";
-  const propertyTypeParts = [];
-  if (bhkText) propertyTypeParts.push(bhkText.trim());
-  if (subTypeText) propertyTypeParts.push(subTypeText);
-  if (propertyInText) propertyTypeParts.push(propertyInText);
-  const propertyTypeStr = `${propertyTypeParts
-    .reverse()
-    .join(" ")} ${builderText}${
-    property?.facing ? `${property.facing} Facing` : ""
-  }`.trim();
-  const finalPropertyType = propertyTypeStr || subTypeText || "Property";
+  const propertyForText =
+    property.property_for === "Sell" ? "for Sale" : "for Rent";
+  const location = property.location_id || "";
+  const city = property.city || "";
+  const titleParts = [bhk, subType, propertyName, builderName]
+    .filter(Boolean)
+    .join(" ");
   const title =
-    `${finalPropertyType} ${forText} in ${locationText}${cityText}`.trim();
-  const description = `Explore ${finalPropertyType.toLowerCase()} in ${locationText}${cityText} ${forText.toLowerCase()}. ${
+    `${titleParts} ${propertyForText} in ${location} ${city}`.trim();
+  const description = `Explore ${titleParts.toLowerCase()} ${propertyForText.toLowerCase()} in ${location} ${city}. ${
     property.description?.slice(0, 150) ||
     "Find your dream property with modern amenities and prime location."
   }`;
   const keywords = [
-    `${finalPropertyType} in ${locationText}${cityText}`,
-    `${finalPropertyType} ${forText}`,
-    `${property.property_for.toLowerCase()} ${finalPropertyType}`,
-    locationText ? `${finalPropertyType} in ${locationText.trim()}` : "",
-    cityText ? `${finalPropertyType} in ${cityText}` : "",
-    property.builder_name ? `${property.builder_name} properties` : "",
+    `${titleParts} ${propertyForText} in ${location} ${city}`,
+    `${bhk} ${subType} in ${location}`,
+    `${propertyName} by ${property.builder_name}`,
+    `${subType} for sale in ${city}`,
   ]
     .filter(Boolean)
     .join(", ");
+  const propertyFor = property.property_for === "Rent" ? "rent" : "sale";
   const bhkPart = property.bedrooms ? `${property.bedrooms}-bhk-` : "";
-  const subTypePart = property.sub_type ? `${property.sub_type}-` : "";
-  const propertyNameSlug = property.property_name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+  const subTypePart = subType ? `${slugify(subType)}-` : "";
+  const propertyNameSlug = propertyName ? slugify(propertyName) : "";
   const builderNameSlug = property.builder_name
-    ? `-by-${property.builder_name
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-+|-+$/g, "")}`
+    ? `-by-${slugify(property.builder_name)}`
     : "";
-  const locationSlug = property.location_id
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-  const citySlug = (property.city || "hyderabad")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-  const forPart = `for-${property.property_for === "Rent" ? "rent" : "sale"}-`;
-  const seoPath = `${bhkPart}${subTypePart}${propertyNameSlug}${builderNameSlug}-${forPart}in-${locationSlug}-${citySlug}`;
-  const canonicalUrl = `https://www.meetowner.in/property/${seoPath}/${id}`;
+  const locationSlug = slugify(location);
+  const citySlug = slugify(city) || "hyderabad";
+  const forPart = `for-${propertyFor}-`;
+  const seoSlug = `${bhkPart}${subTypePart}${propertyNameSlug}${builderNameSlug}-${forPart}in-${locationSlug}-${citySlug}`;
+  const canonicalUrl = `https://www.meetowner.in/property/${seoSlug}/${id}`;
   return { title, description, keywords, canonicalUrl };
 }
 async function fetchProperty(propertyId) {
@@ -94,24 +78,13 @@ export async function generateMetadata({ params }) {
     };
   }
   const propertyId = pathSegments.at(-1);
-  if (!propertyId || !propertyId.startsWith("MO-")) {
-    return {
-      title: "Property Not Found | Meet Owner",
-      description: "The requested property could not be found.",
-      robots: "noindex",
-    };
-  }
   try {
     const property = await fetchProperty(propertyId);
     const { title, description, keywords, canonicalUrl } = buildSeoContent(
       property,
       propertyId
     );
-    const featureImage =
-      property?.images?.[0] ||
-      property?.image?.[0] ||
-      property?.image ||
-      "default-property.jpg";
+    const featureImage = property?.image || "assets/Images/Favicon@10x.png";
     const feature = `https://api.meetowner.in/aws/v1/s3/uploads/${featureImage}`;
     return {
       title,

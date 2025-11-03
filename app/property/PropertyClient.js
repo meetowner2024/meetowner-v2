@@ -2,7 +2,6 @@
 import { useEffect, useState, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { ToastContainer } from "react-toastify";
-import Footer from "../../components/Footer";
 import dynamic from "next/dynamic";
 import { useDispatch } from "react-redux";
 import { setPropertyDetails } from "../../components/store/slices/propertyDetails";
@@ -177,6 +176,7 @@ export default function PropertyClient({
   return (
     <div className="min-h-screen flex flex-col">
       <PropertyHeader setHeaderHeight={setHeaderHeight} />
+
       <div
         className="flex flex-col lg:flex-row w-full max-w-[1536px] mx-auto justify-between h-auto sm:p-3 gap-3 pb-20"
         style={{ paddingTop: `${headerHeight || 10}px` }}

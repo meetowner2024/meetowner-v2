@@ -56,7 +56,9 @@ async function fetchPropertiesForSEO(params) {
 }
 function parseSEOParamsServer(slugArray) {
   if (!slugArray || slugArray.length === 0) return null;
+
   const fullSlug = slugArray.join("-").toLowerCase();
+
   const data = {
     bhk: "",
     property_in: "",
@@ -99,6 +101,7 @@ function parseSEOParamsServer(slugArray) {
   const saleIdx = parts.indexOf("sale");
   const rentIdx = parts.indexOf("rent");
   const markerIdx = saleIdx !== -1 ? saleIdx : rentIdx;
+
   if (markerIdx !== -1 && parts.length > markerIdx + 1) {
     const after = parts.slice(markerIdx + 1).filter((p) => p !== "in");
     if (after.length >= 1) {
@@ -115,6 +118,7 @@ function parseSEOParamsServer(slugArray) {
           : "";
     }
   }
+
   return data;
 }
 export async function generateMetadata({ params, searchParams }) {
@@ -135,7 +139,7 @@ export async function generateMetadata({ params, searchParams }) {
         siteName: "Meet Owner",
         images: [
           {
-            url: "https://placehold.co/600x400?text=Property+Image",
+            url: "/assets/Images/Favicon@10x.png",
             width: 600,
             height: 400,
           },
@@ -146,13 +150,14 @@ export async function generateMetadata({ params, searchParams }) {
         title: "Properties for Sale in Hyderabad | Meet Owner",
         description:
           "Explore residential and commercial properties for sale in Hyderabad.",
-        images: ["https://placehold.co/600x400?text=Property+Image"],
+        images: ["/assets/Images/Favicon@10x.png"],
       },
       alternates: {
         canonical: "https://www.meetowner.in/listings",
       },
     };
   }
+
   const parsedParams = parseSEOParamsServer(pathSegments);
   if (!parsedParams) {
     return {
@@ -160,6 +165,7 @@ export async function generateMetadata({ params, searchParams }) {
       title: "meetowner",
     };
   }
+
   const properties = await fetchPropertiesForSEO(parsedParams);
   const city = parsedParams.city || "Hyderabad";
   const location = parsedParams.location || "";
@@ -187,7 +193,7 @@ export async function generateMetadata({ params, searchParams }) {
   const propertyTypeStr = propertyTypeParts.reverse().join(" ");
   const locationStr = location ? `${location}, ${city}` : city;
   const pageTitle = `${propertyTypeStr} in ${locationStr} ${propertyStatus} | Meet Owner`;
-  const pageDescription = `Explore ${propertyTypeStr} in ${locationStr} ${propertyStatus}. Find the best listings for your dream home or investment property with updated prices and details.`;
+  const pageDescription = `Explore ${propertyTypeStr} in ${locationStr} ${propertyStatus}. Find the best listings for your dream home.`;
   const keywords = [
     `${propertyTypeStr} in ${locationStr}`,
     `${propertyTypeStr} ${propertyStatus}`,
@@ -220,17 +226,21 @@ export async function generateMetadata({ params, searchParams }) {
     propertyFor.toLowerCase() === "rent" ? "rent" : "sale";
   const locationPart = location ? slugify(location) : "";
   const cityPart = slugify(city);
+
   const parts = [
     bhkPart,
     propertyInPart,
     subTypePart,
     `for-${propertyForPart}`,
   ].filter(Boolean);
+
   const locationSegment = locationPart
     ? `in-${locationPart}-${cityPart}`
     : `in-${cityPart}`;
+
   const pathSlug = `/listings/${parts.join("-")}-${locationSegment}`;
   const canonicalUrl = `https://www.meetowner.in${pathSlug}`;
+
   const featuredImages =
     properties
       ?.filter((p) => p?.image)
@@ -249,6 +259,7 @@ export async function generateMetadata({ params, searchParams }) {
     });
   }
   const imagesForListing = featuredImages.map((e) => e.url);
+
   return {
     title: pageTitle,
     description: pageDescription,

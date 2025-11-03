@@ -19,23 +19,27 @@ const Breadcrumb = ({ title }) => {
     privacy: "Privacy & Policies",
     profile: "Profile",
   };
-  const truncate = (str, max = 30) =>
-    str && str.length > max ? `${str.slice(0, max - 3)}...` : str;
+
   let crumbs = [];
-  const slugify = (value) =>
-    value
-      ?.toString()
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "") || "";
+  const slugify = (value) => {
+    return (
+      value
+        ?.toString()
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "") || ""
+    );
+  };
   const buildListingsSeoUrl = (data) => {
-    const city = slugify(data.city || "all");
-    const location = slugify(data.location || "all");
-    const propertyIn = slugify(data.property_in || "all");
-    const bhk = data.bhk ? `${data.bhk}-bhk` : "all";
-    const forType = data.tab?.toLowerCase() === "rent" ? "rent" : "sale";
-    return `/listings/${city}/${location}/${propertyIn}/${bhk}/${forType}`;
+    const citySlug = slugify(data.city || "hyderabad");
+    const locationSlug = slugify(data.location || "all");
+    const propertyInSlug = slugify(data.property_in || "residential");
+    const subType = slugify(data.sub_type || data.property_type || "");
+    const typePart = subType ? `${propertyInSlug}-${subType}` : propertyInSlug;
+    const propertyFor = data.property_for === "Rent" ? "rent" : "sale";
+    const seoSlug = `${typePart}-for-${propertyFor}-in-${locationSlug}-${citySlug}`;
+    return `/listings/${seoSlug}`;
   };
   const hasPropertyData = propertyData?.location && propertyData?.propertyName;
   if (pathnames.includes("property") && hasPropertyData) {
