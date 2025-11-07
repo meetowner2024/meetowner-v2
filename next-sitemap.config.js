@@ -7,12 +7,6 @@ module.exports = {
   additionalPaths: async (config) => {
     const staticRoutes = [
       {
-        loc: `${config.siteUrl}/`,
-        lastmod: "2025-08-08",
-        changefreq: "daily",
-        priority: 1.0,
-      },
-      {
         loc: `${config.siteUrl}/listings`,
         lastmod: "2025-08-08",
         changefreq: "daily",
@@ -25,40 +19,10 @@ module.exports = {
         priority: 0.85,
       },
       {
-        loc: `${config.siteUrl}/favourites`,
-        lastmod: "2025-08-08",
-        changefreq: "daily",
-        priority: 0.7,
-      },
-      {
         loc: `${config.siteUrl}/pre-launch`,
         lastmod: "2025-08-08",
         changefreq: "daily",
         priority: 0.8,
-      },
-      {
-        loc: `${config.siteUrl}/about`,
-        lastmod: "2025-08-08",
-        changefreq: "monthly",
-        priority: 0.75,
-      },
-      {
-        loc: `${config.siteUrl}/services`,
-        lastmod: "2025-08-08",
-        changefreq: "monthly",
-        priority: 0.75,
-      },
-      {
-        loc: `${config.siteUrl}/terms`,
-        lastmod: "2025-08-08",
-        changefreq: "monthly",
-        priority: 0.6,
-      },
-      {
-        loc: `${config.siteUrl}/privacy`,
-        lastmod: "2025-08-08",
-        changefreq: "monthly",
-        priority: 0.6,
       },
     ];
     try {

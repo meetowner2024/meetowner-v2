@@ -59,7 +59,6 @@ async function fetchProperty(propertyId) {
   const JWT_SECRET = process.env.NEXT_PUBLIC_ENCRYPTION_SECRET;
   const ENCRYPTION_KEY = CryptoJS.SHA256(JWT_SECRET).toString();
   const [ivHex, encryptedHex] = data.property?.split(":");
-
   const iv = CryptoJS.enc.Hex.parse(ivHex);
   const encrypted = CryptoJS.enc.Hex.parse(encryptedHex);
   const decrypted = CryptoJS.AES.decrypt(
@@ -69,58 +68,175 @@ async function fetchProperty(propertyId) {
   );
   return JSON.parse(decrypted.toString(CryptoJS.enc.Utf8));
 }
+function buildStructuredData(property, canonicalUrl) {
+  if (!property) return null;
+  const {
+    bedrooms,
+    bathrooms,
+    area,
+    price,
+    property_for,
+    sub_type,
+    description,
+    image,
+    location_id,
+    city,
+  } = property;
+  const isSale = property_for === "Sell";
+  const offerType = isSale
+    ? "https://schema.org/SellAction"
+    : "https://schema.org/RentAction";
+  const availability = isSale
+    ? "https://schema.org/InStock"
+    : "https://schema.org/LeaseOut";
+  return {
+    "@context": "https://schema.org",
+    "@type": ["Apartment", "RealEstateListing"],
+    "@id": canonicalUrl,
+    name: `${bedrooms ? `${bedrooms} BHK ` : ""}${
+      sub_type || "Apartment"
+    } in ${location_id}, ${city}`,
+    description: description || "Property details available on MeetOwner.",
+    image: image
+      ? `https://api.meetowner.in/aws/v1/s3/uploads/${image}`
+      : "https://www.meetowner.in/og-image.jpg",
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: location_id,
+      addressRegion: city,
+      addressCountry: "IN",
+    },
+    numberOfRooms: bedrooms + 1,
+    numberOfBathrooms: bathrooms || 2,
+    floorSize: {
+      "@type": "QuantitativeValue",
+      value: area,
+      unitText: "sq ft",
+    },
+    floorLevel: property.floor ? `Level ${property.floor}` : null,
+    offers: {
+      "@type": "Offer",
+      price: price ? `${price} INR` : null,
+      priceCurrency: "INR",
+      availability,
+      businessFunction: offerType,
+      validFrom: property.updated_at || new Date().toISOString().split("T")[0],
+      seller: {
+        "@type": "RealEstateAgent",
+        name: "MeetOwner",
+        url: "https://www.meetowner.in",
+      },
+      url: canonicalUrl,
+    },
+    amenities: property.amenities
+      ? property.amenities
+          .split(",")
+          .map((a) => ({ "@type": "Text", name: a.trim() }))
+      : [],
+    geo:
+      property.latitude && property.longitude
+        ? {
+            "@type": "GeoCoordinates",
+            latitude: property.latitude,
+            longitude: property.longitude,
+          }
+        : null,
+  };
+}
 export async function generateMetadata({ params }) {
-  const pathSegments = await params.params;
+  const pathSegments = params.params || [];
   if (!pathSegments || pathSegments.length === 0) {
     return {
-      title: "Property Not Found | Meet Owner",
+      title: "Property Not Found | MeetOwner",
       description: "The requested property could not be found.",
-      robots: "noindex",
+      robots: { index: false, follow: false },
     };
   }
   const propertyId = pathSegments.at(-1);
+  if (!propertyId || !propertyId.startsWith("MO-")) {
+    return {
+      title: "Invalid Property | MeetOwner",
+      description: "Invalid property identifier.",
+      robots: { index: false, follow: false },
+    };
+  }
   try {
     const property = await fetchProperty(propertyId);
+    if (!property) {
+      return {
+        title: "Property Not Found | MeetOwner",
+        description: "The requested property could not be found.",
+        robots: { index: false, follow: false },
+      };
+    }
     const { title, description, keywords, canonicalUrl } = buildSeoContent(
       property,
       propertyId
     );
-    const featureImage = property?.image || "assets/Images/Favicon@10x.png";
-    const feature = `https://api.meetowner.in/aws/v1/s3/uploads/${featureImage}`;
+    const featureImage = property.image || "assets/Images/Favicon@10x.png";
+    const featureUrl = `https://api.meetowner.in/aws/v1/s3/uploads/${featureImage}`;
+    const structuredData = buildStructuredData(property, canonicalUrl);
     return {
       title,
       description,
-      keywords,
-      robots: "index, follow",
+      keywords: keywords.join(", "),
+      robots: {
+        index: true,
+        follow: true,
+        googleBot: {
+          index: true,
+          follow: true,
+          "max-snippet": -1,
+          "max-image-preview": "large",
+        },
+      },
+      alternates: { canonical: canonicalUrl },
       openGraph: {
         title,
         description,
-        type: "website",
+        type: "realestate",
+        locale: "en_IN",
         url: canonicalUrl,
+        siteName: "MeetOwner",
         images: [
           {
-            url: feature,
+            url: featureUrl,
             width: 1200,
             height: 630,
-            alt: `${title} - Property Image`,
+            alt: `${title} - Premium Property in ${property.location_id}`,
+            type: "image/jpeg",
           },
         ],
-        siteName: "Meet Owner",
+        tags: [property.sub_type, `${property.bedrooms} BHK`, property.city],
       },
       twitter: {
         card: "summary_large_image",
         title,
         description,
-        images: [{ url: feature }],
+        site: "@meetowner",
+        creator: "@meetowner",
+        images: [
+          {
+            url: featureUrl,
+            alt: `${title} - Property Listing`,
+            width: 1200,
+            height: 675,
+          },
+        ],
       },
-      alternates: { canonical: canonicalUrl },
+      verification: {
+        google: "your-google-site-verification-code",
+      },
+      other: {
+        "application/ld+json": JSON.stringify(structuredData),
+      },
     };
   } catch (err) {
     console.error("Metadata generation error:", err);
     return {
-      title: "Property Not Found | Meet Owner",
-      description: "The requested property could not be found.",
-      robots: "noindex",
+      title: "Property Error | MeetOwner",
+      description: "Unable to load property details.",
+      robots: { index: false, follow: false },
     };
   }
 }
