@@ -1,7 +1,6 @@
 import CryptoJS from "crypto-js";
 import config from "../../../components/utils/config";
 import PropertyClient from "../PropertyClient";
-
 function buildSeoContent(property, id) {
   const slugify = (value) =>
     value
@@ -51,7 +50,6 @@ function buildSeoContent(property, id) {
   const canonicalUrl = `https://www.meetowner.in/property/${seoSlug}/${id}`;
   return { title, description, keywords, canonicalUrl };
 }
-
 async function fetchProperty(propertyId) {
   const response = await fetch(
     `${config.awsApiUrl}/listings/v1/gspmeet?unique_property_id=${propertyId}`,
@@ -83,7 +81,6 @@ async function fetchProperty(propertyId) {
   }
   return JSON.parse(decryptedStr);
 }
-
 function buildStructuredData(property, canonicalUrl) {
   if (!property) return null;
   const {
@@ -162,8 +159,6 @@ function buildStructuredData(property, canonicalUrl) {
   }
   return schema;
 }
-
-// Helper to parse legacy query string (e.g., ?3-bhk-apartment-for-sale-in-manchirevula_Id_MO-468837)
 function parseLegacyQuery(searchParams) {
   if (!searchParams || typeof searchParams !== "object") return null;
   const queryKey = Object.keys(searchParams)[0];
@@ -174,22 +169,17 @@ function parseLegacyQuery(searchParams) {
   }
   return null;
 }
-
 export async function generateMetadata({ params, searchParams }) {
   const pathSegments = params.params || [];
   let propertyId = null;
   let isLegacyQuery = false;
-
-  // Check for legacy query param first
   const legacy = parseLegacyQuery(searchParams);
   if (legacy) {
     propertyId = legacy.propertyId;
     isLegacyQuery = true;
   } else if (pathSegments && pathSegments.length > 0) {
-    // Fallback to path segments
     propertyId = pathSegments.at(-1);
   }
-
   if (!propertyId || !propertyId.startsWith("MO-")) {
     return {
       title: "Property Not Found | MeetOwner",
@@ -197,7 +187,6 @@ export async function generateMetadata({ params, searchParams }) {
       robots: { index: false, follow: false },
     };
   }
-
   try {
     const property = await fetchProperty(propertyId);
     if (!property) {
@@ -211,11 +200,13 @@ export async function generateMetadata({ params, searchParams }) {
       property,
       propertyId
     );
-    const featureImage = property.image || "assets/Images/Favicon@10x.png";
-    const featureUrl = `https://api.meetowner.in/aws/v1/s3/uploads/${featureImage}`;
-    const structuredData = buildStructuredData(property, canonicalUrl);
+    const imageUrl = property.image
+      ? property.image.startsWith("http")
+        ? property.image
+        : `https://api.meetowner.in/aws/v1/s3/uploads/${property.image}`
+      : "https://meetowner.in/favicon.ico";
 
-    // If legacy query, set noindex but canonical to clean URL
+    const structuredData = buildStructuredData(property, canonicalUrl);
     const robots = isLegacyQuery
       ? { index: false, follow: true }
       : {
@@ -228,7 +219,6 @@ export async function generateMetadata({ params, searchParams }) {
             "max-image-preview": "large",
           },
         };
-
     return {
       title,
       description,
@@ -244,11 +234,12 @@ export async function generateMetadata({ params, searchParams }) {
         siteName: "MeetOwner",
         images: [
           {
-            url: featureUrl,
-            width: 1200,
-            height: 630,
-            alt: `${title} - Premium Property in ${property.location_id}`,
-            type: "image/jpeg",
+            url: imageUrl,
+            width: 600,
+            height: 400,
+            alt: `${property.property_name || "Property"} - ${
+              property.city_id || ""
+            }`,
           },
         ],
         tags: [property.sub_type, `${property.bedrooms} BHK`, property.city],
@@ -261,16 +252,16 @@ export async function generateMetadata({ params, searchParams }) {
         creator: "@meetowner",
         images: [
           {
-            url: featureUrl,
-            alt: `${title} - Property Listing`,
-            width: 1200,
-            height: 675,
+            url: imageUrl,
+            width: 600,
+            height: 400,
+            alt: `${property.property_name || "Property"} - ${
+              property.city_id || ""
+            }`,
           },
         ],
       },
-      verification: {
-        google: "your-google-site-verification-code",
-      },
+
       other: {
         "application/ld+json": JSON.stringify(structuredData),
       },
@@ -284,22 +275,17 @@ export async function generateMetadata({ params, searchParams }) {
     };
   }
 }
-
 export default async function PropertyPage({ params, searchParams }) {
   const pathSegments = params?.params || [];
   let propertyId = null;
   let pathSegmentsForClient = pathSegments;
-
-  // Check for legacy query param first
   const legacy = parseLegacyQuery(searchParams);
   if (legacy) {
     propertyId = legacy.propertyId;
-    // Optionally, set pathSegments to mimic clean path for client
     pathSegmentsForClient = [legacy.rawSlug, propertyId];
   } else if (pathSegments && pathSegments.length > 0) {
     propertyId = pathSegments.at(-1);
   }
-
   if (!propertyId || !propertyId.startsWith("MO-")) {
     return (
       <PropertyClient
@@ -310,11 +296,9 @@ export default async function PropertyPage({ params, searchParams }) {
       />
     );
   }
-
   let property = null;
   let error = null;
   let loading = true;
-
   try {
     loading = false;
     property = await fetchProperty(propertyId);
@@ -324,7 +308,6 @@ export default async function PropertyPage({ params, searchParams }) {
     error = err.message || "Failed to fetch property";
     console.error("Property fetch error:", err);
   }
-
   return (
     <PropertyClient
       property={property}
