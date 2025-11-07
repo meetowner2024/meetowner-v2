@@ -56,9 +56,7 @@ async function fetchPropertiesForSEO(params) {
 }
 function parseSEOParamsServer(slugArray) {
   if (!slugArray || slugArray.length === 0) return null;
-
   const fullSlug = slugArray.join("-").toLowerCase();
-
   const data = {
     bhk: "",
     property_in: "",
@@ -101,7 +99,6 @@ function parseSEOParamsServer(slugArray) {
   const saleIdx = parts.indexOf("sale");
   const rentIdx = parts.indexOf("rent");
   const markerIdx = saleIdx !== -1 ? saleIdx : rentIdx;
-
   if (markerIdx !== -1 && parts.length > markerIdx + 1) {
     const after = parts.slice(markerIdx + 1).filter((p) => p !== "in");
     if (after.length >= 1) {
@@ -118,7 +115,6 @@ function parseSEOParamsServer(slugArray) {
           : "";
     }
   }
-
   return data;
 }
 export async function generateMetadata({ params, searchParams }) {
@@ -157,7 +153,6 @@ export async function generateMetadata({ params, searchParams }) {
       },
     };
   }
-
   const parsedParams = parseSEOParamsServer(pathSegments);
   if (!parsedParams) {
     return {
@@ -165,7 +160,6 @@ export async function generateMetadata({ params, searchParams }) {
       title: "meetowner",
     };
   }
-
   const properties = await fetchPropertiesForSEO(parsedParams);
   const city = parsedParams.city || "Hyderabad";
   const location = parsedParams.location || "";
@@ -200,6 +194,21 @@ export async function generateMetadata({ params, searchParams }) {
     `${propertyIn} properties in ${city}`,
     `real estate ${city}`,
     location ? `${propertyTypeStr} in ${location}, ${city}` : "",
+    `${bhk} ${subType} ${propertyStatus} in ${city}`,
+    `apartments for ${propertyStatus
+      .toLowerCase()
+      .replace("for ", "")} in ${city}`,
+    `flats for ${propertyStatus.toLowerCase().replace("for ", "")} in ${
+      location || city
+    }`,
+    `independent houses in ${location || city}`,
+    `villas for ${propertyStatus.toLowerCase().replace("for ", "")} in ${city}`,
+    `plots for sale in ${city}`,
+    `commercial spaces for rent in ${city}`,
+    `${propertyFor.toLowerCase()} properties ${city}`,
+    `buy ${subType || "property"} in ${city}`,
+    `rent ${subType || "apartment"} in ${city}`,
+    `${city} property listings`,
   ]
     .filter(Boolean)
     .join(", ");
@@ -226,21 +235,17 @@ export async function generateMetadata({ params, searchParams }) {
     propertyFor.toLowerCase() === "rent" ? "rent" : "sale";
   const locationPart = location ? slugify(location) : "";
   const cityPart = slugify(city);
-
   const parts = [
     bhkPart,
     propertyInPart,
     subTypePart,
     `for-${propertyForPart}`,
   ].filter(Boolean);
-
   const locationSegment = locationPart
     ? `in-${locationPart}-${cityPart}`
     : `in-${cityPart}`;
-
   const pathSlug = `/listings/${parts.join("-")}-${locationSegment}`;
   const canonicalUrl = `https://www.meetowner.in${pathSlug}`;
-
   const featuredImages =
     properties
       ?.filter((p) => p?.image)
@@ -259,7 +264,6 @@ export async function generateMetadata({ params, searchParams }) {
     });
   }
   const imagesForListing = featuredImages.map((e) => e.url);
-
   return {
     title: pageTitle,
     description: pageDescription,

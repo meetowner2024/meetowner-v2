@@ -33,6 +33,24 @@ function buildSeoContent(property, id) {
     `${bhk} ${subType} in ${location}`,
     `${propertyName} by ${property.builder_name}`,
     `${subType} for sale in ${city}`,
+    `${bhk} ${subType} for sale in ${city}`,
+    `${bhk} ${subType} for sale in ${location}`,
+    `${bhk} flats for sale in ${city}`,
+    `${bhk} flats for sale in ${location}`,
+    `${bhk} apartments for sale in ${city}`,
+    `${bhk} apartments for sale in ${location}`,
+    `${subType} for sale near ${location}`,
+    `luxury ${subType.toLowerCase()} in ${city}`,
+    `ready to move ${subType.toLowerCase()} in ${city}`,
+    `under construction ${subType.toLowerCase()} in ${city}`,
+    `new projects in ${city}`,
+    `best residential projects in ${city}`,
+    `buy ${bhk} ${subType.toLowerCase()} in ${city}`,
+    `top builders in ${city}`,
+    `properties for sale in ${city}`,
+    `real estate in ${city}`,
+    `MeetOwner properties in ${city}`,
+    `${bhk} ${subType.toLowerCase()} price in ${location} ${city}`,
   ]
     .filter(Boolean)
     .join(", ");
@@ -205,7 +223,6 @@ export async function generateMetadata({ params, searchParams }) {
         ? property.image
         : `https://api.meetowner.in/aws/v1/s3/uploads/${property.image}`
       : "https://meetowner.in/favicon.ico";
-
     const structuredData = buildStructuredData(property, canonicalUrl);
     const robots = isLegacyQuery
       ? { index: false, follow: true }
@@ -231,7 +248,7 @@ export async function generateMetadata({ params, searchParams }) {
         type: "website",
         locale: "en_IN",
         url: canonicalUrl,
-        siteName: "MeetOwner",
+        siteName: "Meet Owner",
         images: [
           {
             url: imageUrl,
@@ -248,8 +265,6 @@ export async function generateMetadata({ params, searchParams }) {
         card: "summary_large_image",
         title,
         description,
-        site: "@meetowner",
-        creator: "@meetowner",
         images: [
           {
             url: imageUrl,
@@ -261,7 +276,6 @@ export async function generateMetadata({ params, searchParams }) {
           },
         ],
       },
-
       other: {
         "application/ld+json": JSON.stringify(structuredData),
       },
