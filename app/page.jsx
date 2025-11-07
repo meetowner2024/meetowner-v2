@@ -156,7 +156,7 @@ export default async function Home() {
         contactedIds={contacted}
       />
       {/* <AdVideoPlayer /> */}
-      <AiChat />
+      {/* <AiChat /> */}
     </div>
   );
 }
