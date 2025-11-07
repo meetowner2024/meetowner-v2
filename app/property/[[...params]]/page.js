@@ -1,6 +1,7 @@
 import CryptoJS from "crypto-js";
 import config from "../../../components/utils/config";
 import PropertyClient from "../PropertyClient";
+
 function buildSeoContent(property, id) {
   const slugify = (value) =>
     value
@@ -50,15 +51,25 @@ function buildSeoContent(property, id) {
   const canonicalUrl = `https://www.meetowner.in/property/${seoSlug}/${id}`;
   return { title, description, keywords, canonicalUrl };
 }
+
 async function fetchProperty(propertyId) {
   const response = await fetch(
     `${config.awsApiUrl}/listings/v1/gspmeet?unique_property_id=${propertyId}`,
     { cache: "no-store" }
   );
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
   const data = await response.json();
   const JWT_SECRET = process.env.NEXT_PUBLIC_ENCRYPTION_SECRET;
+  if (!JWT_SECRET) {
+    throw new Error("Encryption secret not configured");
+  }
   const ENCRYPTION_KEY = CryptoJS.SHA256(JWT_SECRET).toString();
   const [ivHex, encryptedHex] = data.property?.split(":");
+  if (!ivHex || !encryptedHex) {
+    throw new Error("Invalid encrypted data format");
+  }
   const iv = CryptoJS.enc.Hex.parse(ivHex);
   const encrypted = CryptoJS.enc.Hex.parse(encryptedHex);
   const decrypted = CryptoJS.AES.decrypt(
@@ -66,8 +77,13 @@ async function fetchProperty(propertyId) {
     CryptoJS.enc.Hex.parse(ENCRYPTION_KEY),
     { iv }
   );
-  return JSON.parse(decrypted.toString(CryptoJS.enc.Utf8));
+  const decryptedStr = decrypted.toString(CryptoJS.enc.Utf8);
+  if (!decryptedStr) {
+    throw new Error("Decryption failed");
+  }
+  return JSON.parse(decryptedStr);
 }
+
 function buildStructuredData(property, canonicalUrl) {
   if (!property) return null;
   const {
@@ -81,6 +97,11 @@ function buildStructuredData(property, canonicalUrl) {
     image,
     location_id,
     city,
+    floor,
+    amenities,
+    latitude,
+    longitude,
+    updated_at,
   } = property;
   const isSale = property_for === "Sell";
   const offerType = isSale
@@ -89,7 +110,7 @@ function buildStructuredData(property, canonicalUrl) {
   const availability = isSale
     ? "https://schema.org/InStock"
     : "https://schema.org/LeaseOut";
-  return {
+  const schema = {
     "@context": "https://schema.org",
     "@type": ["Apartment", "RealEstateListing"],
     "@id": canonicalUrl,
@@ -113,14 +134,13 @@ function buildStructuredData(property, canonicalUrl) {
       value: area,
       unitText: "sq ft",
     },
-    floorLevel: property.floor ? `Level ${property.floor}` : null,
     offers: {
       "@type": "Offer",
       price: price ? `${price} INR` : null,
       priceCurrency: "INR",
       availability,
       businessFunction: offerType,
-      validFrom: property.updated_at || new Date().toISOString().split("T")[0],
+      validFrom: updated_at || new Date().toISOString().split("T")[0],
       seller: {
         "@type": "RealEstateAgent",
         name: "MeetOwner",
@@ -128,38 +148,56 @@ function buildStructuredData(property, canonicalUrl) {
       },
       url: canonicalUrl,
     },
-    amenities: property.amenities
-      ? property.amenities
-          .split(",")
-          .map((a) => ({ "@type": "Text", name: a.trim() }))
+    amenities: amenities
+      ? amenities.split(",").map((a) => ({ "@type": "Text", name: a.trim() }))
       : [],
-    geo:
-      property.latitude && property.longitude
-        ? {
-            "@type": "GeoCoordinates",
-            latitude: property.latitude,
-            longitude: property.longitude,
-          }
-        : null,
   };
+  if (floor) schema.floorLevel = `Level ${floor}`;
+  if (latitude && longitude) {
+    schema.geo = {
+      "@type": "GeoCoordinates",
+      latitude,
+      longitude,
+    };
+  }
+  return schema;
 }
-export async function generateMetadata({ params }) {
+
+// Helper to parse legacy query string (e.g., ?3-bhk-apartment-for-sale-in-manchirevula_Id_MO-468837)
+function parseLegacyQuery(searchParams) {
+  if (!searchParams || typeof searchParams !== "object") return null;
+  const queryKey = Object.keys(searchParams)[0];
+  if (!queryKey) return null;
+  const match = queryKey.match(/(.+)_Id_(MO-\d+)$/);
+  if (match) {
+    return { propertyId: match[2], rawSlug: match[1] };
+  }
+  return null;
+}
+
+export async function generateMetadata({ params, searchParams }) {
   const pathSegments = params.params || [];
-  if (!pathSegments || pathSegments.length === 0) {
+  let propertyId = null;
+  let isLegacyQuery = false;
+
+  // Check for legacy query param first
+  const legacy = parseLegacyQuery(searchParams);
+  if (legacy) {
+    propertyId = legacy.propertyId;
+    isLegacyQuery = true;
+  } else if (pathSegments && pathSegments.length > 0) {
+    // Fallback to path segments
+    propertyId = pathSegments.at(-1);
+  }
+
+  if (!propertyId || !propertyId.startsWith("MO-")) {
     return {
       title: "Property Not Found | MeetOwner",
       description: "The requested property could not be found.",
       robots: { index: false, follow: false },
     };
   }
-  const propertyId = pathSegments.at(-1);
-  if (!propertyId || !propertyId.startsWith("MO-")) {
-    return {
-      title: "Invalid Property | MeetOwner",
-      description: "Invalid property identifier.",
-      robots: { index: false, follow: false },
-    };
-  }
+
   try {
     const property = await fetchProperty(propertyId);
     if (!property) {
@@ -176,25 +214,31 @@ export async function generateMetadata({ params }) {
     const featureImage = property.image || "assets/Images/Favicon@10x.png";
     const featureUrl = `https://api.meetowner.in/aws/v1/s3/uploads/${featureImage}`;
     const structuredData = buildStructuredData(property, canonicalUrl);
+
+    // If legacy query, set noindex but canonical to clean URL
+    const robots = isLegacyQuery
+      ? { index: false, follow: true }
+      : {
+          index: true,
+          follow: true,
+          googleBot: {
+            index: true,
+            follow: true,
+            "max-snippet": -1,
+            "max-image-preview": "large",
+          },
+        };
+
     return {
       title,
       description,
-      keywords: keywords.join(", "),
-      robots: {
-        index: true,
-        follow: true,
-        googleBot: {
-          index: true,
-          follow: true,
-          "max-snippet": -1,
-          "max-image-preview": "large",
-        },
-      },
+      keywords,
+      robots,
       alternates: { canonical: canonicalUrl },
       openGraph: {
         title,
         description,
-        type: "realestate",
+        type: "website",
         locale: "en_IN",
         url: canonicalUrl,
         siteName: "MeetOwner",
@@ -240,40 +284,53 @@ export async function generateMetadata({ params }) {
     };
   }
 }
-export default async function PropertyPage({ params }) {
+
+export default async function PropertyPage({ params, searchParams }) {
   const pathSegments = params?.params || [];
-  if (!pathSegments || pathSegments.length === 0) {
+  let propertyId = null;
+  let pathSegmentsForClient = pathSegments;
+
+  // Check for legacy query param first
+  const legacy = parseLegacyQuery(searchParams);
+  if (legacy) {
+    propertyId = legacy.propertyId;
+    // Optionally, set pathSegments to mimic clean path for client
+    pathSegmentsForClient = [legacy.rawSlug, propertyId];
+  } else if (pathSegments && pathSegments.length > 0) {
+    propertyId = pathSegments.at(-1);
+  }
+
+  if (!propertyId || !propertyId.startsWith("MO-")) {
     return (
       <PropertyClient
         property={null}
         loading={false}
-        error="No URL segments provided"
-        pathSegments={pathSegments}
+        error="Invalid property ID in URL"
+        pathSegments={pathSegmentsForClient}
       />
     );
   }
-  const propertyId = pathSegments.at(-1);
+
   let property = null;
   let error = null;
   let loading = true;
-  if (!propertyId || !propertyId.startsWith("MO-")) {
-    error = "Invalid property ID in URL";
-  } else {
-    try {
-      loading = false;
-      property = await fetchProperty(propertyId);
-      if (!property) error = "Property not found";
-    } catch (err) {
-      loading = false;
-      error = err.message || "Failed to fetch property";
-    }
+
+  try {
+    loading = false;
+    property = await fetchProperty(propertyId);
+    if (!property) error = "Property not found";
+  } catch (err) {
+    loading = false;
+    error = err.message || "Failed to fetch property";
+    console.error("Property fetch error:", err);
   }
+
   return (
     <PropertyClient
       property={property}
       loading={loading}
       error={error}
-      pathSegments={pathSegments}
+      pathSegments={pathSegmentsForClient}
     />
   );
 }
