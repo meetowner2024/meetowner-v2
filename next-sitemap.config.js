@@ -18,12 +18,6 @@ module.exports = {
         changefreq: "daily",
         priority: 0.85,
       },
-      {
-        loc: `${config.siteUrl}/pre-launch`,
-        lastmod: "2025-08-08",
-        changefreq: "daily",
-        priority: 0.8,
-      },
     ];
     try {
       const sitemapResponse = await fetch(

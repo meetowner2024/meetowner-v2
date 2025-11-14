@@ -20,12 +20,8 @@ export default async function SitemapPage() {
             { href: "/", label: "Home" },
             { href: "/listings", label: "Listings" },
             { href: "/property", label: "Property" },
-            { href: "/favourites", label: "Favourites" },
-            { href: "/pre-launch", label: "Pre-Launch" },
             { href: "/about", label: "About" },
             { href: "/services", label: "Services" },
-            { href: "/terms", label: "Terms" },
-            { href: "/privacy", label: "Privacy" },
           ].map((page) => (
             <Link
               key={page.href}
