@@ -44,42 +44,7 @@ const Stat = ({ label, value }) => (
     </div>
   </div>
 );
-const Skeleton = () => (
-  <div className="hidden lg:block p-5">
-    <div className="animate-pulse space-y-4">
-      <div className="h-8 w-3/4 bg-gray-200 rounded" />
-      <div className="flex items-center gap-2">
-        <div className="h-4 w-4 bg-gray-200 rounded-full" />
-        <div className="h-4 w-1/2 bg-gray-200 rounded" />
-      </div>
-      <div className="flex flex-wrap items-center gap-2">
-        <div className="h-6 w-20 bg-gray-200 rounded-full" />
-        <div className="h-4 w-1/3 bg-gray-200 rounded" />
-        <div className="h-4 w-1/4 bg-gray-200 rounded" />
-      </div>
-      <div className="h-4 w-2/3 bg-gray-200 rounded px-4" />
-      <div className="grid grid-cols-2 gap-3">
-        <div className="h-16 w-full bg-gray-200 rounded-xl" />
-        <div className="h-16 w-full bg-gray-200 rounded-xl" />
-        <div className="h-16 w-full bg-gray-200 rounded-xl" />
-        <div className="h-16 w-full bg-gray-200 rounded-xl" />
-      </div>
-      <div className="px-5 mt-3">
-        <div className="flex items-center justify-between text-xs mb-1">
-          <div className="h-4 w-1/4 bg-gray-200 rounded" />
-          <div className="h-4 w-1/3 bg-gray-200 rounded" />
-        </div>
-        <div className="h-2 w-full rounded-full bg-gray-100 overflow-hidden">
-          <div className="h-full bg-gray-300 w-2/5" />
-        </div>
-      </div>
-      <div className="p-5 flex gap-3">
-        <div className="h-11 w-2/3 bg-gray-200 rounded-lg" />
-        <div className="h-11 w-1/3 bg-gray-200 rounded-lg" />
-      </div>
-    </div>
-  </div>
-);
+
 const Empty = ({ message = "No data found." }) => (
   <div className="hidden lg:flex items-center justify-center p-8 text-sm text-gray-500">
     {message}

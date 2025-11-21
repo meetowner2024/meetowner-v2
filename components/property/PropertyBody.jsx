@@ -303,6 +303,7 @@ const PropertyBody = ({ handleLoading, propertyDataDetails }) => {
           "Independent Villa": {
             rera_approved: true,
             occupancy: true,
+            bedrooms: true,
             bathroom: true,
             balconies: true,
             furnished_status: true,
