@@ -1,8 +1,25 @@
-import Header from "../../components/Header";
-import Footer from "../../components/Footer";
 import config from "../../components/utils/config";
-import CareersClient from "../../components/footer-links/CareersClient";
-
+import dynamic from "next/dynamic";
+const LoadingUI = (
+  <div className="flex justify-center items-center py-2">
+    <div className="w-4 h-4 border-2 border-gray-300 border-t-transparent rounded-full animate-spin" />
+  </div>
+);
+const Header = dynamic(() => import("../../components/Header"), {
+  ssr: true,
+  loading: () => LoadingUI,
+});
+const Footer = dynamic(() => import("../../components/Footer"), {
+  ssr: true,
+  loading: () => LoadingUI,
+});
+const CareersClient = dynamic(
+  () => import("../../components/footer-links/CareersClient"),
+  {
+    ssr: true,
+    loading: () => LoadingUI,
+  }
+);
 async function fetchCareers() {
   try {
     const response = await fetch(`${config.awsApiUrl}/api/v1/careers`);

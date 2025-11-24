@@ -1,10 +1,21 @@
-
-import Header from "../../components/Header";
-import Footer from "../../components/Footer";
+import dynamic from "next/dynamic";
+const LoadingUI = (
+  <div className="flex justify-center items-center py-2">
+    <div className="w-4 h-4 border-2 border-gray-300 border-t-transparent rounded-full animate-spin" />
+  </div>
+);
+const Header = dynamic(() => import("../../components/Header"), {
+  ssr: true,
+  loading: () => LoadingUI,
+});
+const Footer = dynamic(() => import("../../components/Footer"), {
+  loading: () => LoadingUI,
+});
+const AboutClient = dynamic(
+  () => import("../../components/footer-links/AboutClient"),
+  { loading: () => LoadingUI }
+);
 import config from "../../components/utils/config";
-import AboutClient from "../../components/footer-links/AboutClient";
-
-
 async function fetchAbout() {
   try {
     const response = await fetch(`${config.awsApiUrl}/api/v1/about`, {
@@ -22,10 +33,8 @@ async function fetchAbout() {
     return "";
   }
 }
-
 export default async function AboutPage() {
   const aboutHtml = await fetchAbout();
-
   return (
     <>
       <Header />

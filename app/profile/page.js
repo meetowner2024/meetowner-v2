@@ -1,8 +1,22 @@
 import { ToastContainer } from "react-toastify";
-import Footer from "../../components/Footer";
-import Header from "../../components/Header";
-import ProfilePage from "../../components/utils/Profile";
-
+import dynamic from "next/dynamic";
+const LoadingUI = (
+  <div className="flex justify-center items-center py-2">
+    <div className="w-4 h-4 border-2 border-gray-300 border-t-transparent rounded-full animate-spin" />
+  </div>
+);
+const ProfilePage = dynamic(() => import("../../components/utils/Profile"), {
+  ssr: true,
+  loading: () => LoadingUI,
+});
+const Header = dynamic(() => import("../../components/Header"), {
+  ssr: true,
+  loading: () => LoadingUI,
+});
+const Footer = dynamic(() => import("../../components/Footer"), {
+  ssr: true,
+  loading: () => LoadingUI,
+});
 const ProfileWrapper = () => {
   return (
     <>

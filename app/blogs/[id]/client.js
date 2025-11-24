@@ -2,13 +2,20 @@
 
 import { Button } from "../../../components/ui/button";
 import { Badge } from "../../../components/ui/badge";
-import { ArrowLeft, Calendar, User, Share2 } from "lucide-react";
+import { Calendar, User, Share2 } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
 import { toast } from "react-toastify";
-import Header from "../../../components/Header";
 import Breadcrumb from "../../../components/utils/BreadCrumb";
-
+import dynamic from "next/dynamic";
+const LoadingUI = (
+  <div className="flex justify-center items-center py-2">
+    <div className="w-4 h-4 border-2 border-gray-300 border-t-transparent rounded-full animate-spin" />
+  </div>
+);
+const Header = dynamic(() => import("../../../components/Header"), {
+  ssr: false,
+  loading: () => LoadingUI,
+});
 export default function ClientBlogPost({ initialPost }) {
   const post = initialPost;
   const handleShare = async () => {
@@ -29,20 +36,13 @@ export default function ClientBlogPost({ initialPost }) {
   return (
     <div className="min-h-screen bg-blog-gradient-subtle">
       <div className="bg-background ">
-        {/* <div className="container mx-auto px-4 py-6">
-          <Link href="/blogs">
-            <Button variant="ghost" size="sm" className="mb-4">
-              <ArrowLeft className="w-4 h-4 mr-2" /> Back to Blog
-            </Button>
-          </Link>
-        </div> */}
-        <Header/>
+        <Header />
       </div>
 
       <article className="container mx-auto px-4 py-12 sm:max-w-6xl">
-         <div className="mb-2">
-           <Breadcrumb title={post.title}/>
-         </div>
+        <div className="mb-2">
+          <Breadcrumb title={post.title} />
+        </div>
         <div className="animate-fade-in">
           {post.image && (
             <div className="aspect-video rounded-lg overflow-hidden mb-8 shadow-blog-card">

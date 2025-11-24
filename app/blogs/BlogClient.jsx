@@ -3,14 +3,21 @@
 import { useState } from "react";
 import BlogCard from "../../components/blog/BlogCard";
 import { Button } from "../../components/ui/button";
-import { ArrowLeft, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { Input } from "../../components/ui/input";
-import { useRouter } from "next/navigation";
-import Header from "../../components/Header";
 import Breadcrumb from "../../components/utils/BreadCrumb";
+import dynamic from "next/dynamic";
+const LoadingUI = (
+  <div className="flex justify-center items-center py-2">
+    <div className="w-4 h-4 border-2 border-gray-300 border-t-transparent rounded-full animate-spin" />
+  </div>
+);
+const Header = dynamic(() => import("../../components/Header"), {
+  ssr: true,
+  loading: () => LoadingUI,
+});
 
 export default function BlogClient({ initialBlogs }) {
-  const router = useRouter();
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [blogs] = useState(initialBlogs);

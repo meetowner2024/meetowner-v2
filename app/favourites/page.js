@@ -14,13 +14,8 @@ import { MdOutlineVerified } from "react-icons/md";
 import { useRouter } from "next/navigation";
 import config from "../../components/utils/config";
 import axios from "axios";
-import ScheduleFormModal from "../../components/utils/ScheduleForm";
 import { toast, ToastContainer } from "react-toastify";
-import Header from "../../components/Header";
-import Footer from "../../components/Footer";
-import DynamicAds from "../../components/utils/DynamicAds";
 import useWhatsappHook from "../../components/utils/useWhatsappHook";
-import Login from "../../components/auth/Login";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/pagination";
@@ -31,6 +26,35 @@ import CryptoJS from "crypto-js";
 import { setPropertyDetails } from "@/components/store/slices/propertyDetails";
 import { useDispatch } from "react-redux";
 import Image from "next/image";
+import dynamic from "next/dynamic";
+const LoadingUI = (
+  <div className="flex justify-center items-center py-2">
+    <div className="w-4 h-4 border-2 border-gray-300 border-t-transparent rounded-full animate-spin" />
+  </div>
+);
+const Header = dynamic(() => import("../../components/Header"), {
+  ssr: false,
+  loading: () => LoadingUI,
+});
+const Footer = dynamic(() => import("../../components/Footer"), {
+  ssr: false,
+  loading: () => LoadingUI,
+});
+const DynamicAds = dynamic(() => import("../../components/utils/DynamicAds"), {
+  ssr: false,
+  loading: () => LoadingUI,
+});
+const Login = dynamic(() => import("../../components/auth/Login"), {
+  ssr: false,
+  loading: () => LoadingUI,
+});
+const ScheduleFormModal = dynamic(
+  () => import("../../components/utils/ScheduleForm"),
+  {
+    ssr: false,
+    loading: () => LoadingUI,
+  }
+);
 const PropertyCard = memo(
   ({
     property,

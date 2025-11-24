@@ -1,6 +1,14 @@
+import dynamic from "next/dynamic";
+const LoadingUI = (
+  <div className="flex justify-center items-center py-2">
+    <div className="w-4 h-4 border-2 border-gray-300 border-t-transparent rounded-full animate-spin" />
+  </div>
+);
+const BlogClient = dynamic(() => import("./BlogClient"), {
+  ssr: true,
+  loading: () => LoadingUI,
+});
 
-import { Metadata } from "next";
-import BlogClient from "./BlogClient";
 import config from "../../components/utils/config";
 
 export const metadata = {
@@ -21,7 +29,9 @@ export const metadata = {
     title: "Meetowner Blogs – Real Estate Tips, Guides & Insights",
     description:
       "Read expert articles on property investment, market updates, and home-buying advice from Meetowner.",
-    url: `${process.env.NEXT_PUBLIC_BASE_URL || "https://www.meetowner.com"}/blogs`,
+    url: `${
+      process.env.NEXT_PUBLIC_BASE_URL || "https://www.meetowner.com"
+    }/blogs`,
     siteName: "Meetowner",
     images: [
       {
@@ -44,7 +54,9 @@ export const metadata = {
   },
 
   alternates: {
-    canonical: `${process.env.NEXT_PUBLIC_BASE_URL || "https://www.meetowner.com"}/blogs`,
+    canonical: `${
+      process.env.NEXT_PUBLIC_BASE_URL || "https://www.meetowner.com"
+    }/blogs`,
   },
 
   robots: {
@@ -66,7 +78,6 @@ async function fetchBlogs() {
   }
 }
 
-
 export default async function BlogPage() {
   const rawBlogs = await fetchBlogs();
 
@@ -77,7 +88,10 @@ export default async function BlogPage() {
         const parsed = JSON.parse(raw);
         return Array.isArray(parsed) ? parsed.map((t) => t.trim()) : [];
       } catch {
-        return raw.split(",").map((t) => t.trim()).filter(Boolean);
+        return raw
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean);
       }
     }
     return [];
@@ -100,7 +114,7 @@ export default async function BlogPage() {
     readTime: "5 min read",
     category: post.category || "Uncategorized",
     tags: parseHashtags(post.hashtags) || [],
-    image: post.image_url
+    image: post.image_url,
   }));
   return <BlogClient initialBlogs={blogs} />;
 }

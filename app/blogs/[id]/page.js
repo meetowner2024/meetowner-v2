@@ -1,34 +1,43 @@
 import config from "../../../components/utils/config";
-import ClientBlogPost from "./client";
+import dynamic from "next/dynamic";
+const LoadingUI = (
+  <div className="flex justify-center items-center py-2">
+    <div className="w-4 h-4 border-2 border-gray-300 border-t-transparent rounded-full animate-spin" />
+  </div>
+);
+const ClientBlogPost = dynamic(() => import("./client"), {
+  ssr: true,
+  loading: () => LoadingUI,
+});
 
 const parseHashtags = (raw) => {
   if (Array.isArray(raw)) return raw;
   if (typeof raw === "string") {
     try {
       const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? parsed.map(t => t.trim()) : [];
+      return Array.isArray(parsed) ? parsed.map((t) => t.trim()) : [];
     } catch {
-      return raw.split(",").map(t => t.trim()).filter(Boolean);
+      return raw
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean);
     }
   }
   return [];
 };
-const resolveImageUrl = (imagePath) => {
-  if (!imagePath) return "https://placehold.co/800x400?text=Blog+Post+Image";
-  if (imagePath.startsWith("http")) return imagePath;
-  return `https://api.meetowner.in/aws/v1/s3${
-    imagePath.startsWith("/") ? "" : "/"
-  }${imagePath}`;
-};
+
 export async function generateMetadata({ params }) {
   const id = await params?.id;
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://www.meetowner.com";
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_URL || "https://www.meetowner.com";
 
   try {
-    const res = await fetch(`${config.awsApiUrl}/blogs/getAllBlogs`, { cache: "no-store" });
+    const res = await fetch(`${config.awsApiUrl}/blogs/getAllBlogs`, {
+      cache: "no-store",
+    });
     if (!res.ok) return { title: "Blog • Meetowner" };
     const { data } = await res.json();
-    const blog = data?.find(p => p.id.toString() === id);
+    const blog = data?.find((p) => p.id.toString() === id);
     if (!blog) return { title: "Blog • Meetowner" };
 
     const post = {
@@ -64,10 +73,12 @@ export async function generateMetadata({ params }) {
 
 async function getPost(id) {
   try {
-    const res = await fetch(`${config.awsApiUrl}/blogs/getAllBlogs`, { cache: "no-store" });
+    const res = await fetch(`${config.awsApiUrl}/blogs/getAllBlogs`, {
+      cache: "no-store",
+    });
     if (!res.ok) return null;
     const { data } = await res.json();
-    const blog = data?.find(p => p.id.toString() === id);
+    const blog = data?.find((p) => p.id.toString() === id);
     if (!blog) return null;
     return {
       id: blog.id,
@@ -84,7 +95,7 @@ async function getPost(id) {
       readTime: "5 min read",
       category: blog.category || "Uncategorized",
       tags: parseHashtags(blog.hashtags),
-     image:blog.image_url,
+      image: blog.image_url,
     };
   } catch {
     return null;
@@ -93,6 +104,11 @@ async function getPost(id) {
 
 export default async function BlogPostPage({ params }) {
   const post = await getPost(params?.id);
-  if (!post) return <div className="p-8 text-red-500 text-2xl flex justify-center h-screen items-center">Post not found.</div>;
+  if (!post)
+    return (
+      <div className="p-8 text-red-500 text-2xl flex justify-center h-screen items-center">
+        Post not found.
+      </div>
+    );
   return <ClientBlogPost initialPost={post} />;
 }

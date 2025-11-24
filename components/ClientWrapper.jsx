@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { WifiOff, RefreshCw } from "lucide-react";
+import { ToastContainer } from "react-toastify";
+
 export default function ClientWrapper({ children, profileData }) {
   const [loginTrigger, setLoginTrigger] = useState(0);
   const [isRetrying, setIsRetrying] = useState(false);
@@ -109,6 +111,18 @@ export default function ClientWrapper({ children, profileData }) {
       loginTrigger={loginTrigger}
       profileData={profileData}
     >
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
       <Provider store={store}>{children}</Provider>
     </UserProfileCheckWrapper>
   );

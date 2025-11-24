@@ -1,23 +1,42 @@
 "use client";
-import ExclussiveCards from "../components/inital-rendering/ExclussiveCards";
-import Header from "./Header";
-import HighDemandProjects from "../components/inital-rendering/HighdemandProjects";
-import RecommendedSellers from "../components/inital-rendering/RecommendedSellers";
-import SearchBar from "../components/inital-rendering/SearchBar";
-import Slider from "../components/inital-rendering/Slider";
-import Dealproperties from "../components/inital-rendering/Dealproperties";
-import HousingPicks from "../components/inital-rendering/HousingPicks";
-import FooterLinks from "./FooterLinks";
-import Footer from "./Footer";
-import store from "./store/store";
-import { Provider, useDispatch } from "react-redux";
-import { useCallback, useEffect, useState } from "react";
-import { ChevronUp } from "lucide-react";
-import { setAuthData } from "./store/slices/authSlice";
-import { ToastContainer } from "react-toastify";
-import config from "./utils/config";
-import axios from "axios";
+import dynamic from "next/dynamic";
 
+const Header = dynamic(() => import("./Header"), { ssr: false });
+const SearchBar = dynamic(
+  () => import("../components/inital-rendering/SearchBar"),
+  { ssr: false }
+);
+const Slider = dynamic(() => import("../components/inital-rendering/Slider"), {
+  ssr: false,
+});
+const Dealproperties = dynamic(
+  () => import("../components/inital-rendering/Dealproperties"),
+  { ssr: false }
+);
+const HousingPicks = dynamic(
+  () => import("../components/inital-rendering/HousingPicks"),
+  { ssr: false }
+);
+const HighDemandProjects = dynamic(
+  () => import("../components/inital-rendering/HighdemandProjects"),
+  { ssr: false }
+);
+const RecommendedSellers = dynamic(
+  () => import("../components/inital-rendering/RecommendedSellers"),
+  { ssr: false }
+);
+const ExclussiveCards = dynamic(
+  () => import("../components/inital-rendering/ExclussiveCards"),
+  { ssr: false }
+);
+const FooterLinks = dynamic(() => import("./FooterLinks"), {
+  ssr: false,
+});
+const Footer = dynamic(() => import("./Footer"), {
+  ssr: false,
+});
+import { useEffect, useState } from "react";
+import { ChevronUp } from "lucide-react";
 const Dashboard = ({
   latestProperties,
   bestDealProperties,
@@ -30,6 +49,10 @@ const Dashboard = ({
   contactedIds = [],
 }) => {
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [renderBelowFold, setRenderBelowFold] = useState(false);
+  useEffect(() => {
+    requestIdleCallback(() => setRenderBelowFold(true));
+  }, []);
   useEffect(() => {
     const handleScroll = () => {
       setShowScrollTop(window.scrollY > 200);
@@ -41,7 +64,6 @@ const Dashboard = ({
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
   const [contacted, setContacted] = useState([]);
-
   useEffect(() => {
     if (contactedIds) {
       setContacted(contactedIds);
@@ -108,55 +130,46 @@ const Dashboard = ({
     ],
   };
   return (
-    <Provider store={store}>
-      <div className=" overflow-x-hidden">
-        <ToastContainer
-          position="top-right"
-          autoClose={3000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="light"
-        />
-        <Header favourites={favourites} />
-        <SearchBar formatted={formatted} />
-        <Slider
-          latestProperties={latestProperties}
-          favourites={favourites}
-          contacted={contacted}
-          setContacted={setContacted}
-        />
-        <Dealproperties
-          bestDealProperties={bestDealProperties}
-          contacted={contacted}
-          setContacted={setContacted}
-        />
-        <HousingPicks bestMeetownerProperties={bestMeetownerProperties} />
-        <HighDemandProjects highDemandProperties={highDemandProperties} />
-        <RecommendedSellers recommendedSellers={recommendedSellers} />
-        <ExclussiveCards meetownerExclusive={meetownerExclusive} />
-        <FooterLinks links={footerLinks} basePath="/listings" />
-        <Footer />
-        {showScrollTop && (
-          <div
-            onClick={scrollToTop}
-            className="fixed bottom-5 left-1/2 bg-white transform -translate-x-1/2 w-36 h-12 flex items-center justify-center  rounded-full shadow-md cursor-pointer  transition-all duration-300 z-50"
-          >
-            <div className="flex items-center space-x-2">
-              <ChevronUp className="w-5 h-5 text-black" />
-              <span className="text-black text-sm font-semibold">
-                Back to Top
-              </span>
-            </div>
+    <div className="overflow-x-hidden">
+      {}
+      <Header favourites={favourites} />
+      <SearchBar formatted={formatted} />
+      <Slider
+        latestProperties={latestProperties}
+        favourites={favourites}
+        contacted={contacted}
+        setContacted={setContacted}
+      />
+      <Dealproperties
+        bestDealProperties={bestDealProperties}
+        contacted={contacted}
+        setContacted={setContacted}
+      />
+      {}
+      {renderBelowFold && (
+        <>
+          <HousingPicks bestMeetownerProperties={bestMeetownerProperties} />
+          <HighDemandProjects highDemandProperties={highDemandProperties} />
+          <RecommendedSellers recommendedSellers={recommendedSellers} />
+          <ExclussiveCards meetownerExclusive={meetownerExclusive} />
+          <FooterLinks links={footerLinks} basePath="/listings" />
+          <Footer />
+        </>
+      )}
+      {showScrollTop && (
+        <div
+          onClick={scrollToTop}
+          className="fixed bottom-5 left-1/2 bg-white transform -translate-x-1/2 w-36 h-12 flex items-center justify-center rounded-full shadow-md cursor-pointer transition-all duration-300 z-50"
+        >
+          <div className="flex items-center space-x-2">
+            <ChevronUp className="w-5 h-5 text-black" />
+            <span className="text-black text-sm font-semibold">
+              Back to Top
+            </span>
           </div>
-        )}
-      </div>
-    </Provider>
+        </div>
+      )}
+    </div>
   );
 };
-
 export default Dashboard;

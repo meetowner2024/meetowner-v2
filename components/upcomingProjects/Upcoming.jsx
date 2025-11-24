@@ -1,17 +1,24 @@
 "use client";
-import React, { useState, useMemo, Suspense } from "react";
-import { useSelector } from "react-redux"; // Added for Redux
+import { useState, useMemo, Suspense } from "react";
+import { useSelector } from "react-redux";
 import { useProperties } from "../utils/useUpcomingProperties";
 import { Filters } from "./Filters";
 import { PropertyList } from "./PropertyList";
 import { QuickView } from "./QuickView";
-
 import { Filter } from "lucide-react";
-import Header from "../Header";
-
+import dynamic from "next/dynamic";
+const LoadingUI = (
+  <div className="flex justify-center items-center py-2">
+    <div className="w-4 h-4 border-2 border-gray-300 border-t-transparent rounded-full animate-spin" />
+  </div>
+);
+const Header = dynamic(() => import("../Header"), {
+  ssr: false,
+  loading: () => LoadingUI,
+});
 export default function Upcoming() {
   const [selectedCategory, setSelectedCategory] = useState("Residential");
-  const { location, bhk, sub_type } = useSelector((state) => state.search); // Get Redux state
+  const { location, bhk, sub_type } = useSelector((state) => state.search);
   const [filters, setFilters] = useState({
     newLaunch: false,
     reraRegistered: false,
@@ -29,10 +36,8 @@ export default function Upcoming() {
   const [showFilters, setShowFilters] = useState(false);
   const [sortBy, setSortBy] = useState("relevance");
   const { properties, loading, error } = useProperties();
-
   if (error) {
   }
-
   const clearFilters = () => {
     setFilters({
       newLaunch: false,
@@ -47,7 +52,6 @@ export default function Upcoming() {
       builder: "",
     });
   };
-
   const filteredProperties = useMemo(() => {
     return properties.filter((property) => {
       if (
@@ -57,8 +61,6 @@ export default function Upcoming() {
       ) {
         return false;
       }
-
-      // Status Filters
       if (filters.newLaunch && property.launch_type !== "Soft Launch") {
         return false;
       }
@@ -77,8 +79,6 @@ export default function Upcoming() {
       ) {
         return false;
       }
-
-      // Price Filter (in crores)
       const price =
         property.sizes?.length > 0
           ? Math.min(
@@ -92,8 +92,6 @@ export default function Upcoming() {
       if (price < filters.minPrice || price > filters.maxPrice) {
         return false;
       }
-
-      // BHK Filter (assuming sizes[].bhk)
       if (filters.bhk.length > 0) {
         const bhkValues = filters.bhk.map((bhk) =>
           bhk === "6+ BHK" ? 6 : parseInt(bhk.split(" ")[0])
@@ -104,16 +102,12 @@ export default function Upcoming() {
           return false;
         }
       }
-
-      // Property Type Filter
       if (
         filters.propertyType.length > 0 &&
         !filters.propertyType.includes(property.sub_type)
       ) {
         return false;
       }
-
-      // Location Filter
       if (
         filters.location &&
         (!property.location ||
@@ -123,8 +117,6 @@ export default function Upcoming() {
       ) {
         return false;
       }
-
-      // Builder Filter
       if (
         filters.builder &&
         (!property.builder_name ||
@@ -134,22 +126,18 @@ export default function Upcoming() {
       ) {
         return false;
       }
-
       return true;
     });
   }, [properties, selectedCategory, filters]);
-
   const Loading = () => (
     <div className="flex justify-center items-center h-screen">
       <div className="animate-spin rounded-full h-10 w-10 border-t-4 border-indigo-600"></div>
     </div>
   );
-
   if (loading) return <Loading />;
   if (error) {
     return <div className="text-red-600 text-center p-4">Error: {error}</div>;
   }
-
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
