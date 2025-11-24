@@ -6,7 +6,6 @@ const LoadingUI = (
   </div>
 );
 const ProfilePage = dynamic(() => import("../../components/utils/Profile"), {
-  ssr: true,
   loading: () => LoadingUI,
 });
 const Header = dynamic(() => import("../../components/Header"), {

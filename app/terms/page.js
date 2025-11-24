@@ -1,21 +1,35 @@
-
-
-import Header from "../../components/Header";
-import Footer from "../../components/Footer";
+import dynamic from "next/dynamic";
 import config from "../../components/utils/config";
-import  TermsClient  from "../../components/footer-links/TermsClient";
-
+const LoadingUI = (
+  <div className="flex justify-center items-center py-2">
+    <div className="w-4 h-4 border-2 border-gray-300 border-t-transparent rounded-full animate-spin" />
+  </div>
+);
+const Footer = dynamic(() => import("../../components/Footer"), {
+  ssr: true,
+  loading: () => LoadingUI,
+});
+const Header = dynamic(() => import("../../components/Header"), {
+  ssr: true,
+  loading: () => LoadingUI,
+});
+const TermsClient = dynamic(
+  () => import("../../components/footer-links/TermsClient"),
+  {
+    loading: () => LoadingUI,
+  }
+);
 
 async function fetchTerms() {
   try {
     const response = await fetch(`${config.awsApiUrl}/api/v1/terms`, {
-      cache: "force-cache", 
+      cache: "force-cache",
     });
     if (!response.ok) {
       throw new Error("Failed to fetch terms and conditions");
     }
     const data = await response.json();
-    return data[0]?.description || ""; 
+    return data[0]?.description || "";
   } catch (err) {
     console.error("Failed to fetch terms:", err);
     return "";

@@ -16,15 +16,19 @@ export default async function Home() {
   }
 
   async function getLatestProperties() {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/getLatestProperties`,
-      {
-        cache: "force-cache",
-      }
-    );
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/getLatestProperties`,
+        {
+          cache: "force-cache",
+        }
+      );
 
-    const data = await res.json();
-    return { properties: data.properties || [] };
+      const data = await res.json();
+      return { properties: data.properties || [] };
+    } catch (error) {
+      console.log("error: ", error);
+    }
   }
 
   async function getBestDealProperties() {
@@ -154,8 +158,6 @@ export default async function Home() {
         formatted={formatted}
         contactedIds={contacted}
       />
-
-  
     </div>
   );
 }

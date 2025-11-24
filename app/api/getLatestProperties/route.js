@@ -94,6 +94,11 @@ export async function GET(req) {
       ...uniqueNewProperties,
       ...uniqueTopProperties,
     ].slice(0, 10);
+    const headers = new Headers();
+    headers.set("Content-Type", "application/json");
+    headers.set("Cache-Control", "public, max-age=60, s-maxage=60");
+
+    headers.set("Vary", "Accept-Encoding");
     if (combinedProperties.length < 10) {
       const stillNeeded = 10 - combinedProperties.length;
       let fallbackQuery = `
@@ -120,11 +125,7 @@ export async function GET(req) {
         ...combinedProperties,
         ...fallbackResults.slice(0, stillNeeded),
       ]);
-      const headers = new Headers();
-      headers.set("Content-Type", "application/json");
-      headers.set("Cache-Control", "public, max-age=60, s-maxage=60");
 
-      headers.set("Vary", "Accept-Encoding");
       return Response.json(
         {
           count: finalProperties.length,
@@ -148,6 +149,7 @@ export async function GET(req) {
       }
     );
   } catch (error) {
+    console.log("error: ", error);
     return Response.json({ message: "Internal Server Error" }, { status: 500 });
   }
 }

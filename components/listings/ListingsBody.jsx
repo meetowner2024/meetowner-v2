@@ -18,13 +18,18 @@ import axios from "axios";
 import useWhatsappHook from "../utils/useWhatsappHook";
 import Breadcrumb from "../utils/BreadCrumb";
 import { toast } from "react-toastify";
-import AdsCard from "./AdsCard";
 import PropertyCard from "./PropertyCard";
 import SkeletonPropertyCard from "./SkeletonPropertyCard";
 import config from "../utils/config";
 import Image from "next/image";
 import { setPropertyDetails } from "../store/slices/propertyDetails";
-import ScheduleFormModal from "../utils/ScheduleForm";
+import dynamic from "next/dynamic";
+const ScheduleFormModal = dynamic(() => import("../utils/ScheduleForm"), {
+  ssr: false,
+});
+const AdsCard = dynamic(() => import("./AdsCard"), {
+  ssr: false,
+});
 import CryptoJS from "crypto-js";
 import { clearSearch } from "../store/slices/searchSlice";
 const formatToIndianCurrency = (value) => {

@@ -8,7 +8,6 @@ const LoadingUI = (
 const ServicesClient = dynamic(
   () => import("../../components/footer-links/ServicesClient"),
   {
-    ssr: true,
     loading: () => LoadingUI,
   }
 );

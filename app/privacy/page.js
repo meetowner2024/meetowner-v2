@@ -8,7 +8,6 @@ const LoadingUI = (
 const PrivacyClient = dynamic(
   () => import("../../components/footer-links/PrivacyClient"),
   {
-    ssr: true,
     loading: () => LoadingUI,
   }
 );
