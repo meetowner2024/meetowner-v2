@@ -13,10 +13,17 @@ function slugify(str) {
     .replace(/-+/g, "-");
 }
 export default function BlogCard({ post }) {
-  const authorInitial = post.author.name
-    ? post.author.name.charAt(0).toUpperCase()
-    : "?";
+  const authorInitial =
+    post.author.name || "Unknown"
+      ? post.author.name.charAt(0).toUpperCase()
+      : "?";
   const slug = slugify(post.title);
+  const authorName =
+    post?.author?.name &&
+    post.author.name !== "undefined" &&
+    post.author.name.trim() !== ""
+      ? post.author.name
+      : "Unknown";
   return (
     <Link href={`/blogs/${slug}/${post.id}`} className="block group ">
       <Card className="h-full shadow-2xl hover:shadow-blog-card-hover border-2 border-gray-300 transition-all duration-300 group-hover:-translate-y-1 overflow-hidden">
@@ -69,7 +76,7 @@ export default function BlogCard({ post }) {
                 </div>
               )}
               <span className="text-sm text-muted-foreground">
-                {post.author.name}
+                {authorName}
               </span>
             </div>
           </div>

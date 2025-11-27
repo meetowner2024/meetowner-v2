@@ -27,7 +27,6 @@ export default async function Home() {
       const data = await res.json();
       return { properties: data.properties || [] };
     } catch (error) {
-      console.log("error: ", error);
     }
   }
 
