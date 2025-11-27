@@ -1,18 +1,18 @@
 "use client";
 
-import { Button } from "../../../components/ui/button";
-import { Badge } from "../../../components/ui/badge";
+import { Button } from "../../../../components/ui/button";
+import { Badge } from "../../../../components/ui/badge";
 import { Calendar, User, Share2 } from "lucide-react";
 import Image from "next/image";
 import { toast } from "react-toastify";
-import Breadcrumb from "../../../components/utils/BreadCrumb";
+import Breadcrumb from "../../../../components/utils/BreadCrumb";
 import dynamic from "next/dynamic";
 const LoadingUI = (
   <div className="flex justify-center items-center py-2">
     <div className="w-4 h-4 border-2 border-gray-300 border-t-transparent rounded-full animate-spin" />
   </div>
 );
-const Header = dynamic(() => import("../../../components/Header"), {
+const Header = dynamic(() => import("../../../../components/Header"), {
   ssr: false,
   loading: () => LoadingUI,
 });
@@ -47,12 +47,13 @@ export default function ClientBlogPost({ initialPost }) {
           {post.image && (
             <div className="aspect-video rounded-lg overflow-hidden mb-8 shadow-blog-card">
               <Image
-                src={`https://api.meetowner.in/aws/v1/s3/blogs/${post.image}`}
+                src={post.image}
                 alt={post.title}
                 width={800}
                 height={400}
                 className="w-full h-full object-cover"
                 priority
+                crossOrigin="anonymous"
               />
             </div>
           )}

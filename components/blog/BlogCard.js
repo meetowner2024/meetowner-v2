@@ -1,15 +1,24 @@
 import { Card, CardContent, CardHeader } from "../ui/card";
 import { Badge } from "../ui/badge";
-import { Calendar, Clock, User } from "lucide-react";
+import { Calendar } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-
+function slugify(str) {
+  return str
+    .toLowerCase()
+    .trim()
+    .replace(/:/g, "")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+}
 export default function BlogCard({ post }) {
   const authorInitial = post.author.name
     ? post.author.name.charAt(0).toUpperCase()
     : "?";
+  const slug = slugify(post.title);
   return (
-    <Link href={`/blogs/${post.id}`} className="block group ">
+    <Link href={`/blogs/${slug}/${post.id}`} className="block group ">
       <Card className="h-full shadow-2xl hover:shadow-blog-card-hover border-2 border-gray-300 transition-all duration-300 group-hover:-translate-y-1 overflow-hidden">
         <div className="aspect-video overflow-hidden">
           <Image
