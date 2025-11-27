@@ -16,10 +16,10 @@ const Header = dynamic(() => import("../../../../components/Header"), {
   ssr: false,
   loading: () => LoadingUI,
 });
-export default function ClientBlogPost({ initialPost }) {
+export default function ClientBlogPost({ initialPost, slug }) {
   const post = initialPost;
   const handleShare = async () => {
-    const url = `${window.location.origin}/blogs/${post.id}`;
+    const url = `${window.location.origin}/blogs/${slug}/${post.id}`;
     if (navigator.share) {
       try {
         await navigator.share({ title: post.title, text: post.excerpt, url });

@@ -109,7 +109,7 @@ async function getPost(id) {
   };
 }
 export default async function BlogPostPage({ params }) {
-  const { id } = params;
+  const { slug, id } = params;
   const post = await getPost(id);
   if (!post)
     return (
@@ -117,5 +117,5 @@ export default async function BlogPostPage({ params }) {
         Post not found.
       </div>
     );
-  return <ClientBlogPost initialPost={post} />;
+  return <ClientBlogPost initialPost={post} slug={slug} />;
 }
