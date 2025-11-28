@@ -48,6 +48,7 @@ import { IoIosHeartEmpty } from "react-icons/io";
 import PromotionalBanner from "./PromotionalBanner";
 import { setPropertyDetails } from "../store/slices/propertyDetails";
 import theme from "../utils/theme.json";
+import { setCities } from "../store/slices/locationSlice";
 const commercialSubTypes = [
   { id: "Office", label: "Office", icon: Building },
   { id: "Retail Shop", label: "Retail Shop", icon: Home },
@@ -67,6 +68,7 @@ const ListingHeader = ({ setShowLoginModal, ads }) => {
   const pathname = usePathname();
   const searchData = useSelector((state) => state.search);
   const [searchInput, setSearchInput] = useState(searchData.location || "");
+  const reduxCities = useSelector((state) => state.location.cities);
   const Data = useSelector((state) => state.auth.loggedIn);
   const [city, setCity] = useState(searchData.city || "");
   const [isCommandOpen, setIsCommandOpen] = useState(false);
@@ -212,19 +214,24 @@ const ListingHeader = ({ setShowLoginModal, ads }) => {
     [searchData]
   );
   const fetchCities = useCallback(async () => {
+    if (reduxCities?.length > 0) {
+      setCitiesList(reduxCities);
+      return;
+    }
     try {
       const response = await axios.get(
         "https://api.meetowner.in/api/v1/getAllCities"
       );
-      const activeCities =
-        response.data
-          ?.filter((city) => city.status === "active")
-          ?.map((item) => item.city) || [];
-      setCitiesList(activeCities);
+      const activeCities = response.data?.filter(
+        (city) => city.status === "active"
+      );
+      const cityNames = activeCities.map((item) => item.city);
+      setCitiesList(cityNames);
+      dispatch(setCities(cityNames));
     } catch (error) {
       console.error("Error fetching cities:", error);
     }
-  }, []);
+  }, [reduxCities, dispatch]);
   useEffect(() => {
     fetchCities();
   }, [fetchCities]);

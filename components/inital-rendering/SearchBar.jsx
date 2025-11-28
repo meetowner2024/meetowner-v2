@@ -17,6 +17,7 @@ import ad1 from "../../app/assets/FAMILY MEETOWNER (1).jpg";
 import axios from "axios";
 import Image from "next/image";
 import theme from "../utils/theme.json";
+import { setCities } from "../store/slices/locationSlice";
 const isVideo = (url) => /\.(mp4|webm|ogg)$/i.test(url);
 const TABS = ["Buy", "Rent", "Plot", "Commercial"];
 const OPTIONS = ["Buy", "Rent"];
@@ -29,7 +30,9 @@ const NextArrow = (props) => {
   return <FaAngleRight {...rest} />;
 };
 export default function SearchBar() {
+  const reduxCities = useSelector((state) => state.location.cities);
   const searchData = useSelector((state) => state.search);
+  const slider = useSelector((state) => state.ads.slider);
   const [activeTab, setActiveTab] = useState(0);
   const [searchInput, setSearchInput] = useState(searchData.location || "");
   const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false);
@@ -44,11 +47,19 @@ export default function SearchBar() {
   const [plotSubType, setPlotSubType] = useState("Buy");
   const [commercialSubType, setCommercialSubType] = useState("Buy");
   const dispatch = useDispatch();
-  const [mediaList, setMediaList] = useState([
-    { id: 1, order: 1, video_url: ad1 },
-  ]);
+  const mediaList = useMemo(() => {
+    if (!slider || slider.length === 0) {
+      return [{ id: 1, order: 1, video_url: ad1 }];
+    }
+    return [...slider]
+      .sort((a, b) => a.order - b.order)
+      .map((item) => ({
+        id: item.id,
+        order: item.order,
+        video_url: item.video_url,
+      }));
+  }, [slider]);
   const [localities, setLocalities] = useState([]);
-  const [isError, setIsError] = useState(false);
   const containerRef = useRef(null);
   const [city, setCity] = useState(searchData.city || "");
   const filteredLocations = useMemo(
@@ -152,29 +163,11 @@ export default function SearchBar() {
     commercialSubType,
     dispatch,
   ]);
-  const fetchMedia = useCallback(async () => {
-    try {
-      const response = await fetch(
-        `${config.awsApiUrl}/adAssets/v1/getAds?ads_page=main_slider&city=${location}`
-      );
-      const data = await response.json();
-      if (data.ads?.length > 0) {
-        const formatted = data.ads
-          .sort((a, b) => a.ads_order - b.ads_order)
-          .map((item) => ({
-            id: item.id,
-            order: item.ads_order,
-            video_url: `https://api.meetowner.in/aws/v1/s3/${item.image}`,
-          }));
-        setMediaList(formatted);
-      } else {
-        setMediaList([{ id: 1, order: 1, video_url: ad1 }]);
-      }
-    } catch (error) {
-      setIsError(true);
-    }
-  }, [location]);
   const fetchCities = useCallback(async () => {
+    if (reduxCities?.length > 0) {
+      setCitiesList(reduxCities);
+      return;
+    }
     setIsLoadingCities(true);
     try {
       const response = await axios.get(
@@ -185,13 +178,13 @@ export default function SearchBar() {
       );
       const cityNames = activeCities.map((item) => item.city);
       setCitiesList(cityNames);
+      dispatch(setCities(cityNames));
     } catch (error) {
       console.error("Error fetching cities:", error);
-      setIsError(true);
     } finally {
       setIsLoadingCities(false);
     }
-  }, []);
+  }, [reduxCities, dispatch]);
   useEffect(() => {
     if (!location) return;
     const fetchLocalities = async () => {
@@ -209,7 +202,6 @@ export default function SearchBar() {
     fetchLocalities();
   }, [searchInput, location]);
   useEffect(() => {
-    fetchMedia();
     fetchCities();
     const handleClickOutside = (event) => {
       if (
@@ -223,7 +215,7 @@ export default function SearchBar() {
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [location, fetchMedia, fetchCities]);
+  }, [fetchCities]);
   const buildListingsUrl = () => {
     const propertyFor = searchData?.tab === "Rent" ? "rent" : "sale";
     const propertyType = (() => {

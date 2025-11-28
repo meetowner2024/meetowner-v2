@@ -37,6 +37,8 @@ const Footer = dynamic(() => import("./Footer"), {
 });
 import { useEffect, useState } from "react";
 import { ChevronUp } from "lucide-react";
+import { useDispatch } from "react-redux";
+import { setSlider } from "./store/slices/adSlice";
 const Dashboard = ({
   latestProperties,
   bestDealProperties,
@@ -47,9 +49,17 @@ const Dashboard = ({
   favourites = [],
   formatted = [],
   contactedIds = [],
+  mediaList = [],
 }) => {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [renderBelowFold, setRenderBelowFold] = useState(false);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (mediaList) {
+      dispatch(setSlider(mediaList));
+    }
+  }, [mediaList]);
   useEffect(() => {
     requestIdleCallback(() => setRenderBelowFold(true));
   }, []);
@@ -131,7 +141,6 @@ const Dashboard = ({
   };
   return (
     <div className="overflow-x-hidden">
-      {}
       <Header favourites={favourites} />
       <SearchBar formatted={formatted} />
       <Slider

@@ -4,6 +4,10 @@ import { ToastContainer } from "react-toastify";
 import { useEffect, useRef, useState, memo } from "react";
 import { useDispatch } from "react-redux";
 import { setSearchData } from "../../components/store/slices/searchSlice";
+import {
+  setListingAds,
+  setPromotionalBanners,
+} from "@/components/store/slices/adSlice";
 const ListingHeader = dynamic(
   () => import("../../components/listings/ListingHeader"),
   { ssr: true }
@@ -19,8 +23,17 @@ const ListingAds = dynamic(
 const LoginModal = dynamic(() => import("../../components/utils/LoginModal"), {
   ssr: false,
 });
-const ListingsPageClient = memo(function ListingsPageClient({ initialParams }) {
+const ListingsPageClient = memo(function ListingsPageClient({
+  initialParams,
+  listingAds,
+  promotionalBannerAds,
+}) {
   const dispatch = useDispatch();
+  useEffect(() => {
+    if (listingAds) {
+      dispatch(setListingAds(listingAds));
+    }
+  }, [listingAds]);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [ads, setAds] = useState([]);
   const [initialized, setInitialized] = useState(false);
@@ -110,15 +123,8 @@ const ListingsPageClient = memo(function ListingsPageClient({ initialParams }) {
   useEffect(() => {
     if (adsFetched.current) return;
     adsFetched.current = true;
-    (async () => {
-      try {
-        const res = await fetch("/api/getAllAds", { cache: "force-cache" });
-        const { results = [] } = await res.json();
-        setAds(results);
-      } catch (e) {
-        console.error("Failed to fetch ads:", e);
-      }
-    })();
+    setAds(promotionalBannerAds);
+    dispatch(setPromotionalBanners(promotionalBannerAds));
   }, []);
   return (
     <>
@@ -134,6 +140,7 @@ const ListingsPageClient = memo(function ListingsPageClient({ initialParams }) {
               showLoginModal={showLoginModal}
               setShowLoginModal={setShowLoginModal}
               initialized={initialized}
+              listingAds={listingAds}
             />
           </div>
           <div className="hidden md:block z-0 w-full md:w-[30%]">

@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { setPropertyDetails } from "../store/slices/propertyDetails";
 import { useDispatch, useSelector } from "react-redux";
 import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -38,6 +37,7 @@ function FeaturedPropertySkeleton() {
   );
 }
 const PropertyListingAds = () => {
+  const { ads } = useSelector((state) => state.ads);
   const [property, setProperty] = useState([]);
   const searchData = useSelector((state) => state.search);
   const [loading, setLoading] = useState(true);
@@ -46,25 +46,15 @@ const PropertyListingAds = () => {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const modalRef = useRef(null);
   const swiperRef = useRef(null);
-  const fetchLatestProperties = async () => {
-    setProperty([]);
-    try {
-      const response = await fetch(
-        `${config.awsApiUrl}/adAssets/v1/getAds?ads_page=listing_ads&city`
-      );
-      const data = await response.json();
-      const validProperties = data.ads.filter(
-        (item) => item.property_data?.image && item.property_data?.property_name
+
+  useEffect(() => {
+    if (ads) {
+      const validProperties = ads.filter(
+        (item) => item?.image && item?.property_name
       );
       setProperty(validProperties);
-    } catch (err) {
-      console.error("Failed to fetch properties:", err);
-    } finally {
       setLoading(false);
     }
-  };
-  useEffect(() => {
-    fetchLatestProperties();
   }, []);
   const handleNavigation = useCallback(
     async (property) => {
@@ -101,11 +91,6 @@ const PropertyListingAds = () => {
           });
         }
       }
-      dispatch(
-        setPropertyDetails({
-          property,
-        })
-      );
       const propertyFor = property?.property_for === "Rent" ? "rent" : "sale";
       const propertyId = property.unique_property_id;
       const bhkPart = property.bedrooms ? `${property.bedrooms}-bhk-` : "";
@@ -205,7 +190,7 @@ const PropertyListingAds = () => {
   return (
     <div className="sticky top-20 lg:block md:block z-20  p-4 rounded-2xl shadow-xl">
       {}
-      {property[2]?.property_data && (
+      {property[2] && (
         <div className="relative rounded-xl overflow-hidden cursor-pointer group">
           <div className="absolute top-4 left-4 z-10">
             <span
@@ -219,8 +204,8 @@ const PropertyListingAds = () => {
             width={600}
             height={400}
             src={
-              property[2]?.property_data?.image
-                ? `https://api.meetowner.in/assets/v1/serve/${property[2].property_data.image}`
+              property[2]?.image
+                ? `https://api.meetowner.in/assets/v1/serve/${property[2].image}`
                 : `https://via.placeholder.com/400x200?text=No+Image`
             }
             alt="Featured Property"
@@ -229,23 +214,21 @@ const PropertyListingAds = () => {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
           <div className="absolute bottom-4 left-4 right-4 text-white">
-            <h3 className="text-lg font-bold">
-              {property[2].property_data.property_name}
-            </h3>
+            <h3 className="text-lg font-bold">{property[2].property_name}</h3>
             <p className="text-sm font-medium">
-              ₹{formatToIndianCurrency(property[2].property_data.property_cost)}
+              ₹{formatToIndianCurrency(property[2].property_cost)}
             </p>
             <div className="flex gap-2 mt-2">
               <button
                 aria-label="View Details"
-                onClick={() => handleNavigation(property[2].property_data)}
+                onClick={() => handleNavigation(property[2])}
                 className="bg-transparent cursor-pointer border border-white text-white font-semibold px-4 py-1 rounded-full hover:bg-white hover:text-blue-600 transition-all duration-300"
               >
                 View Details
               </button>
               <button
                 aria-label="Contact Seller"
-                onClick={() => handleContactSeller(property[2].property_data)}
+                onClick={() => handleContactSeller(property[2])}
                 className="bg-transparent cursor-pointer border border-white text-white font-semibold px-4 py-2 rounded-full hover:bg-white hover:text-blue-600 transition-all duration-300"
               >
                 Contact
@@ -279,7 +262,7 @@ const PropertyListingAds = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: i * 0.2 }}
                   className="relative rounded-xl shadow-lg overflow-hidden bg-white group cursor-pointer transition-transform duration-300 hover:scale-105  "
-                  onClick={() => handleNavigation(item.property_data)}
+                  onClick={() => handleNavigation(item)}
                 >
                   <div className="absolute top-2 left-2 z-10 ">
                     <span className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-semibold px-2 py-1 rounded-full animate-pulse">
@@ -290,25 +273,20 @@ const PropertyListingAds = () => {
                     width={600}
                     height={400}
                     src={
-                      item.property_data?.image
-                        ? `https://api.meetowner.in/assets/v1/serve/${item.property_data.image}`
+                      item?.image
+                        ? `https://api.meetowner.in/assets/v1/serve/${item.image}`
                         : `https://via.placeholder.com/400x200?text=No+Image`
                     }
-                    alt={
-                      item.property_data?.property_name || `Property ${i + 1}`
-                    }
+                    alt={item?.property_name || `Property ${i + 1}`}
                     crossOrigin="anonymous"
                     className="w-full h-42 object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                   <div className="p-4 text-left bg-gradient-to-br from-teal-50 to-cyan-50">
                     <p className="font-bold text-blue-900">
-                      ₹
-                      {formatToIndianCurrency(
-                        item.property_data?.property_cost || 0
-                      )}
+                      ₹{formatToIndianCurrency(item?.property_cost || 0)}
                     </p>
                     <h4 className="font-semibold text-md text-gray-900 line-clamp-1">
-                      {item.property_data?.property_name || "Unnamed Property"}
+                      {item?.property_name || "Unnamed Property"}
                     </h4>
                   </div>
                 </div>

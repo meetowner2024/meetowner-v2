@@ -277,7 +277,7 @@ const PropertyModal = React.memo(
                   quality={100}
                   src={
                     state.images[state.selectedImageIndex]?.url ||
-                    "https://placehold.co/600x400?text=NotFound"
+                    "https://placehold.co/600x400?text=NotFound&format=png"
                   }
                   alt="Main Property"
                   className="w-full h-full object-cover rounded-xl"

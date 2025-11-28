@@ -18,7 +18,6 @@ const FooterLinks = ({ basePath = "/listings" }) => {
   const [error, setError] = useState(null);
   const ref = useRef(null);
   const [visible, setVisible] = useState(false);
-
   useEffect(() => {
     const fetchLinks = async () => {
       setLoading(true);
@@ -27,7 +26,6 @@ const FooterLinks = ({ basePath = "/listings" }) => {
         const res = await fetch(`${config.awsApiUrl}/api/v1/getPropertyLinks`);
         if (!res.ok) throw new Error("Failed to fetch property links");
         const data = await res.json();
-
         setLinks(data);
       } catch (err) {
         setError(err.message);
@@ -37,7 +35,6 @@ const FooterLinks = ({ basePath = "/listings" }) => {
     };
     fetchLinks();
   }, []);
-
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -47,7 +44,6 @@ const FooterLinks = ({ basePath = "/listings" }) => {
       },
       { threshold: 0.3 }
     );
-
     if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
   }, []);
@@ -62,13 +58,33 @@ const FooterLinks = ({ basePath = "/listings" }) => {
         sub_type: link.sub_type,
       })
     );
-    const filters = `?city=${encodeURIComponent(
-      link.city
-    )}&type=${encodeURIComponent(link.property_in)}`;
-    router.push(`${basePath}${filters}`);
+    const slugify = (text) =>
+      text
+        .toString()
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-+|-+$/g, "");
+    const citySlug = slugify(link.city);
+    const locSlug = slugify(link.location || "");
+    const subTypeSlug = slugify(link.sub_type || "");
+    const typeSlug =
+      link.property_in?.toLowerCase() === "commercial"
+        ? "commercial"
+        : link.property_in?.toLowerCase() === "plot"
+        ? "plot"
+        : "residential";
+    const forType = link.property_for === "Sell" ? "sale" : "rent";
+    const inPart =
+      locSlug && locSlug !== citySlug
+        ? `in-${locSlug}-${citySlug}`
+        : `in-${citySlug}`;
+    const finalUrl = `${basePath}/${typeSlug}-${subTypeSlug}-for-${forType}-${inPart}`;
+    router.push(finalUrl);
   };
   const filteredLinks = links.filter((link) => link.property_for === activeTab);
-
   return (
     <footer className="bg-white text-[#1D3A76] py-12 px-4">
       <div className="max-w-8xl mx-auto px-3 py-8 rounded-xl shadow-lg border border-[#1D3A76]/10">
@@ -78,7 +94,6 @@ const FooterLinks = ({ basePath = "/listings" }) => {
           ${visible ? "animate-rise" : "opacity-0 translate-y-10"}`}
           >
             <span> Explore Properties</span>
-
             <svg
               viewBox="0 0 120 10"
               fill="none"

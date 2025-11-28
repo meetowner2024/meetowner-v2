@@ -1,12 +1,19 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
-import { usePathname } from "next/navigation";
 import { ToastContainer } from "react-toastify";
 import dynamic from "next/dynamic";
 import { useDispatch } from "react-redux";
 import { setPropertyDetails } from "../../components/store/slices/propertyDetails";
 import config from "../../components/utils/config";
 import CryptoJS from "crypto-js";
+import {
+  setAds,
+  setFloorPlan,
+  setImages,
+  setNearby,
+  setUserProperties,
+  setVideos,
+} from "@/components/store/slices/adSlice";
 const PropertyHeader = dynamic(
   () => import("../../components/property/PropertyHeader"),
   { ssr: false }
@@ -81,6 +88,12 @@ export default function PropertyClient({
   error: initialError,
   pathSegments,
   loading: initialLoading,
+  ads,
+  userProperties,
+  videos,
+  floorPlan,
+  images,
+  nearby,
 }) {
   const [headerHeight, setHeaderHeight] = useState(0);
   const [propertyLoading, setPropertyLoading] = useState(
@@ -89,7 +102,6 @@ export default function PropertyClient({
   const [localProperty, setLocalProperty] = useState(property);
   const [error, setError] = useState(initialError);
   const dispatch = useDispatch();
-  const pathname = usePathname();
   const hasFetchedRef = useRef(false);
   const extractPropertyId = (segments) => {
     if (!segments || segments.length === 0) return null;
@@ -138,11 +150,33 @@ export default function PropertyClient({
   useEffect(() => {
     if (property && Object.keys(property).length > 0) {
       dispatch(setPropertyDetails({ property }));
+      if (ads && Array.isArray(ads) && ads.length > 0) {
+        dispatch(setAds(ads));
+      }
+      if (userProperties) {
+        dispatch(setUserProperties(userProperties));
+      }
+      if (videos) {
+        dispatch(setVideos(videos));
+      }
+      if (floorPlan) dispatch(setFloorPlan(floorPlan));
+      if (images) dispatch(setImages(images));
+      if (nearby) dispatch(setNearby(nearby));
+
       setLocalProperty(property);
       setPropertyLoading(false);
       hasFetchedRef.current = true;
     }
-  }, [property, dispatch]);
+  }, [
+    property,
+    dispatch,
+    ads,
+    userProperties,
+    videos,
+    floorPlan,
+    nearby,
+    images,
+  ]);
   useEffect(() => {
     if (property || hasFetchedRef.current) return;
     const id = extractPropertyId(pathSegments);
@@ -189,6 +223,7 @@ export default function PropertyClient({
             <PropertyBody
               handleLoading={setPropertyLoading}
               propertyDataDetails={localProperty || property}
+              userProperties={userProperties}
             />
           )}
         </div>
@@ -196,7 +231,10 @@ export default function PropertyClient({
           {isLoading ? (
             <SkeletonPropertyDetails />
           ) : (
-            <PropertyDetails propertyDataDetails={localProperty || property} />
+            <PropertyDetails
+              propertyDataDetails={localProperty || property}
+              userProperties={userProperties}
+            />
           )}
         </div>
       </div>

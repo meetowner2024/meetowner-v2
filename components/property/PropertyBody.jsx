@@ -76,19 +76,23 @@ import Image from "next/image";
 import AmenitiesColor from "../utils/dynamic-colors/AmenitiesColor.json";
 import AroundTheme from "../utils/dynamic-colors/AroundProperty.json";
 import PropertyDetails from "./PropertyDetails";
+import { useSelector } from "react-redux";
 const PropertyBody = ({ handleLoading, propertyDataDetails }) => {
   const [property, setProperty] = useState(propertyDataDetails);
+  const {
+    images,
+    floorplan,
+    nearby: aroundProperty,
+  } = useSelector((state) => state.ads);
+
   const modalRef = useRef(null);
   const maplocation = `${property?.location_id},${property?.city_id},${property?.state_id}`;
   const [error, setError] = useState(null);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [floorplan, setFloorPlan] = useState("");
-  const [images, setImages] = useState([]);
   const [mainImage, setMainImage] = useState("");
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const [aroundProperty, setAroundProperty] = useState("");
   const [showScrollTop, setShowScrollTop] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
     setProperty(propertyDataDetails);
   }, [propertyDataDetails]);
@@ -98,35 +102,10 @@ const PropertyBody = ({ handleLoading, propertyDataDetails }) => {
     }
   }, [property, handleLoading]);
   useEffect(() => {
-    const fetchPropertyData = async () => {
-      if (property?.unique_property_id) {
-        try {
-          const floorPlansResponse = await fetch(
-            `${config.awsApiUrl}/listings/v1/getAllFloorPlans/${property.unique_property_id}`
-          );
-          const floorPlansData = await floorPlansResponse.json();
-          setFloorPlan(floorPlansData[0]);
-          const imagesResponse = await fetch(
-            `https://api.meetowner.in/property/getpropertyphotos?unique_property_id=${property.unique_property_id}`
-          );
-          const imagesData = await imagesResponse.json();
-          setImages(imagesData?.images);
-          setMainImage(imagesData?.images[0]?.url);
-          const aroundResponse = await fetch(
-            `${config.awsApiUrl}/listings/v1/getAroundThisProperty?id=${property.unique_property_id}`
-          );
-          const aroundData = await aroundResponse.json();
-          setAroundProperty(aroundData.results);
-        } catch (error) {
-          console.error("Error fetching property data:", error);
-        } finally {
-          handleLoading(false);
-          setLoading(false);
-        }
-      }
-    };
-    fetchPropertyData();
-  }, [property?.unique_property_id, propertyDataDetails]);
+    if (images && images.length > 0) {
+      setMainImage(images[0].url);
+    }
+  }, [images]);
   useEffect(() => {
     const handleScroll = () => {
       setShowScrollTop(window.scrollY > 200);
@@ -1258,7 +1237,7 @@ const PropertyBody = ({ handleLoading, propertyDataDetails }) => {
                   ? mainImage.trim()
                   : `https://placehold.co/600x400?text=${encodeURIComponent(
                       (property?.property_name || "No Image Found").trim()
-                    )}`
+                    )}&format=png`
               }
               alt="Property Image"
               className="w-full h-[250px] sm:h-[350px] md:h-[450px] object-cover"
@@ -1267,7 +1246,7 @@ const PropertyBody = ({ handleLoading, propertyDataDetails }) => {
                 console.error("Main image failed to load:", mainImage);
                 e.currentTarget.src = `https://placehold.co/600x400?text=${encodeURIComponent(
                   (property?.property_name || "No Image Found").trim()
-                )}`;
+                )}&format=png`;
               }}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-70"></div>
@@ -1285,7 +1264,7 @@ const PropertyBody = ({ handleLoading, propertyDataDetails }) => {
                 ? mainImage.trim()
                 : `https://placehold.co/600x400?text=${encodeURIComponent(
                     (property?.property_name || "No Image Found").trim()
-                  )}`
+                  )}&format=png`
             }
             alt="Property Image"
             className="w-full h-auto md:h-[500px] object-cover rounded-2xl shadow-md"
@@ -1293,7 +1272,7 @@ const PropertyBody = ({ handleLoading, propertyDataDetails }) => {
             onError={(e) => {
               e.target.src = `https://placehold.co/600x400?text=${encodeURIComponent(
                 (property?.property_name || "No Image Found").trim()
-              )}`;
+              )}&format=png`;
             }}
           />
           {images.length > 1 && (
@@ -1405,7 +1384,7 @@ const PropertyBody = ({ handleLoading, propertyDataDetails }) => {
               className="w-full object- h-auto"
               onError={(e) => {
                 e.target.onerror = null;
-                e.target.src = `https://placehold.co/600x400?text=${"No Floor Plan Found"}`;
+                e.target.src = `https://placehold.co/600x400?text=${"No Floor Plan Found"}&format=png`;
               }}
             />
           </div>

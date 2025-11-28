@@ -58,6 +58,7 @@ import { toast } from "react-toastify";
 import config from "../utils/config";
 import useWhatsappHook from "../utils/useWhatsappHook";
 import CryptoJS from "crypto-js";
+import { useSelector } from "react-redux";
 const STORAGE_KEY = "promoBannerDismissedAt";
 const RE_SHOW_AFTER_MS = 4 * 60 * 60 * 1000;
 const gradients = [
@@ -154,7 +155,6 @@ const getFallbackIcon = (name) => {
   return fallbackIcons[hash % fallbackIcons.length];
 };
 const PromotionalBanner = ({
-  ads,
   showPromoBanner: externalShow,
   setShowPromoBanner: setExternalShow,
   handleNavigation,
@@ -173,6 +173,7 @@ const PromotionalBanner = ({
     return decrypted.toString(CryptoJS.enc.Utf8);
   }
   const { handleAPI } = useWhatsappHook();
+  const ads = useSelector((state) => state.ads.promotionalBanners);
   const [currentPromo, setCurrentPromo] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState(null);
@@ -180,17 +181,19 @@ const PromotionalBanner = ({
   const hoverTimeoutRef = useRef(null);
   const swiperPrevRef = useRef(null);
   const swiperNextRef = useRef(null);
-  const [images, setImages] = useState([]);
+  const currentProperty = useMemo(() => ads[currentPromo], [ads, currentPromo]);
+  const images = useMemo(
+    () => currentProperty?.images || [],
+    [currentProperty]
+  );
   const bannerRef = useRef(null);
   const cardRef = useRef(null);
   const abortControllerRef = useRef(null);
   const gradient = useMemo(() => getGradient(currentPromo), [currentPromo]);
-  const currentProperty = useMemo(() => ads[currentPromo], [ads, currentPromo]);
   const imageUrl = useMemo(
     () =>
-      currentProperty?.image
-        ? `https://api.meetowner.in/assets/v1/serve/${currentProperty.image}`
-        : "https://placehold.co/600x400?text=NotFound",
+      currentProperty?.featuredImage ||
+      "https://placehold.co/600x400?text=NotFound",
     [currentProperty]
   );
   const [internalShow, setInternalShow] = useState(true);
@@ -362,28 +365,7 @@ const PromotionalBanner = ({
       return () => clearInterval(interval);
     }
   }, [showPromoBanner, ads, isExpanded]);
-  useEffect(() => {
-    if (!ads[currentPromo]?.unique_property_id) return;
-    const controller = new AbortController();
-    abortControllerRef.current = controller;
-    const fetchImages = async () => {
-      try {
-        const response = await fetch(
-          `${config.awsApiUrl}/property/v1/gpp?unique_property_id=${ads[currentPromo].unique_property_id}`,
-          { signal: controller.signal }
-        );
-        const data = await response.json();
-        setImages(data?.images || []);
-      } catch (error) {
-        if (error.name === "AbortError") return;
-        console.error("Error fetching property images:", error);
-      }
-    };
-    fetchImages();
-    return () => {
-      controller.abort();
-    };
-  }, [currentPromo, ads]);
+
   useEffect(() => {
     if (isExpanded) {
       const handleClickOutside = (e) => {

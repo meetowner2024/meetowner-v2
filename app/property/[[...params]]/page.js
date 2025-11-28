@@ -1,4 +1,4 @@
-import CryptoJS from "crypto-js";
+import crypto from "crypto";
 import config from "../../../components/utils/config";
 import PropertyClient from "../PropertyClient";
 function buildSeoContent(property, id) {
@@ -68,36 +68,47 @@ function buildSeoContent(property, id) {
   const canonicalUrl = `https://www.meetowner.in/property/${seoSlug}/${id}`;
   return { title, description, keywords, canonicalUrl };
 }
+
 async function fetchProperty(propertyId) {
   const response = await fetch(
     `${config.awsApiUrl}/listings/v1/gspmeet?unique_property_id=${propertyId}`,
     { cache: "no-store" }
   );
+
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
+
   const data = await response.json();
+  const encryptedText = data.property;
+
   const JWT_SECRET = process.env.NEXT_PUBLIC_ENCRYPTION_SECRET;
-  if (!JWT_SECRET) {
-    throw new Error("Encryption secret not configured");
-  }
-  const ENCRYPTION_KEY = CryptoJS.SHA256(JWT_SECRET).toString();
-  const [ivHex, encryptedHex] = data.property?.split(":");
-  if (!ivHex || !encryptedHex) {
+  if (!JWT_SECRET) throw new Error("Encryption secret not configured");
+
+  if (!encryptedText || !encryptedText.includes(":")) {
     throw new Error("Invalid encrypted data format");
   }
-  const iv = CryptoJS.enc.Hex.parse(ivHex);
-  const encrypted = CryptoJS.enc.Hex.parse(encryptedHex);
-  const decrypted = CryptoJS.AES.decrypt(
-    { ciphertext: encrypted },
-    CryptoJS.enc.Hex.parse(ENCRYPTION_KEY),
-    { iv }
-  );
-  const decryptedStr = decrypted.toString(CryptoJS.enc.Utf8);
-  if (!decryptedStr) {
-    throw new Error("Decryption failed");
-  }
-  return JSON.parse(decryptedStr);
+
+  const [ivStr, cipherStr] = encryptedText.split(":");
+
+  // Auto-detect HEX or Base64
+  const isHex = /^[0-9a-fA-F]+$/.test(ivStr);
+
+  const iv = Buffer.from(ivStr, isHex ? "hex" : "base64");
+  const encryptedData = Buffer.from(cipherStr, isHex ? "hex" : "base64");
+
+  // CryptoJS SHA256 key
+  const key = crypto.createHash("sha256").update(JWT_SECRET).digest();
+
+  const decipher = crypto.createDecipheriv("aes-256-cbc", key, iv);
+  decipher.setAutoPadding(true); // PKCS7 (CryptoJS default)
+
+  let decrypted = decipher.update(encryptedData, undefined, "utf8");
+  decrypted += decipher.final("utf8");
+
+  if (!decrypted) throw new Error("Decryption failed");
+
+  return JSON.parse(decrypted);
 }
 function buildStructuredData(property, canonicalUrl) {
   if (!property) return null;
@@ -289,7 +300,89 @@ export async function generateMetadata({ params, searchParams }) {
     };
   }
 }
+const fetchLatestProperties = async () => {
+  try {
+    const response = await fetch(
+      `${config.awsApiUrl}/adAssets/v1/getAds?ads_page=listing_ads&city`
+    );
+    const data = await response.json();
+    const validProperties = data.ads.filter(
+      (item) => item?.image && item?.property_name
+    );
+    return validProperties;
+  } catch (err) {
+    console.error("Failed to fetch properties:", err);
+  }
+};
+const fetchUserProperties = async (userId) => {
+  if (!userId) return [];
+  try {
+    const response = await fetch(
+      `${config.awsApiUrl}/listings/v1/getPropertiesByUserID?user_id=${userId}`,
+      { cache: "no-store" }
+    );
+    const data = await response.json();
+    return data.properties || [];
+  } catch (err) {
+    console.error("Failed to fetch user properties:", err);
+    return [];
+  }
+};
+const fetchPropertyVideos = async (unique_property_id) => {
+  if (!unique_property_id) return;
+
+  try {
+    const response = await fetch(
+      `https://api.meetowner.in/property/getpropertyvideos?unique_property_id=${unique_property_id}`
+    );
+    const data = await response.json();
+    return data?.videos;
+  } catch (err) {
+    console.error("Failed to fetch videos:", err);
+  }
+};
+const fetchFloorPlans = async (unique_property_id) => {
+  try {
+    const res = await fetch(
+      `${config.awsApiUrl}/listings/v1/getAllFloorPlans/${unique_property_id}`,
+      { cache: "no-store" }
+    );
+    const data = await res.json();
+    return data?.[0] || null;
+  } catch (err) {
+    console.error("Floor plan fetch error:", err);
+    return null;
+  }
+};
+const fetchPropertyImages = async (unique_property_id) => {
+  try {
+    const res = await fetch(
+      `https://api.meetowner.in/property/getpropertyphotos?unique_property_id=${unique_property_id}`,
+      { cache: "no-store" }
+    );
+    const data = await res.json();
+    return data?.images || [];
+  } catch (err) {
+    console.error("Image fetch error:", err);
+    return [];
+  }
+};
+const fetchNearbyProperties = async (unique_property_id) => {
+  try {
+    const res = await fetch(
+      `${config.awsApiUrl}/listings/v1/getAroundThisProperty?id=${unique_property_id}`,
+      { cache: "no-store" }
+    );
+    const data = await res.json();
+    return data?.results || [];
+  } catch (err) {
+    console.error("Nearby fetch error:", err);
+    return [];
+  }
+};
+
 export default async function PropertyPage({ params, searchParams }) {
+  const ads = await fetchLatestProperties();
   const pathSegments = params?.params || [];
   let propertyId = null;
   let pathSegmentsForClient = pathSegments;
@@ -307,15 +400,28 @@ export default async function PropertyPage({ params, searchParams }) {
         loading={false}
         error="Invalid property ID in URL"
         pathSegments={pathSegmentsForClient}
+        ads={ads}
       />
     );
   }
   let property = null;
+  let userProperties = [];
+  let videos = [];
+  let floorPlan = null;
+  let images = [];
+  let nearby = [];
   let error = null;
   let loading = true;
   try {
     loading = false;
     property = await fetchProperty(propertyId);
+    if (property?.user_id) {
+      userProperties = await fetchUserProperties(property.user_id);
+      videos = await fetchPropertyVideos(property.unique_property_id);
+      floorPlan = await fetchFloorPlans(property.unique_property_id);
+      images = await fetchPropertyImages(property.unique_property_id);
+      nearby = await fetchNearbyProperties(property.unique_property_id);
+    }
     if (!property) error = "Property not found";
   } catch (err) {
     loading = false;
@@ -325,9 +431,15 @@ export default async function PropertyPage({ params, searchParams }) {
   return (
     <PropertyClient
       property={property}
+      floorPlan={floorPlan}
+      images={images}
+      nearby={nearby}
+      userProperties={userProperties}
       loading={loading}
       error={error}
       pathSegments={pathSegmentsForClient}
+      ads={ads}
+      videos={videos}
     />
   );
 }

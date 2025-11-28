@@ -3,9 +3,7 @@ import { cookies } from "next/headers";
 export default async function Home() {
   const cookieStore = await cookies();
   const userCookie = cookieStore.get("user");
-
   let userId = null;
-
   if (userCookie) {
     try {
       const parsed = JSON.parse(userCookie.value);
@@ -14,7 +12,6 @@ export default async function Home() {
       console.error("Failed to parse user cookie:", err);
     }
   }
-
   async function getLatestProperties() {
     try {
       const res = await fetch(
@@ -23,13 +20,10 @@ export default async function Home() {
           cache: "force-cache",
         }
       );
-
       const data = await res.json();
       return { properties: data.properties || [] };
-    } catch (error) {
-    }
+    } catch (error) {}
   }
-
   async function getBestDealProperties() {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_BASE_URL}/api/getBestDealProperties`,
@@ -38,10 +32,8 @@ export default async function Home() {
       }
     );
     const encrypted = await res.json();
-
     return encrypted.results || [];
   }
-
   async function getBestMeetowner() {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_BASE_URL}/api/getBestMeet`,
@@ -52,7 +44,6 @@ export default async function Home() {
     const data = await res.json();
     return data.results || [];
   }
-
   async function getHighDemand() {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_BASE_URL}/api/getHighDemand`,
@@ -61,10 +52,8 @@ export default async function Home() {
       }
     );
     const data = await res.json();
-
     return data.results || [];
   }
-
   async function getRecommended() {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_BASE_URL}/api/getRecommended`,
@@ -73,10 +62,8 @@ export default async function Home() {
       }
     );
     const data = await res.json();
-
     return data.sellers || [];
   }
-
   async function getMeetExclusive() {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_BASE_URL}/api/getMeetExclusive`,
@@ -85,19 +72,15 @@ export default async function Home() {
       }
     );
     const data = await res.json();
-
     return data.results || [];
   }
-
   async function getAllFavourites(user_id) {
     if (!user_id) {
       return [];
     }
-
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_BASE_URL}/api/getAllFavourites?user_id=${user_id}`
     );
-
     const data = await res.json();
     return data.favourites || [];
   }
@@ -109,7 +92,6 @@ export default async function Home() {
       }
     );
     const data = await res.json();
-
     if (data.ads?.length > 0) {
       const formatted = data.ads
         .sort((a, b) => a.ads_order - b.ads_order)
@@ -126,14 +108,29 @@ export default async function Home() {
       `${process.env.NEXT_PUBLIC_BASE_URL}/api/getUserContactSellers?user_id=${userId}`
     );
     const response = await res.json();
-
     const contacts = response?.results || [];
     const contactIds = Array.isArray(contacts)
       ? contacts.map((contact) => contact.unique_property_id)
       : [];
     return contactIds;
   }
-
+  async function getMainSliderAds(city = "Hyderabad") {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/getAds?ads_page=main_slider&city=${city}`,
+      { cache: "force-cache" }
+    );
+    const data = await res.json();
+    if (!data.ads?.length) {
+      return [{ id: 1, order: 1, video_url: "/fallback-banner.jpg" }];
+    }
+    return data.ads
+      .sort((a, b) => a.ads_order - b.ads_order)
+      .map((item) => ({
+        id: item.id,
+        order: item.ads_order,
+        video_url: `https://api.meetowner.in/aws/v1/s3/${item.image}`,
+      }));
+  }
   const { properties } = await getLatestProperties();
   const bestDealProperties = await getBestDealProperties();
   const bestMeetownerProperties = await getBestMeetowner();
@@ -143,7 +140,7 @@ export default async function Home() {
   const favourites = await getAllFavourites(userId);
   const formatted = await getAds();
   const contacted = await getUserContacted(userId);
-
+  const mediaList = await getMainSliderAds();
   return (
     <div>
       <Dashboard
@@ -156,6 +153,7 @@ export default async function Home() {
         favourites={favourites}
         formatted={formatted}
         contactedIds={contacted}
+        mediaList={mediaList}
       />
     </div>
   );

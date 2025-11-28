@@ -24,14 +24,16 @@ import config from "../utils/config";
 import Image from "next/image";
 import { setPropertyDetails } from "../store/slices/propertyDetails";
 import dynamic from "next/dynamic";
+import { dummyAds } from "../utils/dummyAds";
+import ListingAdsCard from "../utils/ListingAdsCard";
+import CryptoJS from "crypto-js";
+import { clearSearch } from "../store/slices/searchSlice";
 const ScheduleFormModal = dynamic(() => import("../utils/ScheduleForm"), {
   ssr: false,
 });
 const AdsCard = dynamic(() => import("./AdsCard"), {
   ssr: false,
 });
-import CryptoJS from "crypto-js";
-import { clearSearch } from "../store/slices/searchSlice";
 const formatToIndianCurrency = (value) => {
   if (!value || isNaN(value)) return "N/A";
   const numValue = parseFloat(value);
@@ -42,7 +44,7 @@ const formatToIndianCurrency = (value) => {
 };
 const cache = new CellMeasurerCache({
   fixedWidth: true,
-  defaultHeight: 350,
+  defaultHeight: 320,
   minHeight: 300,
 });
 function ListingsBody({ setShowLoginModal, initialized = false }) {
@@ -375,7 +377,6 @@ function ListingsBody({ setShowLoginModal, initialized = false }) {
     searchData?.tab,
     searchData?.occupancy,
     searchData?.sub_type,
-
     searchData?.budget,
     searchData?.furnished_status,
     searchData?.occupancy,
@@ -658,11 +659,23 @@ function ListingsBody({ setShowLoginModal, initialized = false }) {
     [setShowLoginModal, setSelectedProperty, setModalOpen]
   );
   const cards = useMemo(() => {
-    const baseCards = data.slice(0);
-    if (loading && hasMore) {
-      return [...baseCards, ...Array(2).fill({ type: "skeleton" })];
+    const result = [...data];
+    if (result.length >= 6 && dummyAds.length >= 1) {
+      const minPosition = 6;
+      const maxPosition = Math.min(12, result.length - 1);
+      const randomPosition =
+        Math.floor(Math.random() * (maxPosition - minPosition + 1)) +
+        minPosition;
+      result.splice(randomPosition, 0, {
+        ...dummyAds[0],
+        isAd: true,
+        key: "ad-popular-filters-random",
+      });
     }
-    return baseCards;
+    if (loading && hasMore) {
+      result.push(...Array(3).fill({ type: "skeleton" }));
+    }
+    return result;
   }, [data, loading, hasMore]);
   const rowRenderer = useCallback(
     ({ index, key, style, parent }) => {
@@ -688,6 +701,13 @@ function ListingsBody({ setShowLoginModal, initialized = false }) {
               <div className="w-full">
                 {item.type === "skeleton" ? (
                   <SkeletonPropertyCard />
+                ) : item.isAd ? (
+                  <div className="m-0 p-0">
+                    <ListingAdsCard
+                      ad={item}
+                      onPropertyClick={handleNavigation}
+                    />
+                  </div>
                 ) : (
                   <PropertyCard
                     property={item}

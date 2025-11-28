@@ -11,22 +11,19 @@ import {
   User,
   ArrowRight,
 } from "lucide-react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setSearchData } from "../store/slices/searchSlice";
-import config from "../utils/config";
 import { useRouter } from "next/navigation";
 import theme from "../utils/theme.json";
 import PropertyListingAds from "./PropertyListingAds";
 import Image from "next/image";
-
 const PropertyAds = ({ handleRender, propertyDataDetails }) => {
+  const { userProperties, videos } = useSelector((state) => state.ads);
   const router = useRouter();
   const dispatch = useDispatch();
   const videoRef = useRef(null);
   const [property, setProperty] = useState();
   const [error, setError] = useState(null);
-  const [videos, setVideos] = useState([]);
-  const [images, setImages] = useState([]);
   const [properties, setProperties] = useState([]);
   const [isPlaying, setIsPlaying] = useState(true);
   const [wasPlaying, setWasPlaying] = useState(false);
@@ -35,56 +32,21 @@ const PropertyAds = ({ handleRender, propertyDataDetails }) => {
   const [muted, setMuted] = useState(true);
   const [showControls, setShowControls] = useState(false);
   const [isSeeking, setIsSeeking] = useState(false);
-
   useEffect(() => {
     setProperty(propertyDataDetails);
   }, [propertyDataDetails]);
-  const fetchPropertyVideos = async () => {
-    if (!property?.unique_property_id) return;
-    setVideos([]);
-    try {
-      const response = await fetch(
-        `https://api.meetowner.in/property/getpropertyvideos?unique_property_id=${property.unique_property_id}`
-      );
-      const data = await response.json();
-      setVideos(data?.videos || []);
-    } catch (err) {
-      console.error("Failed to fetch videos:", err);
-    }
-  };
-  const fetchPropertyimages = async () => {
-    if (!property?.unique_property_id) return;
-    setImages([]);
-    try {
-      const response = await fetch(
-        `https://api.meetowner.in/property/getpropertyphotos?unique_property_id=${property.unique_property_id}`
-      );
-      const data = await response.json();
-      setImages(data?.images || []);
-    } catch (err) {
-      console.error("Failed to fetch images:", err);
-    }
-  };
-  const fetchUserProperties = async () => {
-    if (!property?.user_id) return;
-    setProperties([]);
-    try {
-      const response = await fetch(
-        `${config.awsApiUrl}/listings/v1/getPropertiesByUserID?user_id=${property.user_id}`
-      );
-      const data = await response.json();
-      setProperties(data || []);
-    } catch (err) {
-      console.error("Failed to fetch properties:", err);
-    }
-  };
   useEffect(() => {
     if (property?.unique_property_id) {
-      fetchPropertyVideos();
-      fetchPropertyimages();
-      fetchUserProperties();
+      if (userProperties) {
+        setProperties(userProperties);
+      }
     }
-  }, [property?.unique_property_id, property?.user_id, propertyDataDetails]);
+  }, [
+    property?.unique_property_id,
+    property?.user_id,
+    propertyDataDetails,
+    userProperties,
+  ]);
   useEffect(() => {
     const video = videoRef.current;
     if (!video) {
@@ -150,7 +112,6 @@ const PropertyAds = ({ handleRender, propertyDataDetails }) => {
     videoRef.current.muted = !videoRef.current.muted;
     setMuted(videoRef.current.muted);
   };
-
   const toggleControls = () => {
     setShowControls((prev) => !prev);
   };
@@ -174,14 +135,6 @@ const PropertyAds = ({ handleRender, propertyDataDetails }) => {
     const newTime = Math.max(videoRef.current.currentTime - 10, 0);
     videoRef.current.currentTime = newTime;
   };
-  const formatToIndianCurrency = (value) => {
-    if (!value || isNaN(value)) return "N/A";
-    const numValue = parseFloat(value);
-    if (numValue >= 10000000) return (numValue / 10000000).toFixed(2) + " Cr";
-    if (numValue >= 100000) return (numValue / 100000).toFixed(2) + " L";
-    if (numValue >= 1000) return (numValue / 1000).toFixed(2) + " K";
-    return numValue.toString();
-  };
   const handleNavigation = useCallback(() => {
     dispatch(
       setSearchData({
@@ -190,7 +143,6 @@ const PropertyAds = ({ handleRender, propertyDataDetails }) => {
     );
     router.push("/listings");
   }, [router, dispatch, property?.property_name]);
-
   if (error || !property) {
     return null;
   }
@@ -225,7 +177,7 @@ const PropertyAds = ({ handleRender, propertyDataDetails }) => {
                   onPlay={() => setIsPlaying(true)}
                   onPause={() => setIsPlaying(false)}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20"></div>
+                <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-black/20"></div>
                 <div
                   className={`absolute inset-0 transition-all duration-300 ${
                     showControls ? "opacity-100" : "opacity-0"
@@ -246,7 +198,7 @@ const PropertyAds = ({ handleRender, propertyDataDetails }) => {
                     )}
                   </button>
                 </div>
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent">
+                <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/90 via-black/60 to-transparent">
                   <div className="px-4 pb-3 pt-6">
                     <div className="mb-3">
                       <input
@@ -396,7 +348,7 @@ const PropertyAds = ({ handleRender, propertyDataDetails }) => {
                 </div>
               </>
             ) : (
-              <div className="w-full h-52 flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
+              <div className="w-full h-52 flex items-center justify-center bg-linear-to-br from-slate-100 to-slate-200">
                 <div className="text-center text-slate-600">
                   <p className="text-lg font-semibold">No Video Available</p>
                   <p className="text-sm">
@@ -406,7 +358,7 @@ const PropertyAds = ({ handleRender, propertyDataDetails }) => {
               </div>
             )}
           </div>
-          {properties.properties?.length > 0 && (
+          {properties?.length > 0 && (
             <div className="p-6">
               {}
               <div className="mb-6">
@@ -414,92 +366,82 @@ const PropertyAds = ({ handleRender, propertyDataDetails }) => {
                   <div className="p-1.5 bg-blue-100 rounded-lg">
                     <User className="w-4 h-4 text-blue-600" />
                   </div>
-                  <h3 className="text-md font-medium bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent text-black">
+                  <h3 className="text-md font-medium bg-linear-to-r from-slate-800 to-slate-600 bg-clip-text  text-black">
                     More by {property?.user?.name || property?.property_name}
                   </h3>
                 </div>
-                <div className="w-12 h-1 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-full"></div>
+                <div className="w-12 h-1 bg-linear-to-r from-blue-600 to-cyan-500 rounded-full"></div>
               </div>
               {}
               <div className="space-y-4 mb-6">
-                {properties.properties
-                  ?.slice(0, 3)
-                  .map((propertyItem, index) => (
-                    <div
-                      key={propertyItem.id}
-                      className="group cursor-pointer transform transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
-                      onClick={() => handleRender(propertyItem)}
-                      style={{ animationDelay: `${index * 100}ms` }}
-                    >
-                      <div className="bg-gradient-to-br from-white to-slate-50 border border-slate-200/50 rounded-xl p-4 transition-all duration-300 group-hover:border-blue-300/50 group-hover:shadow-md">
-                        <div className="flex items-center gap-4">
-                          {}
-                          <div className="relative overflow-hidden rounded-lg flex-shrink-0">
-                            <Image
-                              width={600}
-                              height={600}
-                              src={
-                                propertyItem.image
-                                  ? `https://api.meetowner.in/assets/v1/serve/${propertyItem.image}`
-                                  : `https://placehold.co/600x400?text=${
-                                      propertyItem?.property_name ||
-                                      "No Image Found"
-                                    }`
-                              }
-                              alt="Property"
-                              crossOrigin="anonymous"
-                              className="w-16 h-16 object-cover transition-transform duration-300 group-hover:scale-110"
-                              onError={(e) => {
-                                e.target.onerror = null;
-                                e.target.src = `https://placehold.co/600x400?text=${
-                                  propertyItem?.property_name ||
-                                  "No Image Found"
-                                }`;
-                              }}
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                            <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                              <Eye className="w-3 h-3 text-white drop-shadow-lg" />
-                            </div>
+                {properties?.slice(0, 3).map((propertyItem, index) => (
+                  <div
+                    key={index}
+                    className="group cursor-pointer transform transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
+                    onClick={() => handleRender(propertyItem)}
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    <div className="bg-linear-to-br from-white to-slate-50 border border-slate-200/50 rounded-xl p-4 transition-all duration-300 group-hover:border-blue-300/50 group-hover:shadow-md">
+                      <div className="flex items-center gap-4">
+                        {}
+                        <div className="relative overflow-hidden rounded-lg shrink-0">
+                          <Image
+                            width={600}
+                            height={600}
+                            src={
+                              propertyItem.image
+                                ? `https://api.meetowner.in/assets/v1/serve/${propertyItem.image}`
+                                : `https://placehold.co/600x400?text=${
+                                    propertyItem?.property_name ||
+                                    "No Image Found"
+                                  }&format=png`
+                            }
+                            alt="Property"
+                            crossOrigin="anonymous"
+                            className="w-16 h-16 object-cover transition-transform duration-300 group-hover:scale-110"
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = `https://placehold.co/600x400?text=${
+                                propertyItem?.property_name || "No Image Found"
+                              }&format=png`;
+                            }}
+                          />
+                          <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                          <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                            <Eye className="w-3 h-3 text-white drop-shadow-lg" />
                           </div>
-                          {}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between mb-1">
-                              <p className="text-md font-semibold text-blue-900">
-                                ₹{" "}
-                                {property.property_for === "Sell"
-                                  ? formatToIndianCurrency(
-                                      property?.property_cost
-                                    )
-                                  : formatToIndianCurrency(
-                                      property?.monthly_rent
-                                    )}
-                              </p>
-                              <ArrowRight className="w-4 h-4 text-slate-400 transition-all duration-300 group-hover:text-blue-600 group-hover:translate-x-1" />
-                            </div>
-                            <div className="flex items-center gap-2 text-sm text-slate-600">
-                              <span className="bg-slate-100 px-2 py-1 rounded-full font-medium">
-                                {propertyItem?.bedrooms}{" "}
-                                {propertyItem?.sub_type === "Apartment"
-                                  ? "BHK"
-                                  : propertyItem?.sub_type === "Plot"
-                                  ? "Plot"
-                                  : "Land"}
-                              </span>
-                              {propertyItem.location_id && (
-                                <div className="flex items-center gap-1">
-                                  <MapPin className="w-3 h-3 text-slate-400" />
-                                  <span className="truncate text-xs">
-                                    {propertyItem.location_id}
-                                  </span>
-                                </div>
-                              )}
-                            </div>
+                        </div>
+                        {}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between mb-1">
+                            <p className="text-md font-semibold text-blue-900">
+                              {propertyItem?.property_name}
+                            </p>
+                            <ArrowRight className="w-4 h-4 text-slate-400 transition-all duration-300 group-hover:text-blue-600 group-hover:translate-x-1" />
+                          </div>
+                          <div className="flex items-center gap-2 text-sm text-slate-600">
+                            <span className="bg-slate-100 px-2 py-1 rounded-full font-medium">
+                              {propertyItem?.bedrooms}{" "}
+                              {propertyItem?.sub_type === "Apartment"
+                                ? "BHK"
+                                : propertyItem?.sub_type === "Plot"
+                                ? "Plot"
+                                : "Land"}
+                            </span>
+                            {propertyItem.location_id && (
+                              <div className="flex items-center gap-1">
+                                <MapPin className="w-3 h-3 text-slate-400" />
+                                <span className="truncate text-xs">
+                                  {propertyItem.location_id}
+                                </span>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
                     </div>
-                  ))}
+                  </div>
+                ))}
               </div>
               {}
               <button
@@ -510,7 +452,7 @@ const PropertyAds = ({ handleRender, propertyDataDetails }) => {
                   View All Properties
                   <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
                 </span>
-                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+                <div className="absolute inset-0 bg-linear-to-r from-white/0 via-white/20 to-white/0 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
               </button>
             </div>
           )}

@@ -50,7 +50,7 @@ const Empty = ({ message = "No data found." }) => (
     {message}
   </div>
 );
-const PropertyDeatils = ({ propertyDataDetails }) => {
+const PropertyDeatils = ({ propertyDataDetails, userProperties }) => {
   const JWT_SECRET = process.env.NEXT_PUBLIC_ENCRYPTION_SECRET;
   const ENCRYPTION_KEY = CryptoJS.SHA256(JWT_SECRET).toString();
   function decrypt(encryptedText) {
