@@ -12,7 +12,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { IoIosHeartEmpty } from "react-icons/io";
 import { toast } from "react-toastify";
 import theme from "./utils/theme.json";
-
 import Image from "next/image";
 const Header = ({ favourites }) => {
   const Data = useSelector((state) => state.auth.loggedIn);
@@ -21,7 +20,6 @@ const Header = ({ favourites }) => {
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
     const token = JSON.parse(localStorage.getItem("token"));
-
     if (token) {
       dispatch(
         setAuthData({
@@ -67,7 +65,10 @@ const Header = ({ favourites }) => {
       })
     );
     dispatch(setLoggedIn(false));
+    deleteCookie("token", { path: "/" });
+    deleteCookie("user", { path: "/" });
     localStorage.clear();
+    sessionStorage.clear();
     router.push("/");
   };
   const handleFavRoute = () => {
@@ -168,7 +169,6 @@ const Header = ({ favourites }) => {
               />
               Download App
             </button>
-
             <button
               aria-label="Add Property"
               onClick={() =>
@@ -181,7 +181,6 @@ const Header = ({ favourites }) => {
                 | Free
               </span>
             </button>
-
             {Data && (
               <div
                 className="flex cursor-pointer font-medium border border-[#F0AA00] hover:bg-[#F0AA00] px-6 py-1 rounded-full"

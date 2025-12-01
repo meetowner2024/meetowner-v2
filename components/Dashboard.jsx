@@ -61,7 +61,13 @@ const Dashboard = ({
     }
   }, [mediaList]);
   useEffect(() => {
-    requestIdleCallback(() => setRenderBelowFold(true));
+    const ric =
+      window.requestIdleCallback ||
+      function (cb) {
+        return setTimeout(() => cb(), 1);
+      };
+
+    ric(() => setRenderBelowFold(true));
   }, []);
   useEffect(() => {
     const handleScroll = () => {

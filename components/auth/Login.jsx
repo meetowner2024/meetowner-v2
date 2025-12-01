@@ -12,7 +12,11 @@ import CryptoJS from "crypto-js";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
 import { X } from "lucide-react";
 import { setCookie } from "cookies-next";
 import Image from "next/image";
@@ -226,12 +230,12 @@ const Login = ({ onClose, modalRef }) => {
         setCookie("token", accessToken, {
           maxAge: 60 * 60 * 24 * 7,
           path: "/",
-          secure: true,
+          secure: process.env.NODE_ENV === "PRODUCTION",
         });
         setCookie("user", JSON.stringify({ user_details }), {
           maxAge: 60 * 60 * 24 * 7,
           path: "/",
-          secure: true,
+          secure: process.env.NODE_ENV === "PRODUCTION",
         });
         dispatch(
           setAuthData({
@@ -495,7 +499,8 @@ const Login = ({ onClose, modalRef }) => {
       </div>
       <style jsx>{`
         @keyframes gradient-shift {
-          0%, 100% {
+          0%,
+          100% {
             background: linear-gradient(45deg, #3a59d1, #3d90d7, #3a59d1);
           }
           50% {
@@ -523,7 +528,8 @@ const Login = ({ onClose, modalRef }) => {
           }
         }
         @keyframes float {
-          0%, 100% {
+          0%,
+          100% {
             transform: translateY(0px) rotate(0deg);
           }
           50% {
@@ -531,7 +537,8 @@ const Login = ({ onClose, modalRef }) => {
           }
         }
         @keyframes float-delay {
-          0%, 100% {
+          0%,
+          100% {
             transform: translateY(0px) rotate(0deg);
           }
           50% {
