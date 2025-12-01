@@ -488,8 +488,8 @@ const PropertyListing = ({
           <div className="text-center py-10 text-[#1D3A76] font-semibold">
             Loading properties...
           </div>
-        ) : property.length > 0 ? (
-          property.map((property) => (
+        ) : property?.length > 0 ? (
+          property?.map((property) => (
             <SwiperSlide key={property.unique_property_id}>
               <div className="bg-white rounded-xl shadow-lg overflow-hidden">
                 <div className="relative">

@@ -152,7 +152,7 @@ const FooterLinks = ({ basePath = "/listings" }) => {
             </div>
           ) : error ? (
             <div className="text-center py-8 text-red-500">{error}</div>
-          ) : filteredLinks.length === 0 ? (
+          ) : filteredLinks?.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               No links found.
             </div>
@@ -168,12 +168,12 @@ const FooterLinks = ({ basePath = "/listings" }) => {
                   style={{ paddingBottom: "50px" }}
                 >
                   {Array.from({
-                    length: Math.ceil(filteredLinks.length / 5),
+                    length: Math.ceil(filteredLinks?.length / 5),
                   }).map((_, pageIdx) => (
                     <SwiperSlide key={pageIdx}>
                       <ul className="flex flex-col gap-2 items-stretch">
                         {filteredLinks
-                          .slice(pageIdx * 5, pageIdx * 5 + 5)
+                          ?.slice(pageIdx * 5, pageIdx * 5 + 5)
                           .map((link) => (
                             <li key={link.id}>
                               <a

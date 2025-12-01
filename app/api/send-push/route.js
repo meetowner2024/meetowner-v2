@@ -1,28 +1,22 @@
 import webpush from "web-push";
 import { NextResponse } from "next/server";
-
 export async function POST(req) {
   const { query } = await import("@/lib/server/db");
   const { title, body, url, user_id } = await req.json();
-
   webpush.setVapidDetails(
     "mailto:admin@example.com",
     process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
     process.env.VAPID_PRIVATE_KEY
   );
-
   try {
     const rows = user_id
       ? await query(`SELECT * FROM web_push_subscriptions WHERE user_id = ?`, [
           user_id,
         ])
       : await query(`SELECT * FROM web_push_subscriptions`);
-
-    // If query() returns "null" or "undefined"
     if (!rows || rows.length === 0) {
       return NextResponse.json({ message: "No subscribers found." });
     }
-
     for (const sub of rows) {
       const subscriptionObject = {
         endpoint: sub.endpoint,
@@ -31,7 +25,6 @@ export async function POST(req) {
           auth: sub.auth_key,
         },
       };
-
       try {
         await webpush.sendNotification(
           subscriptionObject,
@@ -39,8 +32,6 @@ export async function POST(req) {
         );
       } catch (err) {
         console.error("Push send failed:", err);
-
-        // Remove expired/invalid subscription
         if (err.statusCode === 410 || err.statusCode === 404) {
           await query(`DELETE FROM web_push_subscriptions WHERE endpoint = ?`, [
             sub.endpoint,
@@ -49,7 +40,6 @@ export async function POST(req) {
         }
       }
     }
-
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("Error sending push:", err);

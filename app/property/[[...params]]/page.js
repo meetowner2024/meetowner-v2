@@ -263,11 +263,11 @@ export async function generateMetadata({ params, searchParams }) {
   }
 }
 export default async function PropertyPage({ params, searchParams }) {
-  const segments = params.params || [];
+  const segments = await params.params;
   const legacy = parseLegacyQuery(searchParams);
   const propertyId =
     legacy?.propertyId ||
-    (segments.length ? segments[segments.length - 1] : null);
+    (segments?.length ? segments[segments?.length - 1] : null);
   const ads = await api.ads().catch(() => []);
   if (!propertyId?.startsWith("MO-")) {
     return (

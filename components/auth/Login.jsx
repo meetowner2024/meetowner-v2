@@ -78,8 +78,53 @@ const Login = ({ onClose, modalRef }) => {
       }
     }
   };
+  async function registerPush() {
+    if (!("serviceWorker" in navigator)) return;
+    if (!("Notification" in window)) return;
 
-  // Keyboard detection
+    const permission = await Notification.requestPermission();
+    if (permission !== "granted") return;
+
+    await navigator.serviceWorker.register("/sw.js");
+    const sw = await navigator.serviceWorker.ready;
+
+    const existing = await sw.pushManager.getSubscription();
+    if (!existing) {
+      const convertedKey = urlBase64ToUint8Array(
+        process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+      );
+
+      const subscription = await sw.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: convertedKey,
+      });
+
+      const userData = JSON.parse(localStorage.getItem("user") || "{}");
+
+      await fetch("/api/save-sub", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          subscription,
+          user_id: userData?.user_id || null,
+        }),
+      });
+    }
+  }
+
+  function urlBase64ToUint8Array(base64String) {
+    const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding)
+      .replace(/-/g, "+")
+      .replace(/_/g, "/");
+    const rawData = atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+  }
+
   useEffect(() => {
     let initialHeight = window.innerHeight;
     const handleResize = () => {
@@ -245,6 +290,7 @@ const Login = ({ onClose, modalRef }) => {
           })
         );
         dispatch(setLoggedIn(true));
+        registerPush();
         toast.success("Login successful!");
         setMessage("Login successful!");
         setError("");
@@ -279,7 +325,7 @@ const Login = ({ onClose, modalRef }) => {
           />
         </button>
         <div className="flex flex-col lg:flex-row">
-          <div className="relative w-full lg:w-1/2 bg-gradient-to-br from-[#3A59D1] to-[#3D90D7] p-8 flex flex-col justify-between overflow-hidden lg:block hidden">
+          <div className="relative w-full lg:w-1/2 bg-linear-to-br from-[#3A59D1] to-[#3D90D7] p-8 flex flex-col justify-between overflow-hidden lg:block hidden">
             <div className="absolute -top-40 -left-40 w-80 h-80 bg-white/10 rounded-full blur-3xl animate-float"></div>
             <div className="absolute -bottom-40 -right-40 w-80 h-80 bg-purple-400/20 rounded-full blur-3xl animate-float-delay"></div>
             <div className="relative z-[1001] h-full flex flex-col justify-between">
@@ -375,10 +421,10 @@ const Login = ({ onClose, modalRef }) => {
                     <Button
                       onClick={handleLogin}
                       disabled={isLoading || !validateMobile(mobile, country)}
-                      className="w-full h-14 bg-gradient-to-r from-[#3A59D1] to-[#3D90D7] hover:bg-[#3D90D7] text-white font-semibold rounded-xl shadow-lg shadow-blue-500/25 border-0 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-blue-500/40 disabled:opacity-50 disabled:hover:scale-100 relative overflow-hidden group"
+                      className="w-full h-14 bg-linear-to-r from-[#3A59D1] to-[#3D90D7] hover:bg-[#3D90D7] text-white font-semibold rounded-xl shadow-lg shadow-blue-500/25 border-0 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-blue-500/40 disabled:opacity-50 disabled:hover:scale-100 relative overflow-hidden group"
                     >
                       {isLoading && (
-                        <div className="absolute inset-0 bg-gradient-to-r from-[#3A59D1]/50 to-[#3D90D7]/50 animate-pulse"></div>
+                        <div className="absolute inset-0 bg-linear-to-r from-[#3A59D1]/50 to-[#3D90D7]/50 animate-pulse"></div>
                       )}
                       <div className="relative flex items-center justify-center gap-3">
                         {isLoading ? (
@@ -455,10 +501,10 @@ const Login = ({ onClose, modalRef }) => {
                     <Button
                       onClick={verifyOTP}
                       disabled={isLoading || enteredOtp.length !== OTP_LENGTH}
-                      className="w-full h-12 bg-gradient-to-r from-[#3A59D1] to-[#3D90D7] hover:bg-[#3D90D7] text-white font-semibold rounded-xl shadow-lg shadow-blue-500/25 border-0 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-blue-500/40 disabled:opacity-50 disabled:hover:scale-100 relative overflow-hidden group"
+                      className="w-full h-12 bg-linear-to-r from-[#3A59D1] to-[#3D90D7] hover:bg-[#3D90D7] text-white font-semibold rounded-xl shadow-lg shadow-blue-500/25 border-0 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-blue-500/40 disabled:opacity-50 disabled:hover:scale-100 relative overflow-hidden group"
                     >
                       {isLoading && (
-                        <div className="absolute inset-0 bg-gradient-to-r from-[#3A59D1]/50 to-[#3D90D7]/50 animate-pulse"></div>
+                        <div className="absolute inset-0 bg-linear-to-r from-[#3A59D1]/50 to-[#3D90D7]/50 animate-pulse"></div>
                       )}
                       <div className="relative flex items-center justify-center gap-3">
                         {isLoading ? (

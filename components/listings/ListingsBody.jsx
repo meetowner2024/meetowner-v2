@@ -667,20 +667,20 @@ function ListingsBody({ setShowLoginModal, initialized = false }) {
   );
   const cards = useMemo(() => {
     const result = [...data];
-    if (result.length >= 6 && dummyAds.length >= 1) {
+    if (result?.length >= 6 && dummyAds?.length >= 1) {
       const minPosition = 6;
-      const maxPosition = Math.min(12, result.length - 1);
+      const maxPosition = Math.min(12, result?.length - 1);
       const randomPosition =
         Math.floor(Math.random() * (maxPosition - minPosition + 1)) +
         minPosition;
-      result.splice(randomPosition, 0, {
+      result?.splice(randomPosition, 0, {
         ...dummyAds[0],
         isAd: true,
         key: "ad-popular-filters-random",
       });
     }
     if (loading && hasMore) {
-      result.push(...Array(3).fill({ type: "skeleton" }));
+      result?.push(...Array(3).fill({ type: "skeleton" }));
     }
     return result;
   }, [data, loading, hasMore]);
@@ -771,61 +771,92 @@ function ListingsBody({ setShowLoginModal, initialized = false }) {
   };
   return (
     <div className="min-h-screen relative z-0 overflow-visible">
-      <div className="flex justify-between flex-wrap gap-2 mb-1 mt-0 px-2 ">
-        <div className="flex   flex-grow overflow-hidden  items-center min-w-0">
-          <MapPin className="text-yellow-500 mr-1 w-4 h-4 md:w-5 md:h-5" />
-          <p className="text-sm  whitespace-nowrap overflow-hidden text-ellipsis font-normal text-[#1D3A76]">
-            {searchData?.property_in === "Commercial"
-              ? "Commercial"
-              : searchData?.property_in === "Plot"
-              ? "Plot"
-              : "Residential"}{" "}
-            {searchData?.sub_type || ""} For{" "}
-            {searchData?.tab === "Buy"
-              ? "Sell"
-              : searchData?.tab === "Rent"
-              ? "Rent"
-              : "Sell"}{" "}
-            In {searchData?.city || ""}
-          </p>
-        </div>
-        <div className="relative   flex gap-2 sm:gap-0 flex-col sm:flex-row mb-1 text-left z-50 flex-shrink-0  ">
-          <Breadcrumb />
-          <div className="flex items-center  gap-2">
-            <p className="text-[#000000] text-sm whitespace-nowrap font-medium">
-              Sort by
-            </p>
-            <div
-              className="bg-[#F5F5F5] border border-[#2C4D60] w-full space-x-2  rounded-lg cursor-pointer px-4 py-1  flex items-center relative"
-              onClick={() => setIsOpen(!isOpen)}
-            >
-              <span className="text-xs md:text-sm text-gray-800">
-                {selected}
-              </span>
-              <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4" />
+      <div className="hidden md:block sticky top-0 z-40 bg-white border-b border-gray-200">
+        <div className="w-full px-4 py-4">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-6 flex-1 min-w-0">
+                <div className="flex items-center gap-2 min-w-0">
+                  <MapPin className="w-5 h-5 text-yellow-500 shrink-0 mt-0.5" />
+                  <p className="text-sm md:text-base font-medium text-[#1D3A76] leading-tight truncate">
+                    {searchData?.property_in === "Commercial"
+                      ? "Commercial"
+                      : searchData?.property_in === "Plot"
+                      ? "Plot"
+                      : "Residential"}{" "}
+                    {searchData?.sub_type && (
+                      <span className="font-semibold">
+                        {searchData.sub_type}
+                      </span>
+                    )}{" "}
+                    For{" "}
+                    <span className="font-semibold">
+                      {searchData?.tab === "Rent" ? "Rent" : "Sell"}
+                    </span>{" "}
+                    in{" "}
+                    <span className="font-bold text-[#1D3A76]">
+                      {searchData?.city || "India"}
+                    </span>
+                  </p>
+                </div>
+
+                <div className="hidden md:block">
+                  <Breadcrumb />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between md:justify-end gap-4">
+                <div className="md:hidden flex-1">
+                  <Breadcrumb />
+                </div>
+
+                <div className="relative shrink-0">
+                  <button
+                    onClick={() => setIsOpen(!isOpen)}
+                    className="flex items-center gap-2 bg-linear-to-r from-[#3A59D1] to-[#3D90D7] 
+                         text-white font-medium px-5 py-2.5 rounded-xl 
+                         shadow-lg hover:shadow-xl transition-all duration-300 
+                         whitespace-nowrap text-sm min-w-max"
+                  >
+                    <span>Sort</span>
+                    <span className="font-bold max-w-[100px] truncate">
+                      {selected}
+                    </span>
+                    <ChevronDown
+                      className={`w-4 h-4 transition-transform duration-200 ${
+                        isOpen ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+
+                  {isOpen && (
+                    <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden z-50">
+                      {options.map((option) => (
+                        <button
+                          key={option}
+                          onClick={() => {
+                            setSelected(option);
+                            setIsOpen(false);
+                          }}
+                          className={`w-full text-left px-5 py-3 text-sm font-medium transition-all
+                      ${
+                        selected === option
+                          ? "bg-linear-to-r from-[#3A59D1]/10 to-[#3D90D7]/10 text-[#3A59D1] font-bold"
+                          : "hover:bg-gray-50 text-gray-700"
+                      }`}
+                        >
+                          {option}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
-          {isOpen && (
-            <div className="absolute top-10 right-0 w-50 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
-              {options.map((option) => (
-                <div
-                  key={option}
-                  onClick={() => {
-                    setSelected(option);
-                    setIsOpen(false);
-                  }}
-                  className={`px-4 py-2 cursor-pointer hover:bg-gray-100 text-sm ${
-                    selected === option ? "bg-gray-100 font-medium" : ""
-                  }`}
-                >
-                  {option}
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       </div>
-      {data.length > 0 ? (
+      {data?.length > 0 ? (
         <WindowScroller>
           {({ height, isScrolling, scrollTop }) => (
             <AutoSizer disableHeight>
@@ -836,7 +867,7 @@ function ListingsBody({ setShowLoginModal, initialized = false }) {
                   isScrolling={isScrolling}
                   scrollTop={scrollTop}
                   width={width}
-                  rowCount={cards.length}
+                  rowCount={cards?.length}
                   deferredMeasurementCache={cache}
                   rowHeight={cache.rowHeight}
                   rowRenderer={rowRenderer}
@@ -970,12 +1001,12 @@ function ListingsBody({ setShowLoginModal, initialized = false }) {
           </div>
         </>
       )}
-      {!hasMore && data.length > 0 && (
+      {!hasMore && data?.length > 0 && (
         <div className="w-full py-4 text-center text-[#1D3A76] font-medium">
           No more properties to load.
         </div>
       )}
-      {hasMore && data.length > 0 && !loading && (
+      {hasMore && data?.length > 0 && !loading && (
         <div className="w-full py-4 flex justify-center">
           <button
             onClick={() => setPage((prev) => prev + 1)}

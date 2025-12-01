@@ -104,7 +104,7 @@ export default function PropertyClient({
   const dispatch = useDispatch();
   const hasFetchedRef = useRef(false);
   const extractPropertyId = (segments) => {
-    if (!segments || segments.length === 0) return null;
+    if (!segments || segments?.length === 0) return null;
     const lastSegment = segments.at(-1);
     return lastSegment && lastSegment.startsWith("MO-") ? lastSegment : null;
   };
@@ -148,9 +148,9 @@ export default function PropertyClient({
     window.scrollTo(0, 0);
   }, []);
   useEffect(() => {
-    if (property && Object.keys(property).length > 0) {
+    if (property && Object.keys(property)?.length > 0) {
       dispatch(setPropertyDetails({ property }));
-      if (ads && Array.isArray(ads) && ads.length > 0) {
+      if (ads && Array.isArray(ads) && ads?.length > 0) {
         dispatch(setAds(ads));
       }
       if (userProperties) {

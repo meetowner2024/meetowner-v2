@@ -952,7 +952,7 @@ const ListingHeader = ({ setShowLoginModal, ads }) => {
                     onChange={(e) => {
                       const value = e.target.value;
                       setLocalSearchInput(value);
-                      if (value.length > 0) {
+                      if (value?.length > 0) {
                         setShowMobileSearch(true);
                       }
                     }}

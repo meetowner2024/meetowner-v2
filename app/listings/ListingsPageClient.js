@@ -44,7 +44,7 @@ const ListingsPageClient = memo(function ListingsPageClient({
   const [initialized, setInitialized] = useState(false);
   const modalRef = useRef(null);
   const parseSEOParams = (slugArray) => {
-    if (!slugArray.length) return {};
+    if (!slugArray?.length) return {};
     const fullSlug = slugArray.join("-");
     const lower = fullSlug.toLowerCase();
     const data = {
@@ -89,15 +89,15 @@ const ListingsPageClient = memo(function ListingsPageClient({
     const saleIdx = parts.indexOf("sale");
     const rentIdx = parts.indexOf("rent");
     const markerIdx = saleIdx !== -1 ? saleIdx : rentIdx;
-    if (markerIdx !== -1 && parts.length > markerIdx + 1) {
+    if (markerIdx !== -1 && parts?.length > markerIdx + 1) {
       const after = parts.slice(markerIdx + 1).filter((p) => p !== "in");
-      if (after.length >= 1) {
-        data.city = after[after.length - 1]
+      if (after?.length >= 1) {
+        data.city = after[after?.length - 1]
           .replace(/-/g, " ")
           .replace(/\b\w/g, (c) => c.toUpperCase());
         const locationParts = after.slice(0, -1);
         data.location =
-          locationParts.length > 0
+          locationParts?.length > 0
             ? locationParts
                 .join(" ")
                 .replace(/-/g, " ")
@@ -117,7 +117,7 @@ const ListingsPageClient = memo(function ListingsPageClient({
       city: "Hyderabad",
     };
     let parsed;
-    if (initialParams.length > 0) {
+    if (initialParams?.length > 0) {
       parsed = parseSEOParams(initialParams);
     }
     const initialData = { ...defaults, ...parsed };
@@ -136,9 +136,9 @@ const ListingsPageClient = memo(function ListingsPageClient({
         showLoginModal={showLoginModal}
         setShowLoginModal={setShowLoginModal}
       />
-      <div className="flex flex-col lg:flex-row w-full justify-center h-auto pt-5 sm:pt-24 md:pt-24 lg:pt-5 gap-4">
+      <div className="flex flex-col lg:flex-row w-full justify-center h-auto pt-5 sm:pt-24 md:pt-5 lg:pt-5 gap-4">
         <div className="flex w-full max-w-[1400px] flex-col md:flex-row gap-6">
-          <div className="w-full md:w-[70%]">
+          <div className="w-full lg:w-[70%]">
             <ListingsBody
               showLoginModal={showLoginModal}
               setShowLoginModal={setShowLoginModal}
@@ -146,8 +146,8 @@ const ListingsPageClient = memo(function ListingsPageClient({
               listingAds={listingAds}
             />
           </div>
-          {getAds.length > 0 && (
-            <div className="hidden md:block w-full md:w-[30%] ">
+          {getAds?.length > 0 && (
+            <div className="hidden lg:block w-full lg:w-[30%]">
               <ListingAds />
             </div>
           )}

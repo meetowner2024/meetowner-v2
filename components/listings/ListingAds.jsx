@@ -84,7 +84,7 @@ const ListingAds = () => {
       </div>
     );
   }
-  if (properties.length === 0) {
+  if (properties?.length === 0) {
     return (
       <div className="sticky top-20 bg-gray-50 rounded-2xl p-10 text-center border border-gray-200">
         <Image
@@ -172,7 +172,7 @@ const ListingAds = () => {
           )}
 
           <div className="divide-y divide-gray-100">
-            {others.map((property) => (
+            {others?.map((property) => (
               <div
                 key={property.unique_property_id}
                 onClick={() => handleNavigation(property)}

@@ -14,10 +14,35 @@ import { toast } from "react-toastify";
 import theme from "./utils/theme.json";
 import Image from "next/image";
 import { deleteCookie } from "cookies-next";
+import NotificationPermissionModal from "./auth/NotificationPermissionModal";
 const Header = ({ favourites }) => {
   const Data = useSelector((state) => state.auth.loggedIn);
   const user = useSelector((state) => state.auth.userDetails);
   const [menuOpen, setMenuOpen] = useState(false);
+  useEffect(() => {
+    if (!Data) {
+      setShowNotifModal(false);
+      return;
+    }
+    const lastShown = localStorage.getItem("notif_prompt_last_shown");
+    const lastDismissed = localStorage.getItem("notif_prompt_dismissed");
+    const now = Date.now();
+    const oneDay = 24 * 60 * 60 * 1000;
+    const threeDaysAgo = now - 3 * oneDay;
+    if (lastDismissed && Number(lastDismissed) > threeDaysAgo) {
+      return;
+    }
+    if (lastShown && Number(lastShown) > now - oneDay) {
+      return;
+    }
+    if ("Notification" in window && Notification.permission === "default") {
+      const timer = setTimeout(() => {
+        setShowNotifModal(true);
+        localStorage.setItem("notif_prompt_last_shown", now.toString());
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [Data]);
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
     const token = JSON.parse(localStorage.getItem("token"));
@@ -32,6 +57,7 @@ const Header = ({ favourites }) => {
     }
   }, [Data]);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showNotifModal, setShowNotifModal] = useState(false);
   const modalRef = useRef(null);
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const downloadRef = useRef(null);
@@ -71,6 +97,7 @@ const Header = ({ favourites }) => {
     localStorage.clear();
     sessionStorage.clear();
     router.push("/");
+    setShowNotifModal(false);
   };
   const handleFavRoute = () => {
     const data = localStorage.getItem("user");
@@ -88,26 +115,24 @@ const Header = ({ favourites }) => {
     router.push("/");
   };
   useEffect(() => {
-    const handleClickOutsideDownload = (e) => {
+    const handleClickOutside = (e) => {
+      if (modalRef.current && !modalRef.current.contains(e.target)) {
+        setShowLoginModal(false);
+      }
       if (downloadRef.current && !downloadRef.current.contains(e.target)) {
         setShowDownloadModal(false);
       }
     };
-    if (showDownloadModal) {
-      document.addEventListener("mousedown", handleClickOutsideDownload);
+    if (showLoginModal || showDownloadModal) {
+      document.addEventListener("mousedown", handleClickOutside);
     }
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutsideDownload);
-    };
-  }, [showDownloadModal]);
-  const handleListings = () => {
-    router.push("/pre-launch");
-  };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showLoginModal, showDownloadModal]);
   return (
     <>
       {showAppSuggestion && (
         <div className="   md:hidden w-full z-20">
-          <div className="flex justify-between items-center mx-auto bg-gradient-to-r from-indigo-400 to-blue-600  text-white p-2  shadow-lg animate-slideUp">
+          <div className="flex justify-between items-center mx-auto bg-linear-to-r from-indigo-400 to-blue-600  text-white p-2  shadow-lg animate-slideUp">
             <div className="flex items-center gap-3 sm:px-2">
               <button
                 aria-label="Close"
@@ -231,6 +256,22 @@ const Header = ({ favourites }) => {
           </div>
         </div>
       )}
+      {showNotifModal && Data && (
+        <NotificationPermissionModal
+          onEnabled={() => {
+            toast.success("Notifications enabled! You'll stay updated");
+            setShowNotifModal(false);
+          }}
+          onClose={() => {
+            localStorage.setItem(
+              "notif_prompt_dismissed",
+              Date.now().toString()
+            );
+            setShowNotifModal(false);
+          }}
+        />
+      )}
+
       {showDownloadModal && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-opacity-30 backdrop-blur-xs">
           <div ref={downloadRef} className="relative w-[90%] max-w-sm">

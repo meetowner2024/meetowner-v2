@@ -142,6 +142,21 @@ const fallbackIcons = [
   <FaSolarPanel />,
   <FaShieldAlt />,
 ];
+const slugify = (text = "") =>
+  text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+const buildSeoUrl = (p) => {
+  const bhk = p.bedrooms ? `${p.bedrooms}-bhk-` : "";
+  const subType = p.sub_type ? `${slugify(p.sub_type)}-` : "";
+  const propertySlug = slugify(p.property_name);
+  const builder = p.builder_name ? `-by-${slugify(p.builder_name)}` : "";
+  const propertyFor = `for-${p.property_for === "Rent" ? "rent" : "sale"}-`;
+  const location = slugify(p.location_id || "");
+  const city = slugify(p.city || "hyderabad");
+  return `${bhk}${subType}${propertySlug}${builder}-${propertyFor}in-${location}-${city}`;
+};
 const getGradient = (index) => gradients[index % gradients.length];
 const generateGradient = (index) => {
   const selected = colors[index % colors.length];
@@ -188,7 +203,6 @@ const PromotionalBanner = ({
   );
   const bannerRef = useRef(null);
   const cardRef = useRef(null);
-  const abortControllerRef = useRef(null);
   const gradient = useMemo(() => getGradient(currentPromo), [currentPromo]);
   const imageUrl = useMemo(
     () =>
@@ -256,98 +270,60 @@ const PromotionalBanner = ({
   const handleChatClick = useCallback(
     async (e) => {
       e.stopPropagation();
-      const data = localStorage.getItem("user");
-      if (!data) {
-        toast.info("Please Login to Contact!", {
+      const userData = JSON.parse(localStorage.getItem("user") || "null");
+      if (!userData) {
+        return toast.info("Please Login to Contact!", {
           position: "top-right",
           autoClose: 3000,
         });
-        return;
       }
-      const userData = JSON.parse(data);
       try {
-        const response = await fetch(
+        const res = await fetch(
           `https://api.meetowner.in/listings/v1/gspmeet?unique_property_id=${currentProperty.unique_property_id}`
         );
-        const data = await response.json();
-        const propertydata = data?.property;
-        const decryptedJson = decrypt(propertydata);
-        const parsed = decryptedJson ? JSON.parse(decryptedJson) : null;
-        const sellerdata = parsed.user;
-        const phone = sellerdata?.mobile || sellerdata?.phone;
-        const name = sellerdata?.name || "";
-        if (phone) {
-          const propertyFor =
-            currentProperty.property_for === "Rent" ? "rent" : "sale";
-          const bhkPart = currentProperty.bedrooms
-            ? `${currentProperty.bedrooms}-bhk-`
-            : "";
-          const subTypePart = currentProperty.sub_type
-            ? `${currentProperty.sub_type.toLowerCase().replace(/\s+/g, "-")}-`
-            : "";
-          const propertyNameSlug = currentProperty.property_name
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, "-")
-            .replace(/^-+|-+$/g, "");
-          const builderNameSlug = currentProperty.builder_name
-            ? `-by-${currentProperty.builder_name
-                .toLowerCase()
-                .replace(/[^a-z0-9]+/g, "-")
-                .replace(/^-+|-+$/g, "")}`
-            : "";
-          const locationSlug = currentProperty.location_id
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, "-")
-            .replace(/^-+|-+$/g, "");
-          const citySlug = currentProperty.city
-            ? currentProperty.city
-                .toLowerCase()
-                .replace(/[^a-z0-9]+/g, "-")
-                .replace(/^-+|-+$/g, "")
-            : "hyderabad";
-          const forPart = `for-${propertyFor}-`;
-          const seoSlug = `${bhkPart}${subTypePart}${propertyNameSlug}${builderNameSlug}-${forPart}in-${locationSlug}-${citySlug}`;
-          const propertyId = currentProperty.unique_property_id;
-          const fullUrl = `${window.location.origin}/property/${seoSlug}/${propertyId}`;
-          const encodedMessage = encodeURIComponent(
-            `Hi ${name},\nI'm interested in this property: ${currentProperty.property_name}.\n${fullUrl}\nI look forward to your assistance in the home search. Please get in touch with me at ${userData.mobile} to initiate the process.`
-          );
-          const whatsappUrl = `https://wa.me/+91${phone}?text=${encodedMessage}`;
-          window.open(whatsappUrl, "_blank");
-          const SubType =
-            currentProperty.sub_type === "Apartment"
-              ? `${currentProperty?.sub_type} ${currentProperty?.bedrooms}BHK`
-              : currentProperty?.sub_type;
-          const smspayload = {
-            name: userData?.name,
-            mobile: userData?.mobile,
-            sub_type: SubType,
-            location: currentProperty?.location_id.split(/[\s,]+/)[0],
-            property_cost: formatToIndianCurrency(
-              currentProperty?.property_cost
-            ),
-            ownerMobile: phone || "N/A",
-          };
-          await Promise.all([
-            axios.post(
-              `${config.awsApiUrl}/enquiry/v1/sendLeadTextMessage`,
-              smspayload
-            ),
-            axios.post(`${config.awsApiUrl}/enquiry/v1/contactSeller`, {
-              unique_property_id: currentProperty.unique_property_id,
-              user_id: userData.user_id,
-              fullname: userData.name,
-              mobile: userData.mobile,
-              email: userData.email,
-            }),
-            handleAPI(currentProperty),
-          ]);
-        } else {
-          toast.error("Owner's phone number is not available.", {
+        const json = await res.json();
+        const decrypted = decrypt(json?.property);
+        const seller = decrypted ? JSON.parse(decrypted).user : null;
+        const phone = seller?.mobile || seller?.phone;
+        const name = seller?.name || "";
+        if (!phone) {
+          return toast.error("Owner's phone number is not available.", {
             position: "top-right",
             autoClose: 3000,
           });
         }
+        const seoSlug = buildSeoUrl(currentProperty);
+        const fullUrl = `${window.location.origin}/property/${seoSlug}/${currentProperty.unique_property_id}`;
+        const message = encodeURIComponent(
+          `Hi ${name},\nI'm interested in this property: ${currentProperty.property_name}.\n${fullUrl}\nPlease contact me at ${userData.mobile}.`
+        );
+        window.open(`https://wa.me/+91${phone}?text=${message}`, "_blank");
+        const SubType =
+          currentProperty.sub_type === "Apartment"
+            ? `${currentProperty.sub_type} ${currentProperty.bedrooms}BHK`
+            : currentProperty.sub_type;
+        const smspayload = {
+          name: userData.name,
+          mobile: userData.mobile,
+          sub_type: SubType,
+          location: currentProperty.location_id.split(/[\s,]+/)[0],
+          property_cost: formatToIndianCurrency(currentProperty.property_cost),
+          ownerMobile: phone,
+        };
+        await Promise.allSettled([
+          axios.post(
+            `${config.awsApiUrl}/enquiry/v1/sendLeadTextMessage`,
+            smspayload
+          ),
+          axios.post(`${config.awsApiUrl}/enquiry/v1/contactSeller`, {
+            unique_property_id: currentProperty.unique_property_id,
+            user_id: userData.user_id,
+            fullname: userData.name,
+            mobile: userData.mobile,
+            email: userData.email,
+          }),
+          handleAPI(currentProperty),
+        ]);
       } catch (error) {
         toast.error("Failed to get owner's contact details.", {
           position: "top-right",
@@ -358,14 +334,13 @@ const PromotionalBanner = ({
     [currentProperty, handleAPI]
   );
   useEffect(() => {
-    if (showPromoBanner && ads.length > 0 && !isExpanded) {
+    if (showPromoBanner && ads?.length > 0 && !isExpanded) {
       const interval = setInterval(() => {
-        setCurrentPromo((prev) => (prev + 1) % ads.length);
+        setCurrentPromo((prev) => (prev + 1) % ads?.length);
       }, 4000);
       return () => clearInterval(interval);
     }
   }, [showPromoBanner, ads, isExpanded]);
-
   useEffect(() => {
     if (isExpanded) {
       const handleClickOutside = (e) => {
@@ -400,7 +375,7 @@ const PromotionalBanner = ({
     () => currentProperty?.facilities?.split(",").map((f) => f.trim()) || [],
     [currentProperty]
   );
-  if (!showPromoBanner || ads.length === 0) return null;
+  if (!showPromoBanner || ads?.length === 0) return null;
   return (
     <div className="hidden lg:block z-[999] mb-1 relative">
       <div
@@ -510,8 +485,8 @@ const PromotionalBanner = ({
                   className="w-full rounded-lg overflow-hidden"
                   style={{ height: "100%" }}
                 >
-                  {images.length > 0 ? (
-                    images.map((img, index) => (
+                  {images?.length > 0 ? (
+                    images?.map((img, index) => (
                       <SwiperSlide key={index}>
                         <div className="relative w-full h-full">
                           <Image

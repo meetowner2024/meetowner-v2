@@ -149,6 +149,13 @@ const PropertyDeatils = ({ propertyDataDetails, userProperties }) => {
       const sellerData = await getPropertyDetails?.(property);
       const phone = sellerData?.mobile || sellerData?.phone;
       const name = sellerData?.name || "";
+      await axios.post(`${config.awsApiUrl}/enquiry/v1/contactSeller`, {
+        unique_property_id: property.unique_property_id,
+        user_id: userData.user_id,
+        fullname: userData.name,
+        mobile: userData.mobile,
+        email: userData.email,
+      });
       if (phone) {
         const propertyFor = property.property_for === "Rent" ? "rent" : "sale";
         const propertyId = property.unique_property_id;

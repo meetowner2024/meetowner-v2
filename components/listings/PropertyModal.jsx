@@ -89,7 +89,7 @@ const getFallbackIcon = (name) => {
     (acc, c, i) => acc + c.charCodeAt(0) * (i + 1),
     0
   );
-  return fallbackIcons[hash % fallbackIcons.length];
+  return fallbackIcons[hash % fallbackIcons?.length];
 };
 const PropertyModal = React.memo(
   ({ property, onClose, handleNavigation }) => {
@@ -253,7 +253,7 @@ const PropertyModal = React.memo(
     );
     const visibleThumbnails = useMemo(() => {
       const start = Math.max(0, state.selectedImageIndex - 2);
-      const end = Math.min(start + 5, state.images.length);
+      const end = Math.min(start + 5, state.images?.length);
       return state.images.slice(start, end);
     }, [state.selectedImageIndex, state.images]);
     return (
@@ -366,13 +366,13 @@ const PropertyModal = React.memo(
                   </div>
                 )}
               </div>
-              {facilitiesList.length > 0 && (
+              {facilitiesList?.length > 0 && (
                 <div className="mb-6">
                   <h3 className="text-lg font-semibold text-slate-900 mb-3">
                     Amenities
                   </h3>
                   <div className="grid grid-cols-2 gap-4">
-                    {facilitiesList.slice(0, 10).map((facility, index) => (
+                    {facilitiesList?.slice(0, 10).map((facility, index) => (
                       <div
                         key={index}
                         className="flex items-center gap-2 text-sm"

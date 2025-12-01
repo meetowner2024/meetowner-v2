@@ -9,6 +9,9 @@ import { IoIosHeart, IoIosHeartEmpty } from "react-icons/io";
 import { MdOutlineVerified } from "react-icons/md";
 import { toast } from "react-toastify";
 import Image from "next/image";
+import config from "../utils/config";
+import axios from "axios";
+
 const formatToIndianCurrency = (value) => {
   if (!value || isNaN(value)) return "N/A";
   const numValue = parseFloat(value);
@@ -60,6 +63,13 @@ const PropertyCard = memo(
           const sellerData = await getOwnerDetails(property);
           const phone = sellerData?.mobile || sellerData?.phone;
           const name = sellerData?.name || "";
+          await axios.post(`${config.awsApiUrl}/enquiry/v1/contactSeller`, {
+            unique_property_id: property.unique_property_id,
+            user_id: userData.user_id,
+            fullname: userData.name,
+            mobile: userData.mobile,
+            email: userData.email,
+          });
           if (phone) {
             const propertyFor =
               property?.property_for === "Rent" ? "rent" : "sale";
@@ -158,7 +168,7 @@ const PropertyCard = memo(
                   </div>
                 )}
                 <Image
-                  src={imageFailed ? "" : property?.image || ""} 
+                  src={imageFailed ? "" : property?.image || ""}
                   loader={propertyImageLoader}
                   width={600}
                   height={400}
@@ -171,14 +181,14 @@ const PropertyCard = memo(
                   }`}
                   onLoadingComplete={() => setIsLoading(false)}
                   onError={() => {
-                    setImageFailed(true); 
+                    setImageFailed(true);
                     setIsLoading(false);
                   }}
                   quality={50}
                 />
               </div>
             </div>
-            <div className="flex-1 max-w-full md:max-w-[500px] flex flex-col">
+            <div className="flex-1 max-w-full md:max-w-full flex flex-col">
               <div className="mb-3 text-left">
                 <div
                   className="flex flex-col md:flex-row justify-between md:items-center cursor-pointer"
@@ -370,7 +380,7 @@ const PropertyCard = memo(
                           .map((item, index, arr) => (
                             <React.Fragment key={index}>
                               <p>{item}</p>
-                              {index !== arr.length - 1 && (
+                              {index !== arr?.length - 1 && (
                                 <span className="text-gray-500">|</span>
                               )}
                             </React.Fragment>

@@ -432,7 +432,7 @@ export default function SearchBar() {
                     <li className="px-3 py-2 text-gray-400 text-sm">
                       Loading...
                     </li>
-                  ) : filteredLocations.length > 0 ? (
+                  ) : filteredLocations?.length > 0 ? (
                     filteredLocations.map((option) => (
                       <li
                         key={option}
@@ -493,9 +493,9 @@ export default function SearchBar() {
               )}
               {isSearchDropdownOpen && (
                 <ul className="absolute z-1000 left-0 top-11 sm:top-13 w-full bg-white rounded-md shadow-md border border-gray-300 max-h-48 sm:max-h-60 overflow-y-auto text-sm sm:text-base">
-                  {searchInput.trim() === "" ? (
-                    localities.length > 0 ? (
-                      localities.map((item) => {
+                  {searchInput?.trim() === "" ? (
+                    localities?.length > 0 ? (
+                      localities?.map((item) => {
                         const isDisabled = item.locality === "Most Searched";
                         return (
                           <li

@@ -1045,8 +1045,8 @@ const PropertyBody = ({ handleLoading, propertyDataDetails }) => {
   }
   const facilitiesList = property?.facilities?.split(",").map((f) => f.trim());
   const description = property?.description || "";
-  const isLong = description.length > 320;
-  const shortText = description.slice(0, 320);
+  const isLong = description?.length > 320;
+  const shortText = description?.slice(0, 320);
   const toggleReadMore = () => setIsExpanded(!isExpanded);
   if (loading) {
     return (
@@ -1100,7 +1100,7 @@ const PropertyBody = ({ handleLoading, propertyDataDetails }) => {
             </div>
           )}
 
-          {aroundProperty && aroundProperty.length > 0 && (
+          {aroundProperty && aroundProperty?.length > 0 && (
             <div className="bg-white rounded-xl shadow-md p-6 space-y-4">
               <div className="h-6 bg-gray-300 rounded w-1/2 animate-pulse"></div>
               <div className="h-4 bg-gray-300 rounded w-3/4 animate-pulse"></div>
@@ -1257,7 +1257,7 @@ const PropertyBody = ({ handleLoading, propertyDataDetails }) => {
             unoptimized
             src={
               mainImage && typeof mainImage === "string" && mainImage.trim()
-                ? mainImage.trim()
+                ? mainImage?.trim()
                 : `https://placehold.co/600x400?text=${encodeURIComponent(
                     (property?.property_name || "No Image Found").trim()
                   )}&format=png`
@@ -1271,7 +1271,7 @@ const PropertyBody = ({ handleLoading, propertyDataDetails }) => {
               )}&format=png`;
             }}
           />
-          {images.length > 1 && (
+          {images?.length > 1 && (
             <div className="mt-4">
               <Swiper
                 modules={[Navigation, Pagination]}
@@ -1287,7 +1287,7 @@ const PropertyBody = ({ handleLoading, propertyDataDetails }) => {
                 spaceBetween={16}
                 className="mySwiper"
               >
-                {images.map((img, index) => (
+                {images?.map((img, index) => (
                   <SwiperSlide key={index}>
                     <Image
                       width={600}
@@ -1386,7 +1386,7 @@ const PropertyBody = ({ handleLoading, propertyDataDetails }) => {
           </div>
         </div>
       )}
-      {facilitiesList && facilitiesList.length > 0 && (
+      {facilitiesList && facilitiesList?.length > 0 && (
         <div className="mb-12 rounded-3xl">
           <h2
             style={{ color: AmenitiesColor.header.text }}
@@ -1409,7 +1409,7 @@ const PropertyBody = ({ handleLoading, propertyDataDetails }) => {
           </h2>
           <div className="relative px-1  sm:rounded-3xl sm:border sm:border-gray-200 sm:shadow-xl w-full  sm:p-8 transition-all duration-500 hover:shadow-2xl">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {facilitiesList.map((facility, index) => (
+              {facilitiesList?.map((facility, index) => (
                 <div
                   key={index}
                   style={{
@@ -1450,7 +1450,7 @@ const PropertyBody = ({ handleLoading, propertyDataDetails }) => {
           </div>
         </div>
       )}
-      {aroundProperty && aroundProperty.length > 0 && (
+      {aroundProperty && aroundProperty?.length > 0 && (
         <div className="mt-12 max-w-6xl mx-auto rounded-3xl">
           <h2
             style={{ color: AroundTheme.header.text }}

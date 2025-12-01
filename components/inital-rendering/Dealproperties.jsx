@@ -344,7 +344,7 @@ const DealProperties = ({ bestDealProperties, contacted, setContacted }) => {
                     .map((item, index, arr) => (
                       <React.Fragment key={index}>
                         <p>{item}</p>
-                        {index !== arr.length - 1 && (
+                        {index !== arr?.length - 1 && (
                           <span className="text-gray-500">|</span>
                         )}
                       </React.Fragment>
@@ -385,7 +385,7 @@ const DealProperties = ({ bestDealProperties, contacted, setContacted }) => {
                           .map((item, index, arr) => (
                             <React.Fragment key={index}>
                               <p>{item}</p>
-                              {index !== arr.length - 1 && (
+                              {index !== arr?.length - 1 && (
                                 <span className="text-gray-500">|</span>
                               )}
                             </React.Fragment>

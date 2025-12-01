@@ -12,12 +12,15 @@ export const dummyAds = [
       { label: "Under ₹50L", type: "budget", value: "50" },
       { label: "₹50L - ₹75L", type: "budget", value: "50-75" },
       { label: "Above ₹75L", type: "budget", value: "75+" },
+      { label: "Fully Furnished", type: "furnishing", value: "Fully" },
       { label: "Ready to Move", type: "occupancy", value: "Ready to Move" },
       {
         label: "Under Construction",
         type: "occupancy",
         value: "Under Construction",
       },
+      { label: "Apartment", type: "subtype", value: "Apartment" },
+
       {
         label: "Independent House",
         type: "subtype",
@@ -28,7 +31,6 @@ export const dummyAds = [
         type: "subtype",
         value: "Independent Villa",
       },
-
       { label: "Plot", type: "subtype", value: "Plot" },
     ],
   },

@@ -265,7 +265,7 @@ export async function generateMetadata({ params, searchParams }) {
   };
 }
 export default async function Page({ params }) {
-  const pathSegments = params?.params || [];
+  const pathSegments = await params?.params;
   const [listingAds, getAds, promotionalBannerAds] = await Promise.all([
     fetchListingCardAds(),
     fetchListingSideAds(),
