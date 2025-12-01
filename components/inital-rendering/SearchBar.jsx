@@ -100,6 +100,16 @@ export default function SearchBar() {
     }),
     []
   );
+  const sendUserSearchActivity = (viewData) => {
+    try {
+      const blob = new Blob([JSON.stringify(viewData)], {
+        type: "application/json",
+      });
+      navigator.sendBeacon(`${config.awsApiUrl}/enquiry/v1/userActivity`, blob);
+    } catch (error) {
+      console.error("Beacon send failed:", error);
+    }
+  };
   const handleUserSearched = useCallback(async () => {
     let userDetails = null;
     try {
@@ -122,10 +132,7 @@ export default function SearchBar() {
         sub_type: searchData.sub_type || "",
       };
       try {
-        await axios.post(
-          `${config.awsApiUrl}/enquiry/v1/userActivity`,
-          viewData
-        );
+        sendUserSearchActivity(viewData);
       } catch (error) {
         console.error("Failed to record property view:", {
           message: error.message,

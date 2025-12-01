@@ -9,7 +9,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { WifiOff, RefreshCw } from "lucide-react";
 import { ToastContainer } from "react-toastify";
-
 export default function ClientWrapper({ children, profileData }) {
   const [loginTrigger, setLoginTrigger] = useState(0);
   const [isRetrying, setIsRetrying] = useState(false);
@@ -18,6 +17,48 @@ export default function ClientWrapper({ children, profileData }) {
     if (e.key === "user") {
       setLoginTrigger((prev) => prev + 1);
     }
+  }, []);
+  useEffect(() => {
+    async function registerPush() {
+      if (!("serviceWorker" in navigator)) return;
+      if (!("Notification" in window)) return;
+      const permission = await Notification.requestPermission();
+      if (permission !== "granted") return;
+      await navigator.serviceWorker.register("/sw.js");
+      const sw = await navigator.serviceWorker.ready;
+      const existing = await sw.pushManager.getSubscription();
+      if (!existing) {
+        const convertedKey = urlBase64ToUint8Array(
+          process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+        );
+        const subscription = await sw.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: convertedKey,
+        });
+        const userData = JSON.parse(localStorage.getItem("user") || "{}");
+        await fetch("/api/save-sub", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            subscription,
+            user_id: userData?.user_id || null,
+          }),
+        });
+      }
+    }
+    function urlBase64ToUint8Array(base64String) {
+      const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+      const base64 = (base64String + padding)
+        .replace(/-/g, "+")
+        .replace(/_/g, "/");
+      const rawData = atob(base64);
+      const outputArray = new Uint8Array(rawData.length);
+      for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+      }
+      return outputArray;
+    }
+    registerPush();
   }, []);
   useEffect(() => {
     window.addEventListener("storage", handleStorageChange);

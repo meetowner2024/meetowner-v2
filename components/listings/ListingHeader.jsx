@@ -354,8 +354,18 @@ const ListingHeader = ({ setShowLoginModal, ads }) => {
     if (selectedFilters.occupancy) filters.push(selectedFilters.occupancy);
     return filters;
   }, [selectedFilters, dropdownOptions]);
+  const sendUserSearchActivity = (viewData) => {
+    try {
+      const blob = new Blob([JSON.stringify(viewData)], {
+        type: "application/json",
+      });
+      navigator.sendBeacon(`${config.awsApiUrl}/enquiry/v1/userActivity`, blob);
+    } catch (error) {
+      console.error("Beacon send failed:", error);
+    }
+  };
   const handleUserSearched = useCallback(
-    async (searchValue) => {
+    (searchValue) => {
       let userDetails = null;
       try {
         const data = localStorage.getItem("user");
@@ -377,14 +387,7 @@ const ListingHeader = ({ setShowLoginModal, ads }) => {
           occupancy: selectedFilters.occupancy || "N/A",
           furnished_status: selectedFilters.furnishedStatus || "N/A",
         };
-        try {
-          await axios.post(
-            `${config.awsApiUrl}/enquiry/v1/userActivity`,
-            viewData
-          );
-        } catch (error) {
-          console.error("Failed to record property view:", error);
-        }
+        sendUserSearchActivity(viewData);
       }
     },
     [city, selectedFilters]

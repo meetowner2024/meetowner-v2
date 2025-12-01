@@ -114,7 +114,7 @@ function parseSEOParamsServer(slugArray) {
   }
   return data;
 }
-const fetchListingAds = async () => {
+const fetchListingCardAds = async () => {
   try {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_BASE_URL}/api/getListingAds`,
@@ -130,7 +130,7 @@ const fetchListingAds = async () => {
     return { ready_to_move: [], under_construction: [] };
   }
 };
-const fetchLatestProperties = async () => {
+const fetchListingSideAds = async () => {
   try {
     const response = await fetch(
       `${config.awsApiUrl}/adAssets/v1/getAds?ads_page=listing_ads&city`,
@@ -143,7 +143,7 @@ const fetchLatestProperties = async () => {
     return [];
   }
 };
-const fetchAllAds = async () => {
+const getListingPromotionalBanners = async () => {
   try {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_BASE_URL}/api/getAllAds`,
@@ -267,9 +267,9 @@ export async function generateMetadata({ params, searchParams }) {
 export default async function Page({ params }) {
   const pathSegments = params?.params || [];
   const [listingAds, getAds, promotionalBannerAds] = await Promise.all([
-    fetchListingAds(),
-    fetchLatestProperties(),
-    fetchAllAds(),
+    fetchListingCardAds(),
+    fetchListingSideAds(),
+    getListingPromotionalBanners(),
   ]);
   return (
     <ListingsPageClient

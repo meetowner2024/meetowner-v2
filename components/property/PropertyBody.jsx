@@ -1051,13 +1051,11 @@ const PropertyBody = ({ handleLoading, propertyDataDetails }) => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-200 flex items-center justify-center p-4">
-        {}
         <div className="block md:hidden h-full w-full max-w-sm space-y-6">
-          {}
           <div className="bg-white rounded-xl shadow-md p-2">
             <div className="w-full h-[250px] bg-gray-300 rounded-2xl animate-pulse"></div>
           </div>
-          {}
+
           <div className="bg-white rounded-xl shadow-md p-4">
             <div className="grid grid-cols-4 gap-4">
               <div className="h-20 bg-gray-300 rounded-lg animate-pulse"></div>
@@ -1071,7 +1069,7 @@ const PropertyBody = ({ handleLoading, propertyDataDetails }) => {
               <div className="w-6 h-6 bg-gray-300 rounded-full animate-pulse"></div>
             </div>
           </div>
-          {}
+
           <div className="bg-white rounded-xl shadow-md p-6 space-y-4">
             <div className="h-6 bg-gray-300 rounded w-1/2 animate-pulse"></div>
             <div className="space-y-2">
@@ -1080,14 +1078,14 @@ const PropertyBody = ({ handleLoading, propertyDataDetails }) => {
               <div className="h-4 bg-gray-300 rounded w-2/3 animate-pulse"></div>
             </div>
           </div>
-          {}
+
           {floorplan?.image && (
             <div className="bg-white rounded-xl shadow-md p-6 space-y-4">
               <div className="h-6 bg-gray-300 rounded w-1/2 animate-pulse"></div>
               <div className="w-full h-64 bg-gray-300 rounded-lg animate-pulse"></div>
             </div>
           )}
-          {}
+
           {property?.facilities && (
             <div className="bg-white rounded-xl shadow-md p-6 space-y-4">
               <div className="h-6 bg-gray-300 rounded w-1/2 animate-pulse"></div>
@@ -1101,7 +1099,7 @@ const PropertyBody = ({ handleLoading, propertyDataDetails }) => {
               </div>
             </div>
           )}
-          {}
+
           {aroundProperty && aroundProperty.length > 0 && (
             <div className="bg-white rounded-xl shadow-md p-6 space-y-4">
               <div className="h-6 bg-gray-300 rounded w-1/2 animate-pulse"></div>
@@ -1122,7 +1120,7 @@ const PropertyBody = ({ handleLoading, propertyDataDetails }) => {
               </div>
             </div>
           )}
-          {}
+
           <div className="bg-white rounded-xl shadow-md p-6 space-y-4">
             <div className="h-6 bg-gray-300 rounded w-1/2 animate-pulse"></div>
             <div className="grid grid-cols-2 gap-4">
@@ -1140,16 +1138,15 @@ const PropertyBody = ({ handleLoading, propertyDataDetails }) => {
               ))}
             </div>
           </div>
-          {}
+
           <div className="bg-white rounded-xl shadow-md p-6 space-y-4">
             <div className="h-6 bg-gray-300 rounded w-1/2 animate-pulse"></div>
             <div className="w-full h-64 bg-gray-300 rounded-lg animate-pulse"></div>
           </div>
         </div>
-        {}
+
         <div className="hidden h-screen md:block w-full max-w-6xl">
           <div className="bg-white rounded-xl shadow-md p-8 space-y-6 animate-pulse">
-            {}
             <div className="flex gap-4">
               <div className="w-24 space-y-2">
                 <div className="h-24 bg-gray-300 rounded-lg"></div>
@@ -1158,23 +1155,23 @@ const PropertyBody = ({ handleLoading, propertyDataDetails }) => {
               </div>
               <div className="flex-grow h-[450px] bg-gray-300 rounded-lg"></div>
             </div>
-            {}
+
             <div className="h-8 bg-gray-300 rounded w-1/2"></div>
-            {}
+
             <div className="grid grid-cols-2 gap-4">
               <div className="h-4 bg-gray-300 rounded w-full"></div>
               <div className="h-4 bg-gray-300 rounded w-3/4"></div>
               <div className="h-4 bg-gray-300 rounded w-2/3"></div>
               <div className="h-4 bg-gray-300 rounded w-1/2"></div>
             </div>
-            {}
+
             <div className="grid grid-cols-4 gap-4">
               <div className="h-16 bg-gray-300 rounded-lg"></div>
               <div className="h-16 bg-gray-300 rounded-lg"></div>
               <div className="h-16 bg-gray-300 rounded-lg"></div>
               <div className="h-16 bg-gray-300 rounded-lg"></div>
             </div>
-            {}
+
             <div className="h-80 bg-gray-300 rounded-lg"></div>
           </div>
         </div>
@@ -1185,7 +1182,6 @@ const PropertyBody = ({ handleLoading, propertyDataDetails }) => {
     <div className="relative p-1   w-full px-4 rounded-xl shadow-sm space-y-4">
       <div className="hidden md:block font-['Inter']">
         <div className="flex flex-col md:flex-row gap-2">
-          {}
           {images.length > 1 && (
             <div className="flex flex-col w-full md:w-24 lg:w-30 gap-2 overflow-y-auto max-h-[450px] hide-scrollbar p-2 md:p-0">
               {images.map((img, index) => (
@@ -1225,7 +1221,7 @@ const PropertyBody = ({ handleLoading, propertyDataDetails }) => {
               ))}
             </div>
           )}
-          {}
+
           <div className="relative rounded-lg overflow-hidden shadow-md border border-teal-100/50 flex-grow">
             <Image
               key={mainImage || "default"}
@@ -1456,7 +1452,6 @@ const PropertyBody = ({ handleLoading, propertyDataDetails }) => {
       )}
       {aroundProperty && aroundProperty.length > 0 && (
         <div className="mt-12 max-w-6xl mx-auto rounded-3xl">
-          {}
           <h2
             style={{ color: AroundTheme.header.text }}
             className="text-xl text-left font-bold mb-4 tracking-tight relative"
@@ -1476,14 +1471,14 @@ const PropertyBody = ({ handleLoading, propertyDataDetails }) => {
               />
             </svg>
           </h2>
-          {}
+
           <p
             style={{ color: AroundTheme.card.text }}
             className="text-left text-base mb-6 font-medium tracking-wide"
           >
             {property?.google_address}
           </p>
-          {}
+
           <div className="relative sm:rounded-3xl  sm:hadow-xl sm:p-8 transition-all duration-500 hover:shadow-xl">
             <h3
               style={{ color: AroundTheme.header.text }}
@@ -1491,7 +1486,7 @@ const PropertyBody = ({ handleLoading, propertyDataDetails }) => {
             >
               Around This Property
             </h3>
-            {}
+
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
               {aroundProperty.map((place, index) => (
                 <div
@@ -1502,14 +1497,13 @@ const PropertyBody = ({ handleLoading, propertyDataDetails }) => {
                   }}
                   className="group  relative rounded-xl p-4 border shadow-md hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300 overflow-hidden"
                 >
-                  {}
                   <div
                     style={{
                       background: `linear-gradient(to right, ${AroundTheme.card.gradientFrom}, ${AroundTheme.card.gradientTo})`,
                     }}
                     className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                   />
-                  {}
+
                   <div className="relative flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div

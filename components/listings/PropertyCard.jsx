@@ -28,9 +28,7 @@ const getPriceDisplay = (propertyFor, price) => {
   }
   return price ? `₹ ${formatToIndianCurrency(price)}` : "N/A";
 };
-const imageLoader = ({ src, width, quality }) => {
-  return `${src}`;
-};
+
 const PropertyCard = memo(
   ({
     property,
@@ -131,11 +129,12 @@ const PropertyCard = memo(
       [handleScheduleVisit]
     );
     const [isLoading, setIsLoading] = useState(true);
-    const imageSrc = imageFailed
-      ? `https://placehold.co/600x400/gray/white?text=No Image Found`
-      : property?.image
-      ? `https://api.meetowner.in/assets/v1/serve/${property?.image}`
-      : `https://placehold.co/600x400/gray/white?text=No Image Found`;
+    const propertyImageLoader = ({ src }) => {
+      if (!src) {
+        return "https://placehold.co/600x400/gray/white?text=No+Image+Found";
+      }
+      return `https://api.meetowner.in/assets/v1/serve/${src}`;
+    };
     return (
       <div
         key={`property-${index}`}
@@ -159,20 +158,20 @@ const PropertyCard = memo(
                   </div>
                 )}
                 <Image
-                  loader={imageLoader}
+                  src={imageFailed ? "" : property?.image || ""} 
+                  loader={propertyImageLoader}
                   width={600}
                   height={400}
-                  onClick={() => handleNavigation(property)}
-                  src={imageSrc}
                   alt="Property"
+                  priority={true}
+                  fetchPriority={"high"}
                   crossOrigin="anonymous"
                   className={`w-full h-[250px] cursor-pointer object-cover rounded-md transition-opacity duration-500 ${
                     isLoading && !imageFailed ? "opacity-0" : "opacity-100"
                   }`}
-                  priority={index >= 3}
                   onLoadingComplete={() => setIsLoading(false)}
                   onError={() => {
-                    setImageFailed(true);
+                    setImageFailed(true); 
                     setIsLoading(false);
                   }}
                   quality={50}

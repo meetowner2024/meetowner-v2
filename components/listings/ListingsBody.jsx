@@ -138,6 +138,16 @@ function ListingsBody({ setShowLoginModal, initialized = false }) {
     "Price: High to Low",
     "Newest First",
   ];
+  const sendUserSearchActivity = (viewData) => {
+    try {
+      const blob = new Blob([JSON.stringify(viewData)], {
+        type: "application/json",
+      });
+      navigator.sendBeacon(`${config.awsApiUrl}/enquiry/v1/userActivity`, blob);
+    } catch (error) {
+      console.error("Beacon send failed:", error);
+    }
+  };
   const handleUserSearched = async () => {
     let userDetails = null;
     try {
@@ -163,10 +173,7 @@ function ListingsBody({ setShowLoginModal, initialized = false }) {
         sub_type: searchData?.sub_type || "N/A",
       };
       try {
-        await axios.post(
-          `${config.awsApiUrl}/enquiry/v1/userActivity`,
-          viewData
-        );
+        sendUserSearchActivity(viewData);
       } catch (error) {
         console.error("Failed to record property view:", {
           message: error.message,

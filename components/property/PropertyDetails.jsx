@@ -505,18 +505,6 @@ const PropertyDeatils = ({ propertyDataDetails, userProperties }) => {
             </div>
           </div>
         </div>
-        {showLoginModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-30 backdrop-blur-xs">
-            <div ref={modalRef} className="relative w-[90%] max-w-sm">
-              <Login
-                setShowLoginModal={setShowLoginModal}
-                showLoginModal={showLoginModal}
-                onClose={handleClose}
-                modalRef={modalRef}
-              />
-            </div>
-          </div>
-        )}
       </div>
       <div className="mt-6">
         <PropertyAds
@@ -524,6 +512,18 @@ const PropertyDeatils = ({ propertyDataDetails, userProperties }) => {
           propertyDataDetails={property}
         />
       </div>
+      {showLoginModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-30 backdrop-blur-xs">
+          <div ref={modalRef} className="relative w-[90%] max-w-sm">
+            <Login
+              setShowLoginModal={setShowLoginModal}
+              showLoginModal={showLoginModal}
+              onClose={handleClose}
+              modalRef={modalRef}
+            />
+          </div>
+        </div>
+      )}
     </>
   );
 };

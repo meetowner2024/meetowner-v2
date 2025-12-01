@@ -185,11 +185,10 @@ export default async function RootLayout({ children, params }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {}
         <link rel="canonical" href={canonicalUrl} />
-        {}
+
         <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
-        {}
+
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
@@ -202,7 +201,7 @@ export default async function RootLayout({ children, params }) {
           href="https://www.googletagmanager.com"
         />
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
-        {}
+
         {structuredData.map((schema, idx) => (
           <script
             key={idx}
@@ -210,19 +209,18 @@ export default async function RootLayout({ children, params }) {
             dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
           />
         ))}
-        {}
+
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
         <meta name="language" content="en-IN" />
-        {}
+
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {}
         <noscript>
           <iframe
             src="https://www.googletagmanager.com/ns.html?id=GTM-P8HMN9BJ"
@@ -232,7 +230,7 @@ export default async function RootLayout({ children, params }) {
             title="GTM"
           />
         </noscript>
-        {}
+
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-PQ3F0L8PGL"
           strategy="afterInteractive"
@@ -250,7 +248,7 @@ export default async function RootLayout({ children, params }) {
             `,
           }}
         />
-        {}
+
         <Script
           id="gtm"
           strategy="afterInteractive"

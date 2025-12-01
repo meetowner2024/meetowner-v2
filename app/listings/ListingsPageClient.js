@@ -5,9 +5,11 @@ import { useEffect, useRef, useState, memo } from "react";
 import { useDispatch } from "react-redux";
 import { setSearchData } from "../../components/store/slices/searchSlice";
 import {
+  setAds,
   setListingAds,
   setPromotionalBanners,
 } from "@/components/store/slices/adSlice";
+import { get } from "http";
 const ListingHeader = dynamic(
   () => import("../../components/listings/ListingHeader"),
   { ssr: true }
@@ -26,6 +28,7 @@ const LoginModal = dynamic(() => import("../../components/utils/LoginModal"), {
 const ListingsPageClient = memo(function ListingsPageClient({
   initialParams,
   listingAds,
+  getAds,
   promotionalBannerAds,
 }) {
   const dispatch = useDispatch();
@@ -33,9 +36,11 @@ const ListingsPageClient = memo(function ListingsPageClient({
     if (listingAds) {
       dispatch(setListingAds(listingAds));
     }
-  }, [listingAds]);
+    if (getAds) {
+      dispatch(setAds(getAds));
+    }
+  }, [listingAds, getAds]);
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const [ads, setAds] = useState([]);
   const [initialized, setInitialized] = useState(false);
   const modalRef = useRef(null);
   const parseSEOParams = (slugArray) => {
@@ -123,7 +128,6 @@ const ListingsPageClient = memo(function ListingsPageClient({
   useEffect(() => {
     if (adsFetched.current) return;
     adsFetched.current = true;
-    setAds(promotionalBannerAds);
     dispatch(setPromotionalBanners(promotionalBannerAds));
   }, []);
   return (
@@ -131,7 +135,6 @@ const ListingsPageClient = memo(function ListingsPageClient({
       <ListingHeader
         showLoginModal={showLoginModal}
         setShowLoginModal={setShowLoginModal}
-        ads={ads}
       />
       <div className="flex flex-col lg:flex-row w-full justify-center h-auto pt-5 sm:pt-24 md:pt-24 lg:pt-5 gap-4">
         <div className="flex w-full max-w-[1400px] flex-col md:flex-row gap-6">
@@ -143,9 +146,11 @@ const ListingsPageClient = memo(function ListingsPageClient({
               listingAds={listingAds}
             />
           </div>
-          <div className="hidden md:block z-0 w-full md:w-[30%]">
-            <ListingAds ads={ads} />
-          </div>
+          {getAds.length > 0 && (
+            <div className="hidden md:block w-full md:w-[30%] ">
+              <ListingAds />
+            </div>
+          )}
         </div>
       </div>
       <LoginModal

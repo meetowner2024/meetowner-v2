@@ -1,116 +1,135 @@
 import crypto from "crypto";
-import config from "../../../components/utils/config";
+import config from "@/components/utils/config";
 import PropertyClient from "../PropertyClient";
-function buildSeoContent(property, id) {
-  const slugify = (value) =>
-    value
-      ?.toString()
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "");
-  const bhk = property.bedrooms ? `${property.bedrooms} BHK` : "";
-  const subType = property.sub_type || "";
-  const propertyName = property.property_name || "";
-  const builderName = property.builder_name
-    ? `by ${property.builder_name}`
-    : "";
-  const propertyForText =
-    property.property_for === "Sell" ? "for Sale" : "for Rent";
-  const location = property.location_id || "";
-  const city = property.city || "";
-  const titleParts = [bhk, subType, propertyName, builderName]
-    .filter(Boolean)
-    .join(" ");
-  const title =
-    `${titleParts} ${propertyForText} in ${location} ${city}`.trim();
-  const description = `Explore ${titleParts.toLowerCase()} ${propertyForText.toLowerCase()} in ${location} ${city}. ${
-    property.description?.slice(0, 150) ||
-    "Find your dream property with modern amenities and prime location."
-  }`;
-  const keywords = [
-    `${titleParts} ${propertyForText} in ${location} ${city}`,
-    `${bhk} ${subType} in ${location}`,
-    `${propertyName} by ${property.builder_name}`,
-    `${subType} for sale in ${city}`,
-    `${bhk} ${subType} for sale in ${city}`,
-    `${bhk} ${subType} for sale in ${location}`,
-    `${bhk} flats for sale in ${city}`,
-    `${bhk} flats for sale in ${location}`,
-    `${bhk} apartments for sale in ${city}`,
-    `${bhk} apartments for sale in ${location}`,
-    `${subType} for sale near ${location}`,
-    `luxury ${subType.toLowerCase()} in ${city}`,
-    `ready to move ${subType.toLowerCase()} in ${city}`,
-    `under construction ${subType.toLowerCase()} in ${city}`,
-    `new projects in ${city}`,
-    `best residential projects in ${city}`,
-    `buy ${bhk} ${subType.toLowerCase()} in ${city}`,
-    `top builders in ${city}`,
-    `properties for sale in ${city}`,
-    `real estate in ${city}`,
-    `MeetOwner properties in ${city}`,
-    `${bhk} ${subType.toLowerCase()} price in ${location} ${city}`,
+const slugify = (str) =>
+  str
+    ?.toString()
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+const decryptProperty = (encryptedText) => {
+  const JWT_SECRET = process.env.NEXT_PUBLIC_ENCRYPTION_SECRET;
+  if (!JWT_SECRET) throw new Error("Encryption secret missing");
+  if (!encryptedText?.includes(":"))
+    throw new Error("Invalid encrypted format");
+  const [ivStr, cipherStr] = encryptedText.split(":");
+  const isHex = /^[0-9a-fA-F]+$/.test(ivStr);
+  const iv = Buffer.from(ivStr, isHex ? "hex" : "base64");
+  const encrypted = Buffer.from(cipherStr, isHex ? "hex" : "base64");
+  const key = crypto.createHash("sha256").update(JWT_SECRET).digest();
+  const decipher = crypto.createDecipheriv("aes-256-cbc", key, iv);
+  const decrypted =
+    decipher.update(encrypted, null, "utf8") + decipher.final("utf8");
+  return JSON.parse(decrypted);
+};
+const api = {
+  property: async (id) => {
+    const res = await fetch(
+      `${config.awsApiUrl}/listings/v1/gspmeet?unique_property_id=${id}`,
+      { cache: "no-store" }
+    );
+    if (!res.ok) throw new Error("Property not found");
+    const { property: encrypted } = await res.json();
+    return decryptProperty(encrypted);
+  },
+  ads: async () => {
+    try {
+      const res = await fetch(
+        `${config.awsApiUrl}/adAssets/v1/getAds?ads_page=listing_ads&city`,
+        {
+          next: { revalidate: 3600 },
+        }
+      );
+      const data = await res.json();
+      return (data.ads || []).filter((ad) => ad?.image && ad?.property_name);
+    } catch {
+      return [];
+    }
+  },
+  userProperties: (userId) =>
+    fetch(
+      `${config.awsApiUrl}/listings/v1/getPropertiesByUserID?user_id=${userId}`,
+      {
+        cache: "no-store",
+      }
+    ).then((r) => r.json().then((d) => d.properties || [])),
+  videos: (id) =>
+    fetch(
+      `https://api.meetowner.in/property/getpropertyvideos?unique_property_id=${id}`
+    )
+      .then((r) => r.json())
+      .then((d) => d?.videos || []),
+  floorPlan: (id) =>
+    fetch(`${config.awsApiUrl}/listings/v1/getAllFloorPlans/${id}`, {
+      cache: "no-store",
+    })
+      .then((r) => r.json())
+      .then((d) => d?.[0] || null),
+  images: (id) =>
+    fetch(
+      `https://api.meetowner.in/property/getpropertyphotos?unique_property_id=${id}`,
+      {
+        cache: "no-store",
+      }
+    )
+      .then((r) => r.json())
+      .then((d) => d?.images || []),
+  nearby: (id) =>
+    fetch(`${config.awsApiUrl}/listings/v1/getAroundThisProperty?id=${id}`, {
+      cache: "no-store",
+    })
+      .then((r) => r.json())
+      .then((d) => d?.results || []),
+};
+const buildSeoContent = (property, id) => {
+  const {
+    bedrooms,
+    sub_type = "",
+    property_name = "",
+    builder_name = "",
+    property_for,
+    location_id = "",
+    city = "Hyderabad",
+    description,
+  } = property;
+  const bhk = bedrooms ? `${bedrooms} BHK` : "";
+  const forText = property_for === "Sell" ? "for Sale" : "for Rent";
+  const forSlug = property_for === "Rent" ? "rent" : "sale";
+  const titleParts = [
+    bhk,
+    sub_type,
+    property_name,
+    builder_name ? `by ${builder_name}` : "",
   ]
     .filter(Boolean)
-    .join(", ");
-  const propertyFor = property.property_for === "Rent" ? "rent" : "sale";
-  const bhkPart = property.bedrooms ? `${property.bedrooms}-bhk-` : "";
-  const subTypePart = subType ? `${slugify(subType)}-` : "";
-  const propertyNameSlug = propertyName ? slugify(propertyName) : "";
-  const builderNameSlug = property.builder_name
-    ? `-by-${slugify(property.builder_name)}`
-    : "";
-  const locationSlug = slugify(location);
-  const citySlug = slugify(city) || "hyderabad";
-  const forPart = `for-${propertyFor}-`;
-  const seoSlug = `${bhkPart}${subTypePart}${propertyNameSlug}${builderNameSlug}-${forPart}in-${locationSlug}-${citySlug}`;
-  const canonicalUrl = `https://www.meetowner.in/property/${seoSlug}/${id}`;
-  return { title, description, keywords, canonicalUrl };
-}
-
-async function fetchProperty(propertyId) {
-  const response = await fetch(
-    `${config.awsApiUrl}/listings/v1/gspmeet?unique_property_id=${propertyId}`,
-    { cache: "no-store" }
-  );
-
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-
-  const data = await response.json();
-  const encryptedText = data.property;
-
-  const JWT_SECRET = process.env.NEXT_PUBLIC_ENCRYPTION_SECRET;
-  if (!JWT_SECRET) throw new Error("Encryption secret not configured");
-
-  if (!encryptedText || !encryptedText.includes(":")) {
-    throw new Error("Invalid encrypted data format");
-  }
-
-  const [ivStr, cipherStr] = encryptedText.split(":");
-
-  // Auto-detect HEX or Base64
-  const isHex = /^[0-9a-fA-F]+$/.test(ivStr);
-
-  const iv = Buffer.from(ivStr, isHex ? "hex" : "base64");
-  const encryptedData = Buffer.from(cipherStr, isHex ? "hex" : "base64");
-
-  // CryptoJS SHA256 key
-  const key = crypto.createHash("sha256").update(JWT_SECRET).digest();
-
-  const decipher = crypto.createDecipheriv("aes-256-cbc", key, iv);
-  decipher.setAutoPadding(true); // PKCS7 (CryptoJS default)
-
-  let decrypted = decipher.update(encryptedData, undefined, "utf8");
-  decrypted += decipher.final("utf8");
-
-  if (!decrypted) throw new Error("Decryption failed");
-
-  return JSON.parse(decrypted);
-}
-function buildStructuredData(property, canonicalUrl) {
+    .join(" ");
+  const title = `${titleParts} ${forText} in ${location_id}, ${city}`.trim();
+  const descriptionText =
+    description?.slice(0, 150) ||
+    "Find your dream home with modern amenities in a prime location.";
+  const canonicalSlug = [
+    bedrooms ? `${bedrooms}-bhk` : "",
+    slugify(sub_type),
+    slugify(property_name),
+    builder_name ? `by-${slugify(builder_name)}` : "",
+    `for-${forSlug}-in-${slugify(location_id)}-${slugify(city) || "hyderabad"}`,
+  ]
+    .filter(Boolean)
+    .join("-");
+  const canonicalUrl = `https://www.meetowner.in/property/${canonicalSlug}/${id}`;
+  return {
+    title,
+    description: `Explore ${titleParts.toLowerCase()} ${forText.toLowerCase()} in ${location_id}, ${city}. ${descriptionText}`,
+    canonicalUrl,
+    imageUrl: property.image
+      ? property.image.startsWith("http")
+        ? property.image
+        : `https://api.meetowner.in/aws/v1/s3/uploads/${property.image}`
+      : "https://www.meetowner.in/og-image.jpg",
+  };
+};
+const buildStructuredData = (property, canonicalUrl) => {
   if (!property) return null;
   const {
     bedrooms,
@@ -130,316 +149,172 @@ function buildStructuredData(property, canonicalUrl) {
     updated_at,
   } = property;
   const isSale = property_for === "Sell";
-  const offerType = isSale
-    ? "https://schema.org/SellAction"
-    : "https://schema.org/RentAction";
-  const availability = isSale
-    ? "https://schema.org/InStock"
-    : "https://schema.org/LeaseOut";
-  const schema = {
+  return {
     "@context": "https://schema.org",
-    "@type": ["Apartment", "RealEstateListing"],
-    "@id": canonicalUrl,
+    "@type": "ApartmentComplex",
+    "@id": canonicalUrl + "#listing",
     name: `${bedrooms ? `${bedrooms} BHK ` : ""}${
       sub_type || "Apartment"
     } in ${location_id}, ${city}`,
-    description: description || "Property details available on MeetOwner.",
+    description:
+      description || "Premium residential property listed on MeetOwner.",
+    url: canonicalUrl,
     image: image
       ? `https://api.meetowner.in/aws/v1/s3/uploads/${image}`
       : "https://www.meetowner.in/og-image.jpg",
     address: {
       "@type": "PostalAddress",
+      streetAddress: location_id,
       addressLocality: location_id,
       addressRegion: city,
+      postalCode: "500001",
       addressCountry: "IN",
     },
-    numberOfRooms: bedrooms + 1,
-    numberOfBathrooms: bathrooms || 2,
-    floorSize: {
-      "@type": "QuantitativeValue",
-      value: area,
-      unitText: "sq ft",
-    },
+    geo: latitude &&
+      longitude && {
+        "@type": "GeoCoordinates",
+        latitude,
+        longitude,
+      },
     offers: {
       "@type": "Offer",
-      price: price ? `${price} INR` : null,
+      price: price || 0,
       priceCurrency: "INR",
-      availability,
-      businessFunction: offerType,
-      validFrom: updated_at || new Date().toISOString().split("T")[0],
-      seller: {
-        "@type": "RealEstateAgent",
-        name: "MeetOwner",
-        url: "https://www.meetowner.in",
-      },
+      availability: isSale
+        ? "https://schema.org/InStock"
+        : "https://schema.org/ForRent",
       url: canonicalUrl,
     },
-    amenities: amenities
-      ? amenities.split(",").map((a) => ({ "@type": "Text", name: a.trim() }))
+    numberOfRooms: bedrooms || 1,
+    floorSize: {
+      "@type": "QuantitativeValue",
+      value: area || 1000,
+      unitCode: "SQFT",
+    },
+    amenityFeature: amenities
+      ? amenities.split(",").map((a) => ({
+          "@type": "LocationFeatureSpecification",
+          name: a.trim(),
+        }))
       : [],
   };
-  if (floor) schema.floorLevel = `Level ${floor}`;
-  if (latitude && longitude) {
-    schema.geo = {
-      "@type": "GeoCoordinates",
-      latitude,
-      longitude,
-    };
-  }
-  return schema;
-}
-function parseLegacyQuery(searchParams) {
-  if (!searchParams || typeof searchParams !== "object") return null;
-  const queryKey = Object.keys(searchParams)[0];
-  if (!queryKey) return null;
-  const match = queryKey.match(/(.+)_Id_(MO-\d+)$/);
-  if (match) {
-    return { propertyId: match[2], rawSlug: match[1] };
-  }
-  return null;
-}
+};
+const parseLegacyQuery = (searchParams) => {
+  if (!searchParams) return null;
+  const key = Object.keys(searchParams)[0];
+  const match = key?.match(/(.+)_Id_(MO-\d+)$/);
+  return match ? { propertyId: match[2], rawSlug: match[1] } : null;
+};
 export async function generateMetadata({ params, searchParams }) {
-  const pathSegments = params.params || [];
-  let propertyId = null;
-  let isLegacyQuery = false;
+  const segments = params.params || [];
   const legacy = parseLegacyQuery(searchParams);
-  if (legacy) {
-    propertyId = legacy.propertyId;
-    isLegacyQuery = true;
-  } else if (pathSegments && pathSegments.length > 0) {
-    propertyId = pathSegments.at(-1);
-  }
-  if (!propertyId || !propertyId.startsWith("MO-")) {
+  const propertyId =
+    legacy?.propertyId ||
+    (segments.length ? segments[segments.length - 1] : null);
+  if (!propertyId?.startsWith("MO-")) {
     return {
       title: "Property Not Found | MeetOwner",
-      description: "The requested property could not be found.",
+      description: "The property you're looking for does not exist.",
       robots: { index: false, follow: false },
     };
   }
   try {
-    const property = await fetchProperty(propertyId);
-    if (!property) {
-      return {
-        title: "Property Not Found | MeetOwner",
-        description: "The requested property could not be found.",
-        robots: { index: false, follow: false },
-      };
-    }
-    const { title, description, keywords, canonicalUrl } = buildSeoContent(
+    const property = await api.property(propertyId);
+    const { title, description, canonicalUrl, imageUrl } = buildSeoContent(
       property,
       propertyId
     );
-    const imageUrl = property.image
-      ? property.image.startsWith("http")
-        ? property.image
-        : `https://api.meetowner.in/aws/v1/s3/uploads/${property.image}`
-      : "https://meetowner.in/favicon.ico";
-    const structuredData = buildStructuredData(property, canonicalUrl);
-    const robots = isLegacyQuery
-      ? { index: false, follow: true }
-      : {
-          index: true,
-          follow: true,
-          googleBot: {
-            index: true,
-            follow: true,
-            "max-snippet": -1,
-            "max-image-preview": "large",
-          },
-        };
     return {
       title,
       description,
-      keywords,
-      robots,
+      keywords: `${property.bedrooms} BHK ${
+        property.sub_type
+      } for ${property.property_for.toLowerCase()} in ${property.location_id} ${
+        property.city
+      }, ${property.city} real estate`,
       alternates: { canonical: canonicalUrl },
+      robots: { index: true, follow: true },
       openGraph: {
         title,
         description,
-        type: "website",
-        locale: "en_IN",
         url: canonicalUrl,
-        siteName: "Meet Owner",
-        images: [
-          {
-            url: imageUrl,
-            width: 600,
-            height: 400,
-            alt: `${property.property_name || "Property"} - ${
-              property.city_id || ""
-            }`,
-          },
-        ],
-        tags: [property.sub_type, `${property.bedrooms} BHK`, property.city],
+        siteName: "MeetOwner",
+        type: "website",
+        images: [{ url: imageUrl, width: 1200, height: 630, alt: title }],
       },
       twitter: {
         card: "summary_large_image",
         title,
         description,
-        images: [
-          {
-            url: imageUrl,
-            width: 600,
-            height: 400,
-            alt: `${property.property_name || "Property"} - ${
-              property.city_id || ""
-            }`,
-          },
-        ],
+        images: [imageUrl],
       },
       other: {
-        "application/ld+json": JSON.stringify(structuredData),
+        "application/ld+json": JSON.stringify(
+          buildStructuredData(property, canonicalUrl)
+        ),
       },
     };
   } catch (err) {
-    console.error("Metadata generation error:", err);
+    console.error("Metadata error:", err);
     return {
-      title: "Property Error | MeetOwner",
-      description: "Unable to load property details.",
+      title: "Property Not Available | MeetOwner",
       robots: { index: false, follow: false },
     };
   }
 }
-const fetchLatestProperties = async () => {
-  try {
-    const response = await fetch(
-      `${config.awsApiUrl}/adAssets/v1/getAds?ads_page=listing_ads&city`
-    );
-    const data = await response.json();
-    const validProperties = data.ads.filter(
-      (item) => item?.image && item?.property_name
-    );
-    return validProperties;
-  } catch (err) {
-    console.error("Failed to fetch properties:", err);
-  }
-};
-const fetchUserProperties = async (userId) => {
-  if (!userId) return [];
-  try {
-    const response = await fetch(
-      `${config.awsApiUrl}/listings/v1/getPropertiesByUserID?user_id=${userId}`,
-      { cache: "no-store" }
-    );
-    const data = await response.json();
-    return data.properties || [];
-  } catch (err) {
-    console.error("Failed to fetch user properties:", err);
-    return [];
-  }
-};
-const fetchPropertyVideos = async (unique_property_id) => {
-  if (!unique_property_id) return;
-
-  try {
-    const response = await fetch(
-      `https://api.meetowner.in/property/getpropertyvideos?unique_property_id=${unique_property_id}`
-    );
-    const data = await response.json();
-    return data?.videos;
-  } catch (err) {
-    console.error("Failed to fetch videos:", err);
-  }
-};
-const fetchFloorPlans = async (unique_property_id) => {
-  try {
-    const res = await fetch(
-      `${config.awsApiUrl}/listings/v1/getAllFloorPlans/${unique_property_id}`,
-      { cache: "no-store" }
-    );
-    const data = await res.json();
-    return data?.[0] || null;
-  } catch (err) {
-    console.error("Floor plan fetch error:", err);
-    return null;
-  }
-};
-const fetchPropertyImages = async (unique_property_id) => {
-  try {
-    const res = await fetch(
-      `https://api.meetowner.in/property/getpropertyphotos?unique_property_id=${unique_property_id}`,
-      { cache: "no-store" }
-    );
-    const data = await res.json();
-    return data?.images || [];
-  } catch (err) {
-    console.error("Image fetch error:", err);
-    return [];
-  }
-};
-const fetchNearbyProperties = async (unique_property_id) => {
-  try {
-    const res = await fetch(
-      `${config.awsApiUrl}/listings/v1/getAroundThisProperty?id=${unique_property_id}`,
-      { cache: "no-store" }
-    );
-    const data = await res.json();
-    return data?.results || [];
-  } catch (err) {
-    console.error("Nearby fetch error:", err);
-    return [];
-  }
-};
-
 export default async function PropertyPage({ params, searchParams }) {
-  const ads = await fetchLatestProperties();
-  const pathSegments = params?.params || [];
-  let propertyId = null;
-  let pathSegmentsForClient = pathSegments;
+  const segments = params.params || [];
   const legacy = parseLegacyQuery(searchParams);
-  if (legacy) {
-    propertyId = legacy.propertyId;
-    pathSegmentsForClient = [legacy.rawSlug, propertyId];
-  } else if (pathSegments && pathSegments.length > 0) {
-    propertyId = pathSegments.at(-1);
-  }
-  if (!propertyId || !propertyId.startsWith("MO-")) {
+  const propertyId =
+    legacy?.propertyId ||
+    (segments.length ? segments[segments.length - 1] : null);
+  const ads = await api.ads().catch(() => []);
+  if (!propertyId?.startsWith("MO-")) {
     return (
       <PropertyClient
         property={null}
-        loading={false}
-        error="Invalid property ID in URL"
-        pathSegments={pathSegmentsForClient}
+        error="Invalid property ID"
         ads={ads}
+        pathSegments={segments}
       />
     );
   }
   let property = null;
-  let userProperties = [];
-  let videos = [];
-  let floorPlan = null;
-  let images = [];
-  let nearby = [];
   let error = null;
-  let loading = true;
   try {
-    loading = false;
-    property = await fetchProperty(propertyId);
-    if (property?.user_id) {
-      userProperties = await fetchUserProperties(property.user_id);
-      videos = await fetchPropertyVideos(property.unique_property_id);
-      floorPlan = await fetchFloorPlans(property.unique_property_id);
-      images = await fetchPropertyImages(property.unique_property_id);
-      nearby = await fetchNearbyProperties(property.unique_property_id);
-    }
-    if (!property) error = "Property not found";
+    property = await api.property(propertyId);
+    const [userProperties, videos, floorPlan, images, nearby] = property.user_id
+      ? await Promise.all([
+          api.userProperties(property.user_id).catch(() => []),
+          api.videos(property.unique_property_id),
+          api.floorPlan(property.unique_property_id),
+          api.images(property.unique_property_id),
+          api.nearby(property.unique_property_id),
+        ])
+      : [[], [], null, [], []];
+    return (
+      <PropertyClient
+        property={property}
+        floorPlan={floorPlan}
+        images={images}
+        videos={videos}
+        nearby={nearby}
+        userProperties={userProperties}
+        ads={ads}
+        pathSegments={legacy ? [legacy.rawSlug, propertyId] : segments}
+        error={null}
+      />
+    );
   } catch (err) {
-    loading = false;
-    error = err.message || "Failed to fetch property";
-    console.error("Property fetch error:", err);
+    console.error("Property page error:", err);
+    error = "Property not found or temporarily unavailable.";
+    return (
+      <PropertyClient
+        property={null}
+        error={error}
+        ads={ads}
+        pathSegments={segments}
+      />
+    );
   }
-  return (
-    <PropertyClient
-      property={property}
-      floorPlan={floorPlan}
-      images={images}
-      nearby={nearby}
-      userProperties={userProperties}
-      loading={loading}
-      error={error}
-      pathSegments={pathSegmentsForClient}
-      ads={ads}
-      videos={videos}
-    />
-  );
 }
