@@ -13,6 +13,7 @@ import { IoIosHeartEmpty } from "react-icons/io";
 import { toast } from "react-toastify";
 import theme from "./utils/theme.json";
 import Image from "next/image";
+import { deleteCookie } from "cookies-next";
 const Header = ({ favourites }) => {
   const Data = useSelector((state) => state.auth.loggedIn);
   const user = useSelector((state) => state.auth.userDetails);
