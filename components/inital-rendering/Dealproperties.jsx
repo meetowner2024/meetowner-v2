@@ -14,13 +14,24 @@ import Login from "../auth/Login";
 import Image from "next/image";
 import Link from "next/link";
 import theme from "../utils/theme.json";
-const formatPrice = (price) => {
-  if (price >= 10000000) {
-    return (price / 10000000).toFixed(2) + " Cr";
-  } else if (price >= 100000) {
-    return (price / 100000).toFixed(2) + " L";
+const formatPrice = (price, propertyFor) => {
+  if (price === null || price === undefined || isNaN(price)) return "N/A";
+  const num = Number(price);
+  const clean = (n) => {
+    const f = parseFloat(n.toFixed(2));
+    return f % 1 === 0 ? f.toFixed(0) : f;
+  };
+  if (propertyFor?.toLowerCase() === "rent") {
+    if (num >= 1000) return clean(num / 1000) + "K";
+    return clean(num).toString();
   }
-  return price.toLocaleString();
+  if (num >= 10000000) {
+    return clean(num / 10000000) + " Cr";
+  }
+  if (num >= 100000) {
+    return num.toLocaleString("en-IN");
+  }
+  return num.toLocaleString("en-IN");
 };
 const DealProperties = ({ bestDealProperties, contacted, setContacted }) => {
   const [property] = useState(bestDealProperties || []);

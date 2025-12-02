@@ -44,7 +44,6 @@ const Stat = ({ label, value }) => (
     </div>
   </div>
 );
-
 const Empty = ({ message = "No data found." }) => (
   <div className="hidden lg:flex items-center justify-center p-8 text-sm text-gray-500">
     {message}
@@ -319,20 +318,37 @@ const PropertyDeatils = ({ propertyDataDetails, userProperties }) => {
     };
   };
   const { label: areaLabel, value: areaValue } = getAreaLabelAndValue(property);
-  const statusText =
-    property?.sub_type === "Plot"
-      ? property?.possession_status?.toLowerCase() === "immediate"
+  const statusText = (() => {
+    if (property?.property_for?.toLowerCase() === "rent") {
+      if (!property?.available_from) return "Available: N/A";
+      const date = new Date(property.available_from).toLocaleString("default", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      });
+      return `Available From ${date}`;
+    }
+    if (property?.sub_type === "Plot") {
+      const status = property?.possession_status?.toLowerCase();
+      return status === "immediate"
         ? "Immediate Possession"
-        : "Future Possession"
-      : property?.occupancy === "Ready to move"
-      ? "Ready to Move"
-      : property?.occupancy === "Under Construction" &&
-        property?.under_construction
-      ? `Possession ${new Date(property.under_construction).toLocaleString(
-          "default",
-          { month: "short", year: "numeric" }
-        )}`
-      : "Status: N/A";
+        : "Future Possession";
+    }
+    if (property?.occupancy === "Ready to move") {
+      return "Ready to Move";
+    }
+    if (
+      property?.occupancy === "Under Construction" &&
+      property?.under_construction
+    ) {
+      const date = new Date(property.under_construction).toLocaleString(
+        "default",
+        { month: "short", year: "numeric" }
+      );
+      return `Possession ${date}`;
+    }
+    return "Status: N/A";
+  })();
   return (
     <>
       <div

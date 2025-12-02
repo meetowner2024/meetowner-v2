@@ -79,12 +79,12 @@ import PropertyDetails from "./PropertyDetails";
 import { useSelector } from "react-redux";
 const PropertyBody = ({ handleLoading, propertyDataDetails }) => {
   const [property, setProperty] = useState(propertyDataDetails);
+  console.log("property: ", property);
   const {
     images,
     floorplan,
     nearby: aroundProperty,
   } = useSelector((state) => state.ads);
-
   const modalRef = useRef(null);
   const maplocation = `${property?.location_id},${property?.city_id},${property?.state_id}`;
   const [error, setError] = useState(null);
@@ -165,13 +165,30 @@ const PropertyBody = ({ handleLoading, propertyDataDetails }) => {
     setShowLoginModal(false);
   };
   const formatToIndianCurrency = (value) => {
-    if (!value || isNaN(value)) return "N/A";
+    if (value === null || value === undefined || value === "" || isNaN(value)) {
+      return "N/A";
+    }
     const numValue = parseFloat(value);
-    if (numValue >= 10000000) return (numValue / 10000000).toFixed(2) + " Cr";
-    if (numValue >= 100000) return (numValue / 100000).toFixed(2) + " L";
-    if (numValue >= 1000) return (numValue / 1000).toFixed(2) + " K";
-    return numValue.toString();
+    const formatNumber = (num) => {
+      const formatted = parseFloat(num.toFixed(2));
+      return formatted % 1 === 0 ? formatted.toFixed(0) : formatted;
+    };
+    if (numValue >= 10000000) return `${formatNumber(numValue / 10000000)}Cr`;
+    if (numValue >= 100000) return `${formatNumber(numValue / 100000)}L`;
+    if (numValue >= 1000) return `${formatNumber(numValue / 1000)}K`;
+    return formatNumber(numValue).toString();
   };
+  // Utility formatter
+  const formatValueWithUnit = (value, unit) => {
+    if (!value && value !== 0) return "N/A";
+
+    const num = Number(value);
+    if (isNaN(num)) return "N/A";
+
+    const label = num === 1 ? unit : `${unit}s`; // plural logic
+    return `${num} ${label}`;
+  };
+
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -209,6 +226,7 @@ const PropertyBody = ({ handleLoading, propertyDataDetails }) => {
     if (!date) return "N/A";
     try {
       return new Date(date).toLocaleString("default", {
+        day: "numeric",
         month: "short",
         year: "numeric",
       });
@@ -843,17 +861,19 @@ const PropertyBody = ({ handleLoading, propertyDataDetails }) => {
     },
     security_deposit: {
       label: "Security Deposit",
-      value: (prop) => prop.security_deposit,
+      value: (prop) => formatValueWithUnit(prop.security_deposit, "Month"),
       icon: <Lock className="w-5 h-5" />,
     },
+
     lock_in: {
       label: "Lock-in Period",
-      value: (prop) => prop.lock_in,
+      value: (prop) => formatValueWithUnit(prop.lock_in, "Month"),
       icon: <Lock className="w-5 h-5" />,
     },
+
     brokerage_charge: {
       label: "Brokerage Charge",
-      value: (prop) => prop.brokerage_charge,
+      value: (prop) => formatValueWithUnit(prop.brokerage_charge, "Day"),
       icon: <IndianRupee className="w-5 h-5" />,
     },
     facing: {
@@ -1055,7 +1075,6 @@ const PropertyBody = ({ handleLoading, propertyDataDetails }) => {
           <div className="bg-white rounded-xl shadow-md p-2">
             <div className="w-full h-[250px] bg-gray-300 rounded-2xl animate-pulse"></div>
           </div>
-
           <div className="bg-white rounded-xl shadow-md p-4">
             <div className="grid grid-cols-4 gap-4">
               <div className="h-20 bg-gray-300 rounded-lg animate-pulse"></div>
@@ -1069,7 +1088,6 @@ const PropertyBody = ({ handleLoading, propertyDataDetails }) => {
               <div className="w-6 h-6 bg-gray-300 rounded-full animate-pulse"></div>
             </div>
           </div>
-
           <div className="bg-white rounded-xl shadow-md p-6 space-y-4">
             <div className="h-6 bg-gray-300 rounded w-1/2 animate-pulse"></div>
             <div className="space-y-2">
@@ -1078,14 +1096,12 @@ const PropertyBody = ({ handleLoading, propertyDataDetails }) => {
               <div className="h-4 bg-gray-300 rounded w-2/3 animate-pulse"></div>
             </div>
           </div>
-
           {floorplan?.image && (
             <div className="bg-white rounded-xl shadow-md p-6 space-y-4">
               <div className="h-6 bg-gray-300 rounded w-1/2 animate-pulse"></div>
               <div className="w-full h-64 bg-gray-300 rounded-lg animate-pulse"></div>
             </div>
           )}
-
           {property?.facilities && (
             <div className="bg-white rounded-xl shadow-md p-6 space-y-4">
               <div className="h-6 bg-gray-300 rounded w-1/2 animate-pulse"></div>
@@ -1099,7 +1115,6 @@ const PropertyBody = ({ handleLoading, propertyDataDetails }) => {
               </div>
             </div>
           )}
-
           {aroundProperty && aroundProperty?.length > 0 && (
             <div className="bg-white rounded-xl shadow-md p-6 space-y-4">
               <div className="h-6 bg-gray-300 rounded w-1/2 animate-pulse"></div>
@@ -1120,7 +1135,6 @@ const PropertyBody = ({ handleLoading, propertyDataDetails }) => {
               </div>
             </div>
           )}
-
           <div className="bg-white rounded-xl shadow-md p-6 space-y-4">
             <div className="h-6 bg-gray-300 rounded w-1/2 animate-pulse"></div>
             <div className="grid grid-cols-2 gap-4">
@@ -1138,13 +1152,11 @@ const PropertyBody = ({ handleLoading, propertyDataDetails }) => {
               ))}
             </div>
           </div>
-
           <div className="bg-white rounded-xl shadow-md p-6 space-y-4">
             <div className="h-6 bg-gray-300 rounded w-1/2 animate-pulse"></div>
             <div className="w-full h-64 bg-gray-300 rounded-lg animate-pulse"></div>
           </div>
         </div>
-
         <div className="hidden h-screen md:block w-full max-w-6xl">
           <div className="bg-white rounded-xl shadow-md p-8 space-y-6 animate-pulse">
             <div className="flex gap-4">
@@ -1155,23 +1167,19 @@ const PropertyBody = ({ handleLoading, propertyDataDetails }) => {
               </div>
               <div className="flex-grow h-[450px] bg-gray-300 rounded-lg"></div>
             </div>
-
             <div className="h-8 bg-gray-300 rounded w-1/2"></div>
-
             <div className="grid grid-cols-2 gap-4">
               <div className="h-4 bg-gray-300 rounded w-full"></div>
               <div className="h-4 bg-gray-300 rounded w-3/4"></div>
               <div className="h-4 bg-gray-300 rounded w-2/3"></div>
               <div className="h-4 bg-gray-300 rounded w-1/2"></div>
             </div>
-
             <div className="grid grid-cols-4 gap-4">
               <div className="h-16 bg-gray-300 rounded-lg"></div>
               <div className="h-16 bg-gray-300 rounded-lg"></div>
               <div className="h-16 bg-gray-300 rounded-lg"></div>
               <div className="h-16 bg-gray-300 rounded-lg"></div>
             </div>
-
             <div className="h-80 bg-gray-300 rounded-lg"></div>
           </div>
         </div>
@@ -1221,7 +1229,6 @@ const PropertyBody = ({ handleLoading, propertyDataDetails }) => {
               ))}
             </div>
           )}
-
           <div className="relative rounded-lg overflow-hidden shadow-md border border-teal-100/50 flex-grow">
             <Image
               key={mainImage || "default"}
@@ -1471,14 +1478,12 @@ const PropertyBody = ({ handleLoading, propertyDataDetails }) => {
               />
             </svg>
           </h2>
-
           <p
             style={{ color: AroundTheme.card.text }}
             className="text-left text-base mb-6 font-medium tracking-wide"
           >
             {property?.google_address}
           </p>
-
           <div className="relative sm:rounded-3xl  sm:hadow-xl sm:p-8 transition-all duration-500 hover:shadow-xl">
             <h3
               style={{ color: AroundTheme.header.text }}
@@ -1486,7 +1491,6 @@ const PropertyBody = ({ handleLoading, propertyDataDetails }) => {
             >
               Around This Property
             </h3>
-
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
               {aroundProperty.map((place, index) => (
                 <div
@@ -1503,7 +1507,6 @@ const PropertyBody = ({ handleLoading, propertyDataDetails }) => {
                     }}
                     className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                   />
-
                   <div className="relative flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div
