@@ -24,7 +24,7 @@ export default function BlogClient({ initialBlogs }) {
   const [loading] = useState(false);
   const [error] = useState(null);
 
-  const uniqueCategories = ["All", ...new Set(blogs.map((p) => p.category))];
+  const uniqueCategories = ["All" , ...new Set(blogs.map((p) => p.category))];
 
   const filteredPosts = blogs.filter((post) => {
     const matchesCategory =
@@ -38,13 +38,13 @@ export default function BlogClient({ initialBlogs }) {
 
   return (
     <div className="min-h-screen bg-blog-gradient-subtle ">
-      <section className="relative py-2 px-4 overflow-hidden">
-        <div className="flex flex-col gap-2">
+      <section className="relative   overflow-hidden">
+        <div className="flex flex-col gap-1">
           <Header />
         </div>
       </section>
 
-      <section className="px-4 py-2">
+      <section className=" py-2">
         <div className="container mx-auto">
           {loading ? (
             <div className="text-center py-16">
@@ -78,6 +78,7 @@ export default function BlogClient({ initialBlogs }) {
                       } transition-all duration-200`}
                     >
                       {category}
+                      fg
                     </Button>
                   ))}
                 </div>
