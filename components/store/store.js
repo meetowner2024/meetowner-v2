@@ -6,6 +6,7 @@ import propertyDetails from "./slices/propertyDetails";
 import searchSlice from "./slices/searchSlice";
 import adReducer from "./slices/adSlice";
 import locationSlice from "./slices/locationSlice";
+import profileSlice from "./slices/profileSlice";
 const adPersistConfig = {
   key: "ads",
   storage,
@@ -27,6 +28,7 @@ export const store = configureStore({
     search: searchSlice,
     ads: persistedAdReducer,
     location: persistedLocationReducer,
+    profile: profileSlice,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

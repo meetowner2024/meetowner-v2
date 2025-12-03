@@ -1,41 +1,41 @@
-import { ToastContainer } from "react-toastify";
+import { cookies } from "next/headers";
 import dynamic from "next/dynamic";
-const LoadingUI = (
-  <div className="flex justify-center items-center py-2">
-    <div className="w-4 h-4 border-2 border-gray-300 border-t-transparent rounded-full animate-spin" />
-  </div>
-);
-const ProfilePage = dynamic(() => import("../../components/utils/Profile"), {
-  loading: () => LoadingUI,
-});
-const Header = dynamic(() => import("../../components/Header"), {
-  ssr: true,
-  loading: () => LoadingUI,
-});
-const Footer = dynamic(() => import("../../components/Footer"), {
-  ssr: true,
-  loading: () => LoadingUI,
-});
-const ProfileWrapper = () => {
+import config from "@/components/utils/config";
+const ProfilePage = dynamic(() => import("../../components/utils/Profile"));
+const Header = dynamic(() => import("../../components/Header"), { ssr: true });
+const Footer = dynamic(() => import("../../components/Footer"), { ssr: true });
+export default async function ProfileWrapper() {
+  const cookieStore = await cookies();
+  const user = cookieStore.get("user")?.value;
+  let userData = null;
+  let userId = null;
+
+  try {
+    if (user) {
+      userData = JSON.parse(user);
+      userId = userData?.user_details?.id || null;
+    }
+  } catch (err) {
+    console.error("Invalid user cookie:", err);
+  }
+  if (!userId) {
+    return <div>User not found — please login again.</div>;
+  }
+  const res = await fetch(
+    `${config.awsApiUrl}/user/v1/getProfile?user_id=${userId}`,
+    {
+      cache: "no-store",
+      headers: {
+        "Cache-Control": "no-store",
+      },
+    }
+  );
+  const profile = await res.json();
   return (
     <>
       <Header />
-      <ProfilePage />
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-      />
+      <ProfilePage serverProfile={profile} />
       <Footer />
     </>
   );
-};
-
-export default ProfileWrapper;
+}

@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import config from "@/components/utils/config";
 import PropertyClient from "../PropertyClient";
+import { cookies } from "next/headers";
 const slugify = (str) =>
   str
     ?.toString()
@@ -81,6 +82,24 @@ const api = {
     })
       .then((r) => r.json())
       .then((d) => d?.results || []),
+  userContacted: async (id) => {
+    try {
+      const response = await fetch(
+        `${config.awsApiUrl}/enquiry/v1/getUserContactSellers?user_id=${id}`,
+        { cache: "no-store" }
+      );
+      const result = await response.json();
+      const contacts =
+        result?.data?.results || result?.data || result?.results || [];
+      const contactIds = Array.isArray(contacts)
+        ? contacts.map((c) => c.unique_property_id)
+        : [];
+      return contactIds;
+    } catch (err) {
+      console.error("userContacted error:", err);
+      return [];
+    }
+  },
 };
 const buildSeoContent = (property, id) => {
   const {
@@ -269,6 +288,19 @@ export default async function PropertyPage({ params, searchParams }) {
     legacy?.propertyId ||
     (segments?.length ? segments[segments?.length - 1] : null);
   const ads = await api.ads().catch(() => []);
+  const cookieStore = await cookies();
+  const user = cookieStore.get("user")?.value;
+  let userData = null;
+  let userId = null;
+
+  try {
+    if (user) {
+      userData = JSON.parse(user);
+      userId = userData?.user_details?.id || null;
+    }
+  } catch (err) {
+    console.error("Invalid user cookie:", err);
+  }
   if (!propertyId?.startsWith("MO-")) {
     return (
       <PropertyClient
@@ -283,15 +315,17 @@ export default async function PropertyPage({ params, searchParams }) {
   let error = null;
   try {
     property = await api.property(propertyId);
-    const [userProperties, videos, floorPlan, images, nearby] = property.user_id
-      ? await Promise.all([
-          api.userProperties(property.user_id).catch(() => []),
-          api.videos(property.unique_property_id),
-          api.floorPlan(property.unique_property_id),
-          api.images(property.unique_property_id),
-          api.nearby(property.unique_property_id),
-        ])
-      : [[], [], null, [], []];
+    const [userProperties, videos, floorPlan, images, nearby, contacted] =
+      property.user_id
+        ? await Promise.all([
+            api.userProperties(property.user_id).catch(() => []),
+            api.videos(property.unique_property_id),
+            api.floorPlan(property.unique_property_id),
+            api.images(property.unique_property_id),
+            api.nearby(property.unique_property_id),
+            api.userContacted(userId),
+          ])
+        : [[], [], null, [], []];
     return (
       <PropertyClient
         property={property}
@@ -303,6 +337,7 @@ export default async function PropertyPage({ params, searchParams }) {
         ads={ads}
         pathSegments={legacy ? [legacy.rawSlug, propertyId] : segments}
         error={null}
+        contacted={contacted}
       />
     );
   } catch (err) {

@@ -94,6 +94,7 @@ export default function PropertyClient({
   floorPlan,
   images,
   nearby,
+  contacted,
 }) {
   const [headerHeight, setHeaderHeight] = useState(0);
   const [propertyLoading, setPropertyLoading] = useState(
@@ -162,7 +163,6 @@ export default function PropertyClient({
       if (floorPlan) dispatch(setFloorPlan(floorPlan));
       if (images) dispatch(setImages(images));
       if (nearby) dispatch(setNearby(nearby));
-
       setLocalProperty(property);
       setPropertyLoading(false);
       hasFetchedRef.current = true;
@@ -210,7 +210,6 @@ export default function PropertyClient({
   return (
     <div className="min-h-screen flex flex-col">
       <PropertyHeader setHeaderHeight={setHeaderHeight} />
-
       <div
         className="flex flex-col lg:flex-row w-full max-w-[1536px] mx-auto justify-between h-auto sm:p-3 gap-3 pb-20"
         style={{ paddingTop: `${headerHeight || 10}px` }}
@@ -223,7 +222,7 @@ export default function PropertyClient({
             <PropertyBody
               handleLoading={setPropertyLoading}
               propertyDataDetails={localProperty || property}
-              userProperties={userProperties}
+              contacted={contacted}
             />
           )}
         </div>
@@ -233,7 +232,7 @@ export default function PropertyClient({
           ) : (
             <PropertyDetails
               propertyDataDetails={localProperty || property}
-              userProperties={userProperties}
+              contacted={contacted}
             />
           )}
         </div>
