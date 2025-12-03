@@ -32,7 +32,10 @@ export function useProfileCheck() {
     setIsLoading(true);
     try {
       const response = await fetch(
-        `https://api.meetowner.in/user/v1/getProfile?user_id=${userId}`
+        `${process.env.NEXT_PUBLIC_BASE_URL}/user/v1/getProfile?user_id=${userId}`,
+        {
+          cache: "no-store",
+        }
       );
       const data = await response.json();
       if (!response.ok) {

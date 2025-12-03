@@ -1,88 +1,34 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { Pencil } from "lucide-react";
 import axios from "axios";
 import config from "./config";
 import Image from "next/image";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  CardFooter,
-} from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
-export default function ProfilePage() {
-  const [user, setUser] = useState({
-    user_id: "",
-    name: "",
-    email: "",
-    mobile: "",
-    city: "",
-    password: "",
-    address: "",
-    user_type: "",
-    photo: "",
-  });
+import { setProfileData } from "../store/slices/profileSlice";
+import { useDispatch } from "react-redux";
+export default function ProfilePage({ serverProfile }) {
+  const dispatch = useDispatch();
+  const [user, setUser] = useState(serverProfile);
   const [profileImage, setProfileImage] = useState(
     "https://placehold.co/200x200?text=Upload+Image"
   );
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef(null);
-  const fetchProfile = async (userId) => {
-    setLoading(true);
-    try {
-      const res = await fetch(
-        `${config.awsApiUrl}/user/v1/getProfile?user_id=${userId}`
-      );
-      if (!res.ok) throw new Error("Failed to fetch profile");
-      const data = await res.json();
-      const updatedUser = {
-        user_id: data.id || "",
-        name: data.name || "",
-        email: data.email || "",
-        mobile: data.mobile || "",
-        photo: data.photo || "",
-        city: data.city || "",
-        user_type: data.user_type || "",
-        address: data.address || "",
-        password: "",
-      };
-      setUser(updatedUser);
-      setProfileImage(data.photo || profileImage);
-      localStorage.setItem("user", JSON.stringify(updatedUser));
-    } catch (error) {
-      console.error("Fetch Profile Error:", error);
-      toast.error("Failed to fetch profile data.");
-    } finally {
-      setLoading(false);
-    }
-  };
+
   useEffect(() => {
-    const storedData = localStorage.getItem("user");
-    if (!storedData) {
-      toast.info("Please login to access your profile.");
-      router.push("/");
-      return;
+    if (serverProfile) {
+      dispatch(setProfileData(serverProfile));
+      localStorage.setItem("user", JSON.stringify(serverProfile));
     }
-    try {
-      const userDetails = JSON.parse(storedData);
-      if (userDetails?.user_id) {
-        fetchProfile(userDetails?.user_id);
-      } else {
-        toast.error("Invalid user data. Please login again.");
-      }
-    } catch (error) {
-      console.error("Invalid user data in localStorage:", error);
-      toast.error("Invalid user data. Please login again.");
-    }
-  }, []);
+  }, [serverProfile]);
   const handleChange = (e) => {
     setUser({ ...user, [e.target.name]: e.target.value });
   };
@@ -94,7 +40,7 @@ export default function ProfilePage() {
     setProfileImage(tempImageUrl);
     const formData = new FormData();
     formData.append("photo", file);
-    formData.append("user_id", user.user_id);
+    formData.append("user_id", user.id);
     try {
       const response = await axios.post(
         `${config.awsApiUrl}/user/v1/uploadUserImage`,
@@ -105,11 +51,11 @@ export default function ProfilePage() {
       if (!photoUrl) throw new Error("No photo URL returned");
       setProfileImage(photoUrl);
       toast.success("Profile photo updated successfully!");
-      await fetchProfile(user.user_id);
     } catch (error) {
       console.error("Image Upload Error:", error);
       toast.error("Failed to upload photo.");
       setProfileImage(user.photo || profileImage);
+      router.refresh();
     } finally {
       setLoading(false);
     }
@@ -125,7 +71,7 @@ export default function ProfilePage() {
     }
     setLoading(true);
     const payload = {
-      id: user.user_id,
+      id: user.id,
       name: user.name,
       mobile: user.mobile,
       email: user.email,
@@ -142,7 +88,7 @@ export default function ProfilePage() {
       if (!res.ok) throw new Error("Failed to update user");
       localStorage.setItem("user", JSON.stringify({ ...user, password: "" }));
       toast.success("Profile updated!");
-      await fetchProfile(user.user_id);
+      router.refresh();
     } catch (error) {
       console.error("Update Error:", error);
       toast.error("Something went wrong while updating profile.");
@@ -236,7 +182,7 @@ export default function ProfilePage() {
                   disabled
                 />
               </div>
-              <div className="space-y-1">
+              {/* <div className="space-y-1">
                 <Label htmlFor="password">Password</Label>
                 <Input
                   type="password"
@@ -247,8 +193,8 @@ export default function ProfilePage() {
                   placeholder="Password"
                   disabled={loading}
                 />
-              </div>
-              <div className="sm:col-span-2 space-y-1">
+              </div> */}
+              <div className=" space-y-1">
                 <Label htmlFor="city">City</Label>
                 <Input
                   type="text"

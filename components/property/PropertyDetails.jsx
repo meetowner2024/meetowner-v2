@@ -49,27 +49,26 @@ const Empty = ({ message = "No data found." }) => (
     {message}
   </div>
 );
-const PropertyDeatils = ({ propertyDataDetails, userProperties }) => {
-  const JWT_SECRET = process.env.NEXT_PUBLIC_ENCRYPTION_SECRET;
-  const ENCRYPTION_KEY = CryptoJS.SHA256(JWT_SECRET).toString();
-  function decrypt(encryptedText) {
-    const [ivHex, encryptedHex] = encryptedText.split(":");
-    const iv = CryptoJS.enc.Hex.parse(ivHex);
-    const encrypted = CryptoJS.enc.Hex.parse(encryptedHex);
-    const decrypted = CryptoJS.AES.decrypt(
-      { ciphertext: encrypted },
-      CryptoJS.enc.Hex.parse(ENCRYPTION_KEY),
-      { iv }
-    );
-    return decrypted.toString(CryptoJS.enc.Utf8);
-  }
+const JWT_SECRET = process.env.NEXT_PUBLIC_ENCRYPTION_SECRET;
+const ENCRYPTION_KEY = CryptoJS.SHA256(JWT_SECRET).toString();
+function decrypt(encryptedText) {
+  const [ivHex, encryptedHex] = encryptedText.split(":");
+  const iv = CryptoJS.enc.Hex.parse(ivHex);
+  const encrypted = CryptoJS.enc.Hex.parse(encryptedHex);
+  const decrypted = CryptoJS.AES.decrypt(
+    { ciphertext: encrypted },
+    CryptoJS.enc.Hex.parse(ENCRYPTION_KEY),
+    { iv }
+  );
+  return decrypted.toString(CryptoJS.enc.Utf8);
+}
+const PropertyDeatils = ({ propertyDataDetails, contacted }) => {
   const modalRef = useRef(null);
   const router = useRouter();
   const dispatch = useDispatch();
   const searchData = useSelector((state) => state.search);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [submittedStates, setSubmittedStates] = useState([]);
-  const [contacted, setContacted] = useState([]);
   const [property, setProperty] = useState();
   useEffect(() => {
     setProperty(propertyDataDetails);
@@ -94,28 +93,6 @@ const PropertyDeatils = ({ propertyDataDetails, userProperties }) => {
       console.error("err: ", err);
     }
   };
-  const fetchContactedProperties = async () => {
-    const data = localStorage.getItem("user");
-    if (!data) {
-      return null;
-    }
-    const userDetails = JSON.parse(data);
-    try {
-      const response = await axios.get(
-        `${config.awsApiUrl}/enquiry/v1/getUserContactSellers?user_id=${userDetails?.user_id}`
-      );
-      const contacts = response?.data?.results || response?.data || [];
-      const contactIds = Array.isArray(contacts)
-        ? contacts.map((contact) => contact.unique_property_id)
-        : [];
-      setContacted(contactIds);
-    } catch (error) {
-      console.error("Failed to fetch contacted properties:", error);
-    }
-  };
-  useEffect(() => {
-    fetchContactedProperties();
-  }, []);
   const handleClose = () => {
     setShowLoginModal(false);
   };
@@ -250,7 +227,7 @@ const PropertyDeatils = ({ propertyDataDetails, userProperties }) => {
           contact: true,
         },
       }));
-      setContacted((prev) => [...prev, property.unique_property_id]);
+      router.refresh();
       toast?.success?.("Enquiry submitted!");
     } catch (err) {
       toast?.error?.("Something went wrong. Please try again.");
@@ -497,14 +474,14 @@ const PropertyDeatils = ({ propertyDataDetails, userProperties }) => {
                 }
                 className={`w-full  h-11 rounded-lg text-sm font-semibold   ${
                   submittedStates[property.unique_property_id]?.contact ||
-                  contacted.includes(property.unique_property_id)
+                  contacted?.includes(property.unique_property_id)
                     ? "bg-gray-400 text-white border-1 border-cyan-700 cursor-not-allowed"
                     : `${theme.button.secondary.bg} ${theme.button.secondary.text} cursor-pointer hover:opacity-90`
                 }
   `}
               >
                 {submittedStates[property?.unique_property_id]?.contact ||
-                contacted.includes(property.unique_property_id)
+                contacted?.includes(property.unique_property_id)
                   ? "Submitted"
                   : "Contact Seller"}
               </button>

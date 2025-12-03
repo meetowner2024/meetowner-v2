@@ -47,7 +47,7 @@ const cache = new CellMeasurerCache({
   defaultHeight: 320,
   minHeight: 300,
 });
-function ListingsBody({ setShowLoginModal, initialized = false }) {
+function ListingsBody({ setShowLoginModal, initialized = false, contacted }) {
   const JWT_SECRET = process.env.NEXT_PUBLIC_ENCRYPTION_SECRET;
   const ENCRYPTION_KEY = CryptoJS.SHA256(JWT_SECRET);
   function decrypt(encryptedText) {
@@ -71,7 +71,6 @@ function ListingsBody({ setShowLoginModal, initialized = false }) {
   const [hasMore, setHasMore] = useState(true);
   const maxLimit = 500;
   const [likedProperties, setLikedProperties] = useState([]);
-  const [contacted, setContacted] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState("Relevance");
   const router = useRouter();
@@ -351,31 +350,12 @@ function ListingsBody({ setShowLoginModal, initialized = false }) {
     },
     [searchData, selected, router, decrypt]
   );
-  const fetchContactedProperties = async () => {
-    const data = localStorage.getItem("user");
-    if (!data) {
-      return null;
-    }
-    const userDetails = JSON.parse(data);
-    try {
-      const response = await axios.get(
-        `${config.awsApiUrl}/enquiry/v1/getUserContactSellers?user_id=${userDetails?.user_id}`
-      );
-      const contacts = response?.data?.results || response?.data || [];
-      const contactIds = Array.isArray(contacts)
-        ? contacts.map((contact) => contact.unique_property_id)
-        : [];
-      setContacted(contactIds);
-    } catch (error) {
-      console.error("Failed to fetch contacted properties:", error);
-    }
-  };
+
   useEffect(() => {
     setData([]);
     setPage(1);
     setHasMore(true);
     fetchProperties(1, true);
-    fetchContactedProperties();
   }, [
     searchData?.location,
     searchData?.bhk,
@@ -594,7 +574,6 @@ function ListingsBody({ setShowLoginModal, initialized = false }) {
       );
       await axios.post(`${config.awsApiUrl}/enquiry/v1/contactSeller`, payload);
       await handleAPI(selectedProperty);
-      fetchContactedProperties();
       localStorage.setItem("visit_submitted", "true");
       setSubmittedStates((prev) => ({
         ...prev,
@@ -603,11 +582,7 @@ function ListingsBody({ setShowLoginModal, initialized = false }) {
           contact: true,
         },
       }));
-      setContacted((prev) =>
-        prev.includes(selectedProperty.unique_property_id)
-          ? prev
-          : [...prev, selectedProperty.unique_property_id]
-      );
+      router.refresh();
       setModalOpen(false);
     } catch (err) {
       console.error("Error in handleModalSubmit:", err, { selectedProperty });
@@ -622,7 +597,6 @@ function ListingsBody({ setShowLoginModal, initialized = false }) {
     setSubmittedStates,
     setModalOpen,
     setShowLoginModal,
-    fetchContactedProperties,
   ]);
   const handleScheduleVisit = useCallback(
     (property) => {

@@ -71,7 +71,6 @@ import {
   FaWifi,
 } from "react-icons/fa6";
 import Login from "../auth/Login";
-import config from "../utils/config";
 import Image from "next/image";
 import AmenitiesColor from "../utils/dynamic-colors/AmenitiesColor.json";
 import AroundTheme from "../utils/dynamic-colors/AroundProperty.json";

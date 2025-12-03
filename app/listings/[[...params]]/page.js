@@ -2,6 +2,7 @@ import config from "@/components/utils/config";
 import ListingsPageClient from "../ListingsPageClient";
 import crypto from "crypto";
 import { cache } from "react";
+import { cookies } from "next/headers";
 const decryptData = (encryptedText, secret) => {
   if (!encryptedText || !secret) return null;
   try {
@@ -156,6 +157,24 @@ const getListingPromotionalBanners = async () => {
     return [];
   }
 };
+const getUserContacted = async (id) => {
+  try {
+    const response = await fetch(
+      `${config.awsApiUrl}/enquiry/v1/getUserContactSellers?user_id=${id}`,
+      { cache: "no-store" }
+    );
+    const result = await response.json();
+    const contacts =
+      result?.data?.results || result?.data || result?.results || [];
+    const contactIds = Array.isArray(contacts)
+      ? contacts.map((c) => c.unique_property_id)
+      : [];
+    return contactIds;
+  } catch (err) {
+    console.error("userContacted error:", err);
+    return [];
+  }
+};
 export async function generateMetadata({ params, searchParams }) {
   const pathSegments = params?.params || [];
   const defaultMeta = {
@@ -266,17 +285,33 @@ export async function generateMetadata({ params, searchParams }) {
 }
 export default async function Page({ params }) {
   const pathSegments = await params?.params;
-  const [listingAds, getAds, promotionalBannerAds] = await Promise.all([
-    fetchListingCardAds(),
-    fetchListingSideAds(),
-    getListingPromotionalBanners(),
-  ]);
+  const cookieStore = await cookies();
+  const user = cookieStore.get("user")?.value;
+  let userData = null;
+  let userId = null;
+
+  try {
+    if (user) {
+      userData = JSON.parse(user);
+      userId = userData?.user_details?.id || null;
+    }
+  } catch (err) {
+    console.error("Invalid user cookie:", err);
+  }
+  const [listingAds, getAds, promotionalBannerAds, contacted] =
+    await Promise.all([
+      fetchListingCardAds(),
+      fetchListingSideAds(),
+      getListingPromotionalBanners(),
+      getUserContacted(userId),
+    ]);
   return (
     <ListingsPageClient
       initialParams={pathSegments}
       listingAds={listingAds}
       getAds={getAds}
       promotionalBannerAds={promotionalBannerAds}
+      contacted={contacted}
     />
   );
 }

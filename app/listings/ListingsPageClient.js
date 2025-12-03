@@ -30,6 +30,7 @@ const ListingsPageClient = memo(function ListingsPageClient({
   listingAds,
   getAds,
   promotionalBannerAds,
+  contacted,
 }) {
   const dispatch = useDispatch();
   useEffect(() => {
@@ -144,6 +145,7 @@ const ListingsPageClient = memo(function ListingsPageClient({
               setShowLoginModal={setShowLoginModal}
               initialized={initialized}
               listingAds={listingAds}
+              contacted={contacted}
             />
           </div>
           {getAds?.length > 0 && (
