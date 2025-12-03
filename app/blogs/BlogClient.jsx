@@ -39,7 +39,7 @@ export default function BlogClient({ initialBlogs }) {
   return (
     <div className="min-h-screen bg-blog-gradient-subtle ">
       <section className="relative py-2 px-4 overflow-hidden">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col gap-2">
           <Header />
         </div>
       </section>

@@ -79,7 +79,6 @@ import PropertyDetails from "./PropertyDetails";
 import { useSelector } from "react-redux";
 const PropertyBody = ({ handleLoading, propertyDataDetails }) => {
   const [property, setProperty] = useState(propertyDataDetails);
-  console.log("property: ", property);
   const {
     images,
     floorplan,

@@ -120,9 +120,9 @@ export default function ClientBlogPost({ initialPost, slug }) {
           />
 
           <div className="mt-8 pt-6 border-t">
-            <div className="flex flex-wrap items-center gap-1 w-full max-w-4xl">
-              <span className="text-sm text-muted-foreground">Tags:</span>
-              <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap items-center gap-1 w-full ">
+              <span className="text-sm text-muted-foreground font-semibold">Tags:</span>
+              <div className="flex flex-wrap gap- 2">
                 {post.tags && post.tags.length > 0 ? (
                   post.tags.map((tag, index) => (
                     <span
