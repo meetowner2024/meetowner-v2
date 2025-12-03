@@ -78,7 +78,7 @@ export default function BlogClient({ initialBlogs }) {
                       } transition-all duration-200`}
                     >
                       {category}
-                      fg
+                    
                     </Button>
                   ))}
                 </div>
