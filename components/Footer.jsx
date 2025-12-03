@@ -84,13 +84,18 @@ const Footer = () => {
                     Careers
                   </Link>
                 </li>
-                 <li>
-                    <Link href="/blogs" className="hover:underline">
-                      Blogs
-                    </Link>
-                  </li>
+                <li>
+                  <Link href="/blogs" className="hover:underline">
+                    Blogs
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/sitemap" className="hover:underline">
+                    Sitemap
+                  </Link>
+                </li>
               </ul>
-            </div>
+            </div> 
 
             <div className="text-left w-40">
               <h3 className="text-lg font-bold mb-4">Legal</h3>
