@@ -125,7 +125,7 @@ const PropertyModal = React.memo(
       const fetchImages = async () => {
         try {
           const response = await fetch(
-            `https://api.meetowner.in/property/getpropertyphotos?unique_property_id=${property.unique_property_id}`
+            `https://api.meetowner.in/property/v1/gpp?unique_property_id=${property.unique_property_id}`
           );
           const data = await response.json();
           if (isMounted) {

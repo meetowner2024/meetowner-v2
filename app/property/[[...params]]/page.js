@@ -57,7 +57,7 @@ const api = {
     ).then((r) => r.json().then((d) => d.properties || [])),
   videos: (id) =>
     fetch(
-      `https://api.meetowner.in/property/getpropertyvideos?unique_property_id=${id}`
+      `${config.awsApiUrl}/property/v1/getPropertyVideos?unique_property_id=${id}`
     )
       .then((r) => r.json())
       .then((d) => d?.videos || []),
@@ -68,12 +68,9 @@ const api = {
       .then((r) => r.json())
       .then((d) => d?.[0] || null),
   images: (id) =>
-    fetch(
-      `https://api.meetowner.in/property/getpropertyphotos?unique_property_id=${id}`,
-      {
-        cache: "no-store",
-      }
-    )
+    fetch(`${config.awsApiUrl}/property/v1/gpp?unique_property_id=${id}`, {
+      cache: "no-store",
+    })
       .then((r) => r.json())
       .then((d) => d?.images || []),
   nearby: (id) =>
