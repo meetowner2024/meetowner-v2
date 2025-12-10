@@ -16,7 +16,9 @@ export async function GET(req) {
       .subtract(8, "days")
       .format("YYYY-MM-DD HH:mm:ss");
     let newPropertiesQuery = `
-      SELECT * FROM properties 
+      SELECT unique_property_id, property_name, builder_name, property_in,
+             property_for, sub_type, occupancy, location_id, city_id,google_address,
+             facilities, image, bathroom, bedrooms, property_cost,bike_parking,car_parking,monthly_rent, user_id FROM properties 
       WHERE property_status = 1 
         AND sub_type != "PLOT" 
         AND updated_date >= ?
@@ -53,7 +55,9 @@ export async function GET(req) {
     }
     const remainingCount = 10 - uniqueNewProperties.length;
     let topPropertiesQuery = `
-      SELECT * FROM properties 
+      SELECT unique_property_id, property_name, builder_name, property_in,
+             property_for, sub_type, occupancy, location_id, city_id,google_address,
+             facilities, image, bathroom, bedrooms, property_cost,bike_parking,car_parking,monthly_rent, user_id FROM properties 
       WHERE property_status = 1 
         AND sub_type != "PLOT"
     `;
@@ -102,7 +106,9 @@ export async function GET(req) {
     if (combinedProperties.length < 10) {
       const stillNeeded = 10 - combinedProperties.length;
       let fallbackQuery = `
-        SELECT * FROM properties 
+        SELECT unique_property_id, property_name, builder_name, property_in,
+             property_for, sub_type, occupancy, location_id, city_id,google_address,
+             facilities, image, bathroom, bedrooms, property_cost,bike_parking,car_parking,monthly_rent, user_id FROM properties 
         WHERE property_status = 1 
           AND sub_type != "PLOT"
       `;

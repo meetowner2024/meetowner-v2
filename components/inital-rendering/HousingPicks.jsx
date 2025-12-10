@@ -369,8 +369,8 @@ const HousingPicks = ({ bestMeetownerProperties }) => {
                 </div>
               </SwiperSlide>
             ))}
-            <div className="swiper-button-prev !text-white !bg-black/30 !w-10 !h-10 !rounded-full !top-1/2 !-translate-y-1/2 after:!text-lg" />
-            <div className="swiper-button-next !text-white !bg-black/30 !w-10 !h-10 !rounded-full !top-1/2 !-translate-y-1/2 after:!text-lg" />
+            <div className="swiper-button-prev text-white!  w-10! h-8! rounded-full! top-1/2!  after:text-lg!" />
+            <div className="swiper-button-next text-white!  w-10! h-8! rounded-full! top-1/2! after:text-lg!" />
           </Swiper>
         </div>
       </div>

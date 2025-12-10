@@ -1,7 +1,9 @@
 export async function GET(req) {
   try {
     const sql = `
-      SELECT * 
+      SELECT unique_property_id, property_name, builder_name, property_in,
+             property_for, sub_type, occupancy, location_id, city_id,google_address,
+             facilities, image, bathroom, bedrooms, property_cost,bike_parking,car_parking,monthly_rent, user_id 
       FROM properties 
       WHERE other_info = 'best deal' OR other_info = 'meetowner exclusive' 
       ORDER BY id DESC

@@ -129,8 +129,16 @@ const PropertyListing = ({
       return f % 1 === 0 ? f.toFixed(0) : f;
     };
     if (propertyFor?.toLowerCase() === "rent") {
-      if (num >= 1000) return clean(num / 1000) + "K";
-      return clean(num).toString();
+      if (num <= 90000) {
+        return clean(num / 1000) + "K";
+      }
+      if (num >= 10000000) {
+        return clean(num / 10000000) + " Cr";
+      }
+      if (num >= 100000) {
+        return clean(num / 100000) + "Lakh";
+      }
+      return num.toLocaleString("en-IN");
     }
     if (num >= 10000000) {
       return clean(num / 10000000) + " Cr";
@@ -139,6 +147,13 @@ const PropertyListing = ({
       return num.toLocaleString("en-IN");
     }
     return num.toLocaleString("en-IN");
+  };
+  const getPrice = (property) => {
+    if (activeTab === "Rent") return property.monthly_rent;
+    if (activeTab === "Sell") return property.property_cost;
+    return property.property_for === "Rent"
+      ? property.monthly_rent
+      : property.property_cost;
   };
   const handleLike = useCallback(
     async (property) => {
@@ -593,11 +608,7 @@ const PropertyListing = ({
                     <div className="text-lg font-bold text-[#1D3A76] inline-flex items-baseline gap-0.5">
                       <span className="text-xl">₹</span>
                       <span>
-                        {formatPrice(
-                          activeTab === "Rent"
-                            ? property?.monthly_rent
-                            : property.property_cost
-                        )}
+                        {formatPrice(getPrice(property), property.property_for)}
                       </span>
                     </div>
                     <button

@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 export async function GET() {
   try {
-    const sql = `SELECT * FROM properties WHERE other_info = 'best deal' ORDER BY id DESC`;
+    const sql = `SELECT unique_property_id, property_name, builder_name, property_in,
+             property_for, sub_type, occupancy, location_id, city_id,google_address,
+             facilities, image, bathroom, bedrooms, property_cost,bike_parking,car_parking,monthly_rent, user_id FROM properties WHERE other_info = 'best deal' ORDER BY id DESC`;
     const { query } = await import("@/lib/server/db");
     const results = await query(sql, []);
     if (!results || results.length === 0) {
