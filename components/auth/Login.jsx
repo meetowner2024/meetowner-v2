@@ -161,7 +161,7 @@ const Login = ({ onClose, modalRef }) => {
   const checkUserExists = useCallback(async () => {
     try {
       const { data } = await axios.post(
-        "https://api.meetowner.in/auth/loginnew",
+        `${config.awsApiUrl}/auth/v1/loginnew`,
         { mobile },
         { headers: { "Content-Type": "application/json" } }
       );
