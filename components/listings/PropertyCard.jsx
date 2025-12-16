@@ -145,6 +145,13 @@ const PropertyCard = memo(
       }
       return `https://api.meetowner.in/assets/v1/serve/${src}`;
     };
+    const isPlaceholder = imageFailed || !property?.image;
+    const placeholderText = encodeURIComponent(
+      (property?.property_name || "No Image Found").trim()
+    );
+
+    const PLACEHOLDER_IMAGE = `https://placehold.co/400x400/gray/white?text=${placeholderText}`;
+
     return (
       <div
         key={`property-${index}`}
@@ -168,16 +175,14 @@ const PropertyCard = memo(
                   </div>
                 )}
                 <Image
-                  src={imageFailed ? "" : property?.image || ""}
-                  loader={propertyImageLoader}
+                  src={isPlaceholder ? PLACEHOLDER_IMAGE : property.image}
+                  loader={isPlaceholder ? undefined : propertyImageLoader}
+                  unoptimized={isPlaceholder}
                   width={600}
                   height={400}
                   alt="Property"
-                  priority={true}
-                  fetchPriority={"high"}
-                  crossOrigin="anonymous"
-                  className={`w-full h-[250px] cursor-pointer object-cover rounded-md transition-opacity duration-500 ${
-                    isLoading && !imageFailed ? "opacity-0" : "opacity-100"
+                  className={`w-full h-[250px] object-cover rounded-md transition-opacity duration-500 ${
+                    isLoading && !isPlaceholder ? "opacity-0" : "opacity-100"
                   }`}
                   onLoadingComplete={() => setIsLoading(false)}
                   onError={() => {
