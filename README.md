@@ -14,7 +14,7 @@ graph LR
     Buyer([👤 Prospective Buyer]) --> |2. Views & Likes| App
     Buyer --> |3. Sends Contact Request| Owner
     Owner --> |4. Reviews & Call Back| Buyer
-    
+
     style App fill:#e1f5fe,stroke:#01579b,stroke-width:2px
     style Owner fill:#fff9c4,stroke:#fbc02d,stroke-width:2px
     style Buyer fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
@@ -27,6 +27,7 @@ MeetOwner is a full-stack web application built with **Next.js 15 (App Router)**
 ## 🛠 Tech Stack
 
 ### Frontend
+
 - **Framework:** Next.js 15 (App Router)
 - **Library:** React 19
 - **Styling:** Tailwind CSS 4, CSS Modules
@@ -35,6 +36,7 @@ MeetOwner is a full-stack web application built with **Next.js 15 (App Router)**
 - **Interaction:** Swiper, React-Slick
 
 ### Backend
+
 - **Runtime:** Node.js (Next.js API Routes)
 - **Database:** MySQL (managed via `mysql2` connection pool)
 - **Storage:** AWS S3 (Property Images)
@@ -64,18 +66,21 @@ meetowner-v2/
 Follow these instructions to run the project locally.
 
 ### Prerequisites
+
 - Node.js (v18+)
 - MySQL Server
 
 ### Installation
 
 1.  **Clone the repository**
+
     ```bash
     git clone https://github.com/meetowner2024/meetowner-v2.git
     cd meetowner-v2
     ```
 
 2.  **Install dependencies**
+
     ```bash
     npm install
     ```
@@ -96,6 +101,7 @@ Follow these instructions to run the project locally.
     ```
 
 4.  **Run Development Server**
+
     ```bash
     npm run dev
     ```
@@ -108,42 +114,61 @@ Below is a detailed view of how the application processes requests, from the use
 
 ```mermaid
 graph TD
-    subgraph Client_Side [🖥️ Browser / Client]
-        User((User)) --> |URL Request| NextServer
-        User --> |Interactions| Dashboard[Dashboard Components]
+
+    %% ======================
+    %% Client
+    %% ======================
+    subgraph Client["Browser / Client"]
+        User((User))
+        Dashboard["Dashboard Components"]
+        User -->|Interactions| Dashboard
     end
 
-    subgraph NextJS_App [⚙️ Application Server (Next.js)]
-        NextServer[Next.js Server] --> |SSR Execution| Page[app/page.jsx]
-        Dashboard --> |API Calls| APIRoutes[API Routes /app/api/*]
-        
-        subgraph Logic_Layer
-            Page --> |Fetch Data| Controller{Route Logic}
-            APIRoutes --> |Process Request| Controller
-        end
+    %% ======================
+    %% Application Server
+    %% ======================
+    subgraph AppServer["Application Server - Next.js"]
+        NextServer["Next.js Server"]
+        Page["app/page.jsx"]
+        APIRoutes["API Routes (/app/api)"]
+        Controller{"Route Logic"}
+
+        NextServer -->|SSR| Page
+        Dashboard -->|API Calls| APIRoutes
+        Page -->|Fetch Data| Controller
+        APIRoutes -->|Process Request| Controller
     end
 
-    subgraph Data_Services [💾 Data & Storage]
-        Controller --> |SQL Query| DBPool[MySQL Connection Pool]
-        DBPool --> |Read/Write| DB[(MySQL Database)]
-        Controller --> |Image Keys| S3[[AWS S3 Storage]]
+    %% ======================
+    %% Data Layer
+    %% ======================
+    subgraph DataLayer["Data & Storage"]
+        DBPool["MySQL Connection Pool"]
+        DB[(MySQL Database)]
+        S3["AWS S3 Storage"]
     end
 
-    %% Data Return Flow
-    DB --> |Result Rows| DBPool
-    DBPool --> |JSON Data| Controller
-    Controller --> |Props/JSON| NextServer
-    NextServer --> |HTML/Hydration| Client_Side
+    %% ======================
+    %% Data Flow
+    %% ======================
+    User -->|URL Request| NextServer
+    Controller -->|SQL Query| DBPool
+    DBPool -->|Read / Write| DB
+    Controller -->|Image Keys| S3
 
-    style Client_Side fill:#f5f5f5,stroke:#333,stroke-dasharray: 5 5
-    style NextJS_App fill:#e3f2fd,stroke:#1565c0
-    style Data_Services fill:#fff3e0,stroke:#ef6c00
+    DB -->|Result Rows| DBPool
+    DBPool -->|JSON Data| Controller
+    Controller -->|Props / JSON| NextServer
+    NextServer -->|HTML + Hydration| User
+
 ```
 
 ### Key Components Illustrated
+
 1.  **Page (`page.jsx`)**: Acts as the data orchestrator, fetching initial content on the server.
 2.  **API Routes**: Handle dynamic requests (filtering, contact forms) separate from page loads.
 3.  **DB Pool**: A singleton pattern ensures efficient connection management to MySQL.
 
 ---
+
 © 2024 MeetOwner. All rights reserved.
