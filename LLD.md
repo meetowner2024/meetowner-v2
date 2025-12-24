@@ -1,4 +1,4 @@
-# ⚙️ Low Level Design (LLD) - MeetOwner V2
+# ⚙️ Low Level Design (LLD) - MeetOwner
 
 ## 1. Codebase Structure Strategy
 

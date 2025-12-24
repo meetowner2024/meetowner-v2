@@ -1,4 +1,4 @@
-# 🏗 High Level Design (HLD) - MeetOwner V2
+# 🏗 High Level Design (HLD) - MeetOwner
 
 ## 1. System Overview
 
