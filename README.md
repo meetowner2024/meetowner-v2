@@ -1,8 +1,8 @@
-# 🏡 MeetOwner V2 - Real Estate Property Selling App
+# 🏡 MeetOwner - Real Estate Property Selling App
 
 ![Next.js](https://img.shields.io/badge/Next.js-15-black) ![React](https://img.shields.io/badge/React-19-blue) ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-4-38B2AC) ![MySQL](https://img.shields.io/badge/MySQL-Database-4479A1)
 
-Welcome to the **MeetOwner V2** codebase! This application connects property owners directly with buyers/renters, providing a seamless platform for real estate transactions.
+Welcome to the **MeetOwner** codebase! This application connects property owners directly with buyers/renters, providing a seamless platform for real estate transactions.
 
 ## 🚀 Overview
 
