@@ -102,6 +102,8 @@ _Stores additional images for a property._
 2.  **Environment Variables**: Credentials stored in `.env` and accessed via `process.env`.
 3.  **Caching**: API calls in `page.jsx` use `cache: "force-cache"` to leverage Next.js Data Cache, reducing repeated hits to the DB for the same content.
 
+```mermaid
+
 classDiagram
 direction LR
 
@@ -186,3 +188,4 @@ direction LR
     Dashboard --> HeroSection
     Dashboard --> PropertyRow
     Dashboard --> Footer
+```
