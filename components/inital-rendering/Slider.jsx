@@ -39,21 +39,6 @@ const PropertyListing = ({
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [likedProperties, setLikedProperties] = useState([]);
-  const [imageFailed, setImageFailed] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const propertyImageLoader = ({ src }) => {
-    if (!src) {
-      return "https://placehold.co/600x400/gray/white?text=No+Image+Found";
-    }
-    return `https://api.meetowner.in/assets/v1/serve/${src}`;
-  };
-  const isPlaceholder = imageFailed || !property?.image;
-  const placeholderText = encodeURIComponent(
-    (property?.property_name || "No Image Found").trim()
-  );
-
-  const PLACEHOLDER_IMAGE = `https://placehold.co/400x400/gray/white?text=${placeholderText}`;
-
   useEffect(() => {
     router.prefetch("/listings");
   }, [router]);
@@ -534,21 +519,23 @@ const PropertyListing = ({
               <div className="bg-white rounded-xl shadow-lg overflow-hidden">
                 <div className="relative">
                   <Image
-                    src={isPlaceholder ? PLACEHOLDER_IMAGE : property.image}
-                    loader={isPlaceholder ? undefined : propertyImageLoader}
-                    unoptimized={isPlaceholder}
+                    src={
+                      property.image
+                        ? `https://api.meetowner.in/assets/v1/serve/${property.image}`
+                        : `https://placehold.co/600x400?text=${
+                            property?.property_name || "No Image Found"
+                          }`
+                    }
+                    alt={property?.property_name || "Property"}
                     width={600}
                     height={400}
-                    alt="Property"
-                    className={`w-full h-[250px] object-cover rounded-md transition-opacity duration-500 ${
-                      isLoading && !isPlaceholder ? "opacity-0" : "opacity-100"
-                    }`}
-                    onLoadingComplete={() => setIsLoading(false)}
-                    onError={() => {
-                      setImageFailed(true);
-                      setIsLoading(false);
+                    className="w-full h-64 object-cover rounded-md"
+                    onError={(e) => {
+                      e.currentTarget.src = `https://placehold.co/600x400?text=${
+                        property?.property_name || "No Image Found"
+                      }`;
                     }}
-                    quality={50}
+                    priority={true}
                   />
                   <div className="absolute top-4 left-4">
                     <span className="bg-[#F0AA00] text-black px-3 py-1 rounded-full text-sm">

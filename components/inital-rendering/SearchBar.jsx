@@ -47,12 +47,6 @@ export default function SearchBar() {
   const [plotSubType, setPlotSubType] = useState("Buy");
   const [commercialSubType, setCommercialSubType] = useState("Buy");
   const dispatch = useDispatch();
-  const PLACEHOLDER_IMAGE =
-    "https://placehold.co/400x400/gray/white?text=No+Image";
-  const [failedMedia, setFailedMedia] = useState({});
-  const markFailed = (index) => {
-    setFailedMedia((prev) => ({ ...prev, [index]: true }));
-  };
   const mediaList = useMemo(() => {
     if (!slider || slider.length === 0) {
       return [{ id: 1, order: 1, video_url: ad1 }];
@@ -330,42 +324,35 @@ export default function SearchBar() {
       ref={containerRef}
     >
       <Slider {...settings} ref={sliderRef}>
-        {mediaList.map((item, index) => {
-          const hasFailed = failedMedia[index];
-          const isVid = isVideo(item?.video_url);
-          return (
-            <div key={index} className="relative">
-              <div className="relative">
-                {}
-                {isVid && !hasFailed ? (
-                  <video
-                    ref={(el) => (videoRefs.current[index] = el)}
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="w-full h-[250px] sm:h-[300px] md:h-[400px] object-cover"
-                    onError={() => markFailed(index)}
-                  >
-                    <source src={item.video_url} type="video/mp4" />
-                  </video>
-                ) : (
-                  <Image
-                    src={hasFailed || !item?.video_url ? ad1 : item.video_url}
-                    unoptimized
-                    width={600}
-                    height={400}
-                    alt={`media-${index}`}
-                    className="w-full h-[250px] sm:h-[300px] md:h-[400px] object-cover"
-                    onError={() => markFailed(index)}
-                  />
-                )}
-                {}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-              </div>
+        {mediaList.map((item, index) => (
+          <div key={index} className="relative">
+            <div className="relative">
+              {isVideo(item.video_url) ? (
+                <video
+                  ref={(el) => (videoRefs.current[index] = el)}
+                  autoPlay
+                  loop
+                  muted
+                  className="w-full h-[250px] sm:h-[300px] md:h-[400px] object-cover"
+                >
+                  <source src={item.video_url} type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+              ) : (
+                <Image
+                  unoptimized
+                  width={600}
+                  height={400}
+                  src={item.video_url}
+                  crossOrigin="anonymous"
+                  alt={`media-${index}`}
+                  className="w-full h-[300px] sm:h-[300px] md:h-[400px] object-cover"
+                />
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
             </div>
-          );
-        })}
+          </div>
+        ))}
       </Slider>
       <div className="relative bottom-15 sm:bottom-20 left-1/2 transform -translate-x-1/2 w-11/12 sm:w-10/12 md:w-3/4 lg:w-2/3">
         <div className="bg-white/30 flex justify-center rounded-t-2xl shadow-lg p-3 sm:p-4 border border-white/20">

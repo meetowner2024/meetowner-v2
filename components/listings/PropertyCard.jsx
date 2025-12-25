@@ -175,14 +175,16 @@ const PropertyCard = memo(
                   </div>
                 )}
                 <Image
-                  src={isPlaceholder ? PLACEHOLDER_IMAGE : property.image}
-                  loader={isPlaceholder ? undefined : propertyImageLoader}
-                  unoptimized={isPlaceholder}
+                  src={imageFailed ? "" : property?.image || ""}
+                  loader={propertyImageLoader}
                   width={600}
                   height={400}
                   alt="Property"
-                  className={`w-full h-[250px] object-cover rounded-md transition-opacity duration-500 ${
-                    isLoading && !isPlaceholder ? "opacity-0" : "opacity-100"
+                  priority={true}
+                  fetchPriority={"high"}
+                  crossOrigin="anonymous"
+                  className={`w-full h-[250px] cursor-pointer object-cover rounded-md transition-opacity duration-500 ${
+                    isLoading && !imageFailed ? "opacity-0" : "opacity-100"
                   }`}
                   onLoadingComplete={() => setIsLoading(false)}
                   onError={() => {
