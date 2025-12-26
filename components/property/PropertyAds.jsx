@@ -17,6 +17,87 @@ import { useRouter } from "next/navigation";
 import theme from "../utils/theme.json";
 import PropertyListingAds from "./PropertyListingAds";
 import Image from "next/image";
+const AdItem = ({ propertyItem, index, handleRender }) => {
+  const [imageFailed, setImageFailed] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const adImageLoader = ({ src }) => {
+    if (!src || src === "placeholder_image") {
+      const text = encodeURIComponent(
+        (propertyItem?.property_name || "Details")
+          .replace(/[^a-zA-Z0-9\s]/g, "")
+          .slice(0, 20)
+      );
+      return `https://placehold.co/600x400/f3f4f6/1d3a76?text=${text}`;
+    }
+    return `https://api.meetowner.in/assets/v1/serve/${src}`;
+  };
+  return (
+    <div
+      className="group cursor-pointer transform transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
+      onClick={() => handleRender(propertyItem)}
+      style={{ animationDelay: `${index * 100}ms` }}
+    >
+      <div className="bg-linear-to-br from-white to-slate-50 border border-slate-200/50 rounded-xl p-4 transition-all duration-300 group-hover:border-blue-300/50 group-hover:shadow-md">
+        <div className="flex items-center gap-4">
+          <div className="relative overflow-hidden rounded-lg shrink-0 w-16 h-16">
+            <Image
+              width={600}
+              height={600}
+              loader={adImageLoader}
+              src={
+                !imageFailed && propertyItem.image
+                  ? propertyItem.image
+                  : "placeholder_image"
+              }
+              alt="Property"
+              crossOrigin="anonymous"
+              className={`w-full h-full object-cover transition-transform duration-300 group-hover:scale-110 ${
+                isLoading && !imageFailed ? "opacity-0" : "opacity-100"
+              }`}
+              onLoadingComplete={() => setIsLoading(false)}
+              onError={() => {
+                if (!imageFailed) {
+                  setImageFailed(true);
+                  setIsLoading(false);
+                }
+              }}
+            />
+            <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-all duration-300">
+              <Eye className="w-3 h-3 text-white drop-shadow-lg" />
+            </div>
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-md font-semibold text-blue-900 truncate pr-2">
+                {propertyItem?.property_name}
+              </p>
+              <ArrowRight className="w-4 h-4 text-slate-400 shrink-0 transition-all duration-300 group-hover:text-blue-600 group-hover:translate-x-1" />
+            </div>
+            <div className="flex items-center gap-2 text-sm text-slate-600">
+              <span className="bg-slate-100 px-2 py-1 rounded-full font-medium whitespace-nowrap">
+                {propertyItem?.bedrooms}{" "}
+                {propertyItem?.sub_type === "Apartment"
+                  ? "BHK"
+                  : propertyItem?.sub_type === "Plot"
+                  ? "Plot"
+                  : "Land"}
+              </span>
+              {propertyItem.location_id && (
+                <div className="flex items-center gap-1 min-w-0">
+                  <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
+                  <span className="truncate text-xs">
+                    {propertyItem.location_id}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 const PropertyAds = ({ handleRender, propertyDataDetails }) => {
   const { userProperties, videos } = useSelector((state) => state.ads);
   const router = useRouter();
@@ -375,72 +456,12 @@ const PropertyAds = ({ handleRender, propertyDataDetails }) => {
               {}
               <div className="space-y-4 mb-6">
                 {properties?.slice(0, 3).map((propertyItem, index) => (
-                  <div
+                  <AdItem
                     key={index}
-                    className="group cursor-pointer transform transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
-                    onClick={() => handleRender(propertyItem)}
-                    style={{ animationDelay: `${index * 100}ms` }}
-                  >
-                    <div className="bg-linear-to-br from-white to-slate-50 border border-slate-200/50 rounded-xl p-4 transition-all duration-300 group-hover:border-blue-300/50 group-hover:shadow-md">
-                      <div className="flex items-center gap-4">
-                        {}
-                        <div className="relative overflow-hidden rounded-lg shrink-0">
-                          <Image
-                            width={600}
-                            height={600}
-                            src={
-                              propertyItem.image
-                                ? `https://api.meetowner.in/assets/v1/serve/${propertyItem.image}`
-                                : `https://placehold.co/600x400?text=${
-                                    propertyItem?.property_name ||
-                                    "No Image Found"
-                                  }&format=png`
-                            }
-                            alt="Property"
-                            crossOrigin="anonymous"
-                            className="w-16 h-16 object-cover transition-transform duration-300 group-hover:scale-110"
-                            onError={(e) => {
-                              e.target.onerror = null;
-                              e.target.src = `https://placehold.co/600x400?text=${
-                                propertyItem?.property_name || "No Image Found"
-                              }&format=png`;
-                            }}
-                          />
-                          <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                          <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                            <Eye className="w-3 h-3 text-white drop-shadow-lg" />
-                          </div>
-                        </div>
-                        {}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between mb-1">
-                            <p className="text-md font-semibold text-blue-900">
-                              {propertyItem?.property_name}
-                            </p>
-                            <ArrowRight className="w-4 h-4 text-slate-400 transition-all duration-300 group-hover:text-blue-600 group-hover:translate-x-1" />
-                          </div>
-                          <div className="flex items-center gap-2 text-sm text-slate-600">
-                            <span className="bg-slate-100 px-2 py-1 rounded-full font-medium">
-                              {propertyItem?.bedrooms}{" "}
-                              {propertyItem?.sub_type === "Apartment"
-                                ? "BHK"
-                                : propertyItem?.sub_type === "Plot"
-                                ? "Plot"
-                                : "Land"}
-                            </span>
-                            {propertyItem.location_id && (
-                              <div className="flex items-center gap-1">
-                                <MapPin className="w-3 h-3 text-slate-400" />
-                                <span className="truncate text-xs">
-                                  {propertyItem.location_id}
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                    propertyItem={propertyItem}
+                    index={index}
+                    handleRender={handleRender}
+                  />
                 ))}
               </div>
               {}

@@ -350,7 +350,6 @@ function ListingsBody({ setShowLoginModal, initialized = false, contacted }) {
     },
     [searchData, selected, router, decrypt]
   );
-
   useEffect(() => {
     setData([]);
     setPage(1);
@@ -640,18 +639,32 @@ function ListingsBody({ setShowLoginModal, initialized = false, contacted }) {
     [setShowLoginModal, setSelectedProperty, setModalOpen]
   );
   const cards = useMemo(() => {
-    const result = [...data];
-    if (result?.length >= 6 && dummyAds?.length >= 1) {
-      const minPosition = 6;
-      const maxPosition = Math.min(12, result?.length - 1);
-      const randomPosition =
-        Math.floor(Math.random() * (maxPosition - minPosition + 1)) +
-        minPosition;
-      result?.splice(randomPosition, 0, {
-        ...dummyAds[0],
-        isAd: true,
-        key: "ad-popular-filters-random",
-      });
+    const result = [...(data || [])];
+    const promotionalAds = [
+      {
+        ad_type: "seller_promotion",
+        title: "Sell with Us",
+      },
+      {
+        ad_type: "app_download",
+        title: "Download App",
+      },
+    ];
+    const allAds = [...(dummyAds || []), ...promotionalAds];
+    if (result.length > 0 && allAds.length > 0) {
+      const adInterval = 15;
+      let injectedCount = 0;
+      for (let i = adInterval; i < result.length; i += adInterval) {
+        const insertionIndex = i + injectedCount;
+        const adTemplate = allAds[injectedCount % allAds.length];
+        const adToInsert = {
+          ...adTemplate,
+          isAd: true,
+          key: `ad-${adTemplate.ad_type}-${injectedCount}-${insertionIndex}`,
+        };
+        result.splice(insertionIndex, 0, adToInsert);
+        injectedCount++;
+      }
     }
     if (loading && hasMore) {
       result?.push(...Array(3).fill({ type: "skeleton" }));
@@ -773,17 +786,14 @@ function ListingsBody({ setShowLoginModal, initialized = false, contacted }) {
                     </span>
                   </p>
                 </div>
-
                 <div className="hidden md:block">
                   <Breadcrumb />
                 </div>
               </div>
-
               <div className="flex items-center justify-between md:justify-end gap-4">
                 <div className="md:hidden flex-1">
                   <Breadcrumb />
                 </div>
-
                 <div className="relative shrink-0">
                   <button
                     onClick={() => setIsOpen(!isOpen)}
@@ -802,7 +812,6 @@ function ListingsBody({ setShowLoginModal, initialized = false, contacted }) {
                       }`}
                     />
                   </button>
-
                   {isOpen && (
                     <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden z-50">
                       {options.map((option) => (

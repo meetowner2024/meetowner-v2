@@ -140,17 +140,16 @@ const PropertyCard = memo(
     );
     const [isLoading, setIsLoading] = useState(true);
     const propertyImageLoader = ({ src }) => {
-      if (!src) {
-        return "https://placehold.co/600x400/gray/white?text=No+Image+Found";
+      if (!src || src === "placeholder_image") {
+        const text = encodeURIComponent(
+          (property?.property_name || "Details")
+            .replace(/[^a-zA-Z0-9\s]/g, "")
+            .slice(0, 20)
+        );
+        return `https://placehold.co/600x400/f3f4f6/1d3a76?text=${text}`; // Grey background, Brand Blue text
       }
       return `https://api.meetowner.in/assets/v1/serve/${src}`;
     };
-    const isPlaceholder = imageFailed || !property?.image;
-    const placeholderText = encodeURIComponent(
-      (property?.property_name || "No Image Found").trim()
-    );
-
-    const PLACEHOLDER_IMAGE = `https://placehold.co/400x400/gray/white?text=${placeholderText}`;
 
     return (
       <div
@@ -175,11 +174,15 @@ const PropertyCard = memo(
                   </div>
                 )}
                 <Image
-                  src={imageFailed ? "" : property?.image || ""}
+                  src={
+                    !imageFailed && property?.image
+                      ? property.image
+                      : "placeholder_image"
+                  }
                   loader={propertyImageLoader}
                   width={600}
                   height={400}
-                  alt="Property"
+                  alt={property?.property_name || "Property Image"}
                   priority={true}
                   fetchPriority={"high"}
                   crossOrigin="anonymous"
@@ -188,8 +191,10 @@ const PropertyCard = memo(
                   }`}
                   onLoadingComplete={() => setIsLoading(false)}
                   onError={() => {
-                    setImageFailed(true);
-                    setIsLoading(false);
+                    if (!imageFailed) {
+                      setImageFailed(true);
+                      setIsLoading(false);
+                    }
                   }}
                   quality={50}
                 />

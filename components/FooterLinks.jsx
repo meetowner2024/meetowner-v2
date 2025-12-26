@@ -7,7 +7,6 @@ import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import { setSearchData } from "./store/slices/searchSlice";
 import config from "./utils/config";
-import Link from "next/link";
 import theme from "./utils/theme.json";
 const FooterLinks = ({ basePath = "/listings" }) => {
   const dispatch = useDispatch();
@@ -130,7 +129,7 @@ const FooterLinks = ({ basePath = "/listings" }) => {
                      px-8 py-2.5 rounded-full text-sm font-bold transition-all duration-300
                      ${
                        activeTab === tab
-                         ? "bg-[#1D3A76] text-white shadow-lg shadow-blue-900/20"
+                         ? `${theme.button.secondary.bg} ${theme.button.secondary.text} hover:opacity-90 shadow-lg shadow-blue-900/20`
                          : "text-gray-500 hover:text-[#1D3A76]"
                      }
                    `}
