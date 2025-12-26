@@ -86,9 +86,9 @@ const FooterLinks = ({ basePath = "/listings" }) => {
   };
   const filteredLinks = links.filter((link) => link.property_for === activeTab);
   return (
-    <footer className="bg-white text-[#1D3A76] py-12 px-4">
-      <div className="max-w-8xl mx-auto px-3 py-8 rounded-xl shadow-lg border border-[#1D3A76]/10">
-        <div ref={ref} className="overflow-hidden">
+    <footer className="bg-white text-[#1D3A76] py-16 px-4">
+      <div className="max-w-8xl mx-auto px-3">
+        <div ref={ref} className="overflow-hidden mb-8">
           <h2
             className={`text-3xl font-bold text-gray-900 text-left flex flex-col
           ${visible ? "animate-rise" : "opacity-0 translate-y-10"}`}
@@ -111,54 +111,55 @@ const FooterLinks = ({ basePath = "/listings" }) => {
             </svg>
           </h2>
         </div>
-        {}
-        <div className="block md:hidden h-4"></div>
-        <div className="flex justify-center mb-8  ">
-          <div className="flex justify-center w-full flex-wrap gap-4 space-x-2 overflow-x-auto scrollbar-hide max-w-full px-1 md:overflow-visible md:space-x-6">
-            <Link
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                setActiveTab("Buy");
-              }}
-              className={`whitespace-nowrap   px-4 py-2 font-semibold border border-[#ddd] rounded-full transition-colors duration-300 ${
-                activeTab === "Buy"
-                  ? `text-white ${theme.button.secondary.bg}`
-                  : `text-[#1D3A76] ${theme.button.secondary.hover}`
-              }`}
-            >
-              Properties for Buy
-            </Link>
-            <Link
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                setActiveTab("Rent");
-              }}
-              className={`whitespace-nowrap px-4 py-2 font-semibold border border-[#ddd] rounded-full transition-colors duration-300 ${
-                activeTab === "Rent"
-                  ? `text-white ${theme.button.secondary.bg}`
-                  : `text-[#1D3A76] ${theme.button.secondary.hover}`
-              }`}
-            >
-              Properties for Rent
-            </Link>
+
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+          <p className="text-gray-500 max-w-2xl">
+            Browse through our extensive list of properties categorized by
+            location and type. Find exactly what you are looking for with ease.
+          </p>
+
+          <div className="flex p-1 bg-gray-100 rounded-full self-start md:self-auto">
+            {["Buy", "Rent"].map((tab) => (
+              <button
+                key={tab}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setActiveTab(tab);
+                }}
+                className={`
+                     px-8 py-2.5 rounded-full text-sm font-bold transition-all duration-300
+                     ${
+                       activeTab === tab
+                         ? "bg-[#1D3A76] text-white shadow-lg shadow-blue-900/20"
+                         : "text-gray-500 hover:text-[#1D3A76]"
+                     }
+                   `}
+              >
+                Properties for {tab}
+              </button>
+            ))}
           </div>
         </div>
-        <div className="bg-white">
+
+        <div className="min-h-[200px]">
           {loading ? (
-            <div className="text-center py-8 text-gray-500">
-              Loading links...
+            <div className="text-center py-12">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#1D3A76]"></div>
+              <p className="mt-2 text-gray-500 text-sm">
+                Loading properties...
+              </p>
             </div>
           ) : error ? (
-            <div className="text-center py-8 text-red-500">{error}</div>
+            <div className="text-center py-12 text-red-500 bg-red-50 rounded-xl">
+              {error}
+            </div>
           ) : filteredLinks?.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              No links found.
+            <div className="text-center py-12 text-gray-500 bg-gray-50 rounded-xl">
+              No properties found for {activeTab}.
             </div>
           ) : (
             <>
-              {}
+              {/* Mobile View */}
               <div className="block md:hidden">
                 <Swiper
                   slidesPerView={1}
@@ -168,48 +169,65 @@ const FooterLinks = ({ basePath = "/listings" }) => {
                   style={{ paddingBottom: "50px" }}
                 >
                   {Array.from({
-                    length: Math.ceil(filteredLinks?.length / 5),
+                    length: Math.ceil(filteredLinks?.length / 6),
                   }).map((_, pageIdx) => (
                     <SwiperSlide key={pageIdx}>
-                      <ul className="flex flex-col gap-2 items-stretch">
+                      <div className="grid grid-cols-1 gap-3 px-1">
                         {filteredLinks
-                          ?.slice(pageIdx * 5, pageIdx * 5 + 5)
+                          ?.slice(pageIdx * 6, pageIdx * 6 + 6)
                           .map((link) => (
-                            <li key={link.id}>
-                              <a
-                                href="#"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  handleLinkClick(link);
-                                }}
-                                className="block text-[#1D3A76] text-sm font-medium hover:text-white hover:bg-[#1D3A76] transition-colors duration-200 px-3 py-2 rounded border border-[#1D3A76]/30 w-full text-left"
-                              >
-                                {link.link_title}
-                              </a>
-                            </li>
+                            <a
+                              key={link.id}
+                              href="#"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                handleLinkClick(link);
+                              }}
+                              className="block bg-gray-50 text-gray-700 text-sm font-semibold hover:bg-white hover:text-[#1D3A76] hover:shadow-lg transition-all duration-300 px-5 py-4 rounded-2xl text-center active:scale-95"
+                            >
+                              {link.link_title}
+                            </a>
                           ))}
-                      </ul>
+                      </div>
                     </SwiperSlide>
                   ))}
                 </Swiper>
               </div>
+
+              {/* Desktop View */}
               <div className="hidden md:block">
-                <ul className="flex flex-wrap gap-2 gap-y-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {filteredLinks.map((link) => (
-                    <li key={link.id}>
-                      <a
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleLinkClick(link);
-                        }}
-                        className="text-[#1D3A76] text-sm font-medium hover:text-white hover:bg-[#1D3A76] transition-colors duration-200 px-3 py-1 rounded border border-[#1D3A76]/30"
-                      >
+                    <a
+                      key={link.id}
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleLinkClick(link);
+                      }}
+                      className="group flex items-center justify-between bg-gray-50 hover:bg-white px-6 py-4 rounded-2xl transition-all duration-300 hover:shadow-[0_10px_30px_-10px_rgba(29,58,118,0.15)] hover:-translate-y-1"
+                    >
+                      <span className="text-gray-600 font-medium text-sm group-hover:text-[#1D3A76] transition-colors truncate pr-2">
                         {link.link_title}
-                      </a>
-                    </li>
+                      </span>
+                      <span className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm group-hover:bg-[#F0AA00] group-hover:text-white transition-all duration-300">
+                        <svg
+                          className="w-4 h-4 transform group-hover:translate-x-0.5 transition-transform"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M9 5l7 7-7 7"
+                          ></path>
+                        </svg>
+                      </span>
+                    </a>
                   ))}
-                </ul>
+                </div>
               </div>
             </>
           )}
