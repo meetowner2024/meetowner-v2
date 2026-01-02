@@ -1,14 +1,11 @@
 "use client";
 import dynamic from "next/dynamic";
 
-const Header = dynamic(() => import("./Header"), { ssr: false });
+const Header = dynamic(() => import("./Header"));
 const SearchBar = dynamic(
-  () => import("../components/inital-rendering/SearchBar"),
-  { ssr: false }
+  () => import("../components/inital-rendering/SearchBar")
 );
-const Slider = dynamic(() => import("../components/inital-rendering/Slider"), {
-  ssr: false,
-});
+const Slider = dynamic(() => import("../components/inital-rendering/Slider"));
 const Dealproperties = dynamic(
   () => import("../components/inital-rendering/Dealproperties"),
   { ssr: false }

@@ -24,7 +24,7 @@ import loginimage from "../../app/assets/finalone.png";
 import meetlogo from "../../app/assets/Images/Logo.png";
 import meetownericon from "../../app/assets/Images/Favicon@10x.png";
 
-const JWT_SECRET = "khsfskhfks983493123!@#JSFKORuiweo232";
+const JWT_SECRET = process.env.NEXT_PUBLIC_JWT_SECRET;
 const OTP_LENGTH = 4;
 const RESEND_COOLDOWN = 30;
 

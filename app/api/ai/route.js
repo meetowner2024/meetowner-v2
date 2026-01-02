@@ -206,7 +206,7 @@ const filterAndRankFromDB = async (extracted, q, limit = 6) => {
     isBudget,
   } = extracted;
   let sql = `
-    SELECT * FROM properties 
+    SELECT id, unique_property_id, image, property_name, property_for, location_id, builder_name, bedrooms, bathroom, car_parking, bike_parking, monthly_rent, property_cost, sub_type, floors, occupancy, facilities, google_address, city_id, updated_date FROM properties 
     WHERE property_status = 1 
   `;
   const params = [];
@@ -376,7 +376,7 @@ const filterAndRankFromDB = async (extracted, q, limit = 6) => {
     .map((x) => x.p);
   if (scored.length === 0 && q) {
     const fallbackSql = `
-      SELECT * FROM properties 
+      SELECT id, unique_property_id, image, property_name, property_for, location_id, builder_name, bedrooms, bathroom, car_parking, bike_parking, monthly_rent, property_cost, sub_type, floors, occupancy, facilities, google_address, city_id, updated_date FROM properties 
       WHERE property_status = 1 
         AND LOWER(property_name) LIKE ? 
         OR LOWER(builder_name) LIKE ? 

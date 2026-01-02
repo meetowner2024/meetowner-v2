@@ -529,6 +529,7 @@ const PropertyListing = ({
                     alt={property?.property_name || "Property"}
                     width={600}
                     height={400}
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     className="w-full h-64 object-cover rounded-md"
                     onError={(e) => {
                       e.currentTarget.src = `https://placehold.co/600x400?text=${

@@ -13,7 +13,22 @@ import { ToastContainer } from "react-toastify";
 export default function ClientWrapper({ children, profileData }) {
   const [loginTrigger, setLoginTrigger] = useState(0);
   const [isRetrying, setIsRetrying] = useState(false);
+  const [showOfflineModal, setShowOfflineModal] = useState(true);
   const { isOnline } = useNetworkStatus();
+
+  useEffect(() => {
+    if (!isOnline) {
+      setShowOfflineModal(true);
+    }
+  }, [isOnline]);
+
+  const handleRetry = () => {
+    setIsRetrying(true);
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
+  };
+
   const handleStorageChange = useCallback((e) => {
     if (e.key === "user") {
       setLoginTrigger((prev) => prev + 1);
@@ -53,60 +68,6 @@ export default function ClientWrapper({ children, profileData }) {
       }
     }
   }, [isOnline, children]);
-  if (!isOnline) {
-    const handleRetry = () => {
-      setIsRetrying(true);
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
-    };
-    return (
-      <div className="fixed inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 bg-opacity-90 flex items-center justify-center z-50 animate-fade-in">
-        <div className="w-full max-w-md mx-4 animate-slide-up">
-          <Card className="bg-white/95 backdrop-blur-md shadow-2xl border border-gray-200/50 rounded-2xl">
-            <CardHeader className="text-center">
-              <div className="mx-auto mb-4 animate-pulse-wifi">
-                <WifiOff className="h-16 w-16 text-red-500" />
-              </div>
-              <CardTitle className="text-2xl font-bold text-gray-900">
-                No Internet Connection
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-center">
-              <Alert className="mb-6 bg-red-50 border-red-200">
-                <AlertTitle className="text-red-700 font-semibold">
-                  Connection Lost
-                </AlertTitle>
-                <AlertDescription className="text-red-600">
-                  It looks like you're offline. Please check your network and
-                  try again.
-                </AlertDescription>
-              </Alert>
-              <Button
-                onClick={handleRetry}
-                disabled={isRetrying}
-                className="relative bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 hover:scale-105 disabled:opacity-50"
-              >
-                <span className="inline-flex items-center">
-                  {isRetrying ? (
-                    <>
-                      <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
-                      Retrying...
-                    </>
-                  ) : (
-                    <>
-                      <RefreshCw className="h-5 w-5 mr-2" />
-                      Retry
-                    </>
-                  )}
-                </span>
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  }
   return (
     <UserProfileCheckWrapper
       loginTrigger={loginTrigger}
@@ -125,6 +86,62 @@ export default function ClientWrapper({ children, profileData }) {
         theme="light"
       />
       <Provider store={store}>{children}</Provider>
+
+      {!isOnline && showOfflineModal && (
+        <div className="fixed inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 bg-opacity-90 flex items-center justify-center z-[9999] animate-fade-in px-4">
+          <div className="w-full max-w-md animate-slide-up">
+            <Card className="bg-white/95 backdrop-blur-md shadow-2xl border border-gray-200/50 rounded-2xl">
+              <CardHeader className="text-center">
+                <div className="mx-auto mb-4 animate-pulse-wifi">
+                  <WifiOff className="h-16 w-16 text-red-500" />
+                </div>
+                <CardTitle className="text-2xl font-bold text-gray-900">
+                  No Internet Connection
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-center">
+                <Alert className="mb-6 bg-red-50 border-red-200">
+                  <AlertTitle className="text-red-700 font-semibold">
+                    Connection Lost
+                  </AlertTitle>
+                  <AlertDescription className="text-red-600">
+                    It looks like you're offline. Please check your network and
+                    try again.
+                  </AlertDescription>
+                </Alert>
+                <div className="flex flex-col gap-3">
+                  <Button
+                    onClick={handleRetry}
+                    disabled={isRetrying}
+                    className="w-full relative bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 hover:scale-[1.02] disabled:opacity-50"
+                  >
+                    <span className="inline-flex items-center justify-center w-full">
+                      {isRetrying ? (
+                        <>
+                          <RefreshCw className="h-5 w-5 mr-2 animate-spin" />
+                          Retrying...
+                        </>
+                      ) : (
+                        <>
+                          <RefreshCw className="h-5 w-5 mr-2" />
+                          Retry Connection
+                        </>
+                      )}
+                    </span>
+                  </Button>
+                  <Button
+                    onClick={() => setShowOfflineModal(false)}
+                    variant="outline"
+                    className="w-full border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold py-3 px-6 rounded-lg transition-all duration-300 hover:scale-[1.02]"
+                  >
+                    Continue Offline
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
     </UserProfileCheckWrapper>
   );
 }

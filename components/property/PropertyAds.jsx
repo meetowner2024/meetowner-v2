@@ -10,6 +10,9 @@ import {
   MapPin,
   User,
   ArrowRight,
+  Maximize,
+  Minimize,
+  RotateCw,
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { setSearchData } from "../store/slices/searchSlice";
@@ -203,19 +206,63 @@ const PropertyAds = ({ handleRender, propertyDataDetails }) => {
     return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
   };
   const handleForward = () => {
-    if (!videoRef.current) {
-      return;
+    if (!videoRef.current) return;
+    const video = videoRef.current;
+    const totalDuration = video.duration || duration || 0;
+    if (totalDuration > 0) {
+      const newTime = Math.min(video.currentTime + 10, totalDuration);
+      video.currentTime = newTime;
+      setCurrentTime(newTime);
     }
-    const newTime = Math.min(videoRef.current.currentTime + 10, duration || 0);
-    videoRef.current.currentTime = newTime;
   };
+
   const handleBackward = () => {
-    if (!videoRef.current) {
-      return;
-    }
-    const newTime = Math.max(videoRef.current.currentTime - 10, 0);
-    videoRef.current.currentTime = newTime;
+    if (!videoRef.current) return;
+    const video = videoRef.current;
+    const newTime = Math.max(video.currentTime - 10, 0);
+    video.currentTime = newTime;
+    setCurrentTime(newTime);
   };
+
+  const [rotation, setRotation] = useState(0);
+  const handleRotate = () => {
+    setRotation((prev) => (prev + 90) % 360);
+  };
+
+
+  const [isFullScreen, setIsFullScreen] = useState(false);
+  const containerRef = useRef(null);
+
+  const toggleFullScreen = () => {
+    if (!containerRef.current) return;
+
+    if (!document.fullscreenElement) {
+      containerRef.current.requestFullscreen().catch((err) => {
+        console.error("Error attempting to enable full-screen mode:", err);
+      });
+      if (videoRef.current && screen.orientation) {
+        screen.orientation.lock("landscape").catch(() => {});
+      }
+    } else {
+      document.exitFullscreen();
+      if (screen.orientation) {
+        screen.orientation.unlock();
+      }
+    }
+  };
+
+  useEffect(() => {
+    const handleFullScreenChange = () => {
+      setIsFullScreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener("fullscreenchange", handleFullScreenChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullScreenChange);
+    };
+  }, []);
+
+
   const handleNavigation = useCallback(() => {
     dispatch(
       setSearchData({
@@ -224,61 +271,39 @@ const PropertyAds = ({ handleRender, propertyDataDetails }) => {
     );
     router.push("/listings");
   }, [router, dispatch, property?.property_name]);
+
   if (error || !property) {
     return null;
   }
+
   return (
     <>
       <div className="hidden lg:block sticky top-6">
         <div className="bg-white/80 backdrop-blur-lg border border-white/20 rounded-2xl shadow-xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]">
-          {}
-          <div className="relative" onClick={toggleControls}>
+          {/* Main Video Section */}
+          <div
+            className="relative bg-black"
+            onClick={toggleControls}
+            ref={containerRef}
+          >
             {videos[0]?.url ? (
               <>
                 <video
                   ref={videoRef}
                   src={videos[0]?.url || null}
-                  className="w-full h-52 object-cover"
+                  className={`w-full object-contain transition-all duration-300 ${
+                    isFullScreen ? "h-screen" : "h-52"
+                  }`}
+                  style={{ transform: `rotate(${rotation}deg)` }}
                   autoPlay
                   crossOrigin="anonymous"
                   muted={muted}
                   loop
                   playsInline
                   preload="metadata"
-                  onLoadedMetadata={() => {
-                    if (videoRef.current && videoRef.current.duration) {
-                      setDuration(videoRef.current.duration);
-                    }
-                  }}
-                  onTimeUpdate={() => {
-                    if (videoRef.current && !isSeeking) {
-                      setCurrentTime(videoRef.current.currentTime);
-                    }
-                  }}
-                  onPlay={() => setIsPlaying(true)}
-                  onPause={() => setIsPlaying(false)}
                 />
                 <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-black/20"></div>
-                <div
-                  className={`absolute inset-0 transition-all duration-300 ${
-                    showControls ? "opacity-100" : "opacity-0"
-                  }`}
-                >
-                  <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      togglePlayPause();
-                    }}
-                    className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-md border border-white/30 rounded-full p-4 transition-all duration-300 hover:bg-white/30 hover:scale-110"
-                  >
-                    {isPlaying ? (
-                      <Pause className="w-6 h-6 text-white" />
-                    ) : (
-                      <Play className="w-6 h-6 text-white ml-1" />
-                    )}
-                  </button>
-                </div>
+
                 <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/90 via-black/60 to-transparent">
                   <div className="px-4 pb-3 pt-6">
                     <div className="mb-3">
@@ -421,6 +446,29 @@ const PropertyAds = ({ handleRender, propertyDataDetails }) => {
                             <VolumeX className="w-4 h-4 text-white" />
                           ) : (
                             <Volume2 className="w-4 h-4 text-white" />
+                          )}
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRotate();
+                          }}
+                          className="p-2 rounded-full bg-white/10 backdrop-blur-md transition-all duration-200 hover:bg-white/20 hover:scale-110"
+                          title="Rotate Video"
+                        >
+                          <RotateCw className="w-4 h-4 text-white" />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleFullScreen();
+                          }}
+                          className="p-2 rounded-full bg-white/10 backdrop-blur-md transition-all duration-200 hover:bg-white/20 hover:scale-110"
+                        >
+                          {isFullScreen ? (
+                            <Minimize className="w-4 h-4 text-white" />
+                          ) : (
+                            <Maximize className="w-4 h-4 text-white" />
                           )}
                         </button>
                       </div>

@@ -9,7 +9,7 @@ export async function GET(req) {
       });
     }
     const { query } = await import("@/lib/server/db");
-    const sql = `SELECT * FROM users WHERE id = ? LIMIT 1`;
+    const sql = `SELECT id, name, email, mobile, city, user_type, photo, country, country_code FROM users WHERE id = ? LIMIT 1`;
     const results = await query(sql, [user_id], { timeout: 5000 });
 
     if (results.length === 0) {

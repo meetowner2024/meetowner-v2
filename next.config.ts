@@ -1,8 +1,13 @@
-import type { NextConfig } from "next";
+// next.config.ts
+const withPWA = require("next-pwa")({
+  dest: "public",
+  disable: process.env.NODE_ENV === "development",
+  register: true,
+  skipWaiting: true,
+});
 
-
-const nextConfig: NextConfig = {
-  
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   images: {
     remotePatterns: [
       {
@@ -19,29 +24,30 @@ const nextConfig: NextConfig = {
         hostname: "ui-avatars.com",
         pathname: "/api/**",
       },
-    {
-      protocol: "https",
-      hostname: "images.unsplash.com", 
-      pathname: "/**",
-    },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+        pathname: "/**",
+      },
       {
         protocol: "https",
         hostname: "via.placeholder.com",
         pathname: "/**",
-      },{
+      },
+      {
         protocol: "https",
-        hostname: "**",  
+        hostname: "**",
         pathname: "/**",
       },
       {
         protocol: "http",
-        hostname: "**",   
+        hostname: "**",
         pathname: "/**",
       },
     ],
     minimumCacheTTL: 60 * 60 * 24,
   },
-  webpack(config) {
+  webpack(config: any) {
     config.optimization.splitChunks.cacheGroups = {
       ...config.optimization.splitChunks.cacheGroups,
       dashboard: {
@@ -58,4 +64,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+module.exports = withPWA(nextConfig);

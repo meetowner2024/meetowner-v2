@@ -131,16 +131,29 @@ export default async function Home() {
         video_url: `https://api.meetowner.in/aws/v1/s3/${item.image}`,
       }));
   }
-  const { properties } = await getLatestProperties();
-  const bestDealProperties = await getBestDealProperties();
-  const bestMeetownerProperties = await getBestMeetowner();
-  const highDemandProperties = await getHighDemand();
-  const recommendedSellers = await getRecommended();
-  const meetownerExclusive = await getMeetExclusive();
-  const favourites = await getAllFavourites(userId);
-  const formatted = await getAds();
-  const contacted = await getUserContacted(userId);
-  const mediaList = await getMainSliderAds();
+  const [
+    { properties },
+    bestDealProperties,
+    bestMeetownerProperties,
+    highDemandProperties,
+    recommendedSellers,
+    meetownerExclusive,
+    favourites,
+    formatted,
+    contacted,
+    mediaList,
+  ] = await Promise.all([
+    getLatestProperties(),
+    getBestDealProperties(),
+    getBestMeetowner(),
+    getHighDemand(),
+    getRecommended(),
+    getMeetExclusive(),
+    getAllFavourites(userId),
+    getAds(),
+    getUserContacted(userId),
+    getMainSliderAds(),
+  ]);
   return (
     <div>
       <Dashboard

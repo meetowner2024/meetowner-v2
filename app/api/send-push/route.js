@@ -9,15 +9,19 @@ export async function POST(req) {
     process.env.VAPID_PRIVATE_KEY
   );
   try {
-    const rows = user_id
-      ? await query(`SELECT * FROM web_push_subscriptions WHERE user_id = ?`, [
-          user_id,
-        ])
-      : await query(`SELECT * FROM web_push_subscriptions`);
+    const queryStr = user_id
+      ? "SELECT endpoint, p256dh_key, auth_key FROM web_push_subscriptions WHERE user_id = ?"
+      : "SELECT endpoint, p256dh_key, auth_key FROM web_push_subscriptions";
+
+    const rows = user_id ? await query(queryStr, [user_id]) : await query(queryStr);
+
     if (!rows || rows.length === 0) {
       return NextResponse.json({ message: "No subscribers found." });
     }
-    for (const sub of rows) {
+
+    const payload = JSON.stringify({ title, body, url });
+
+    const notifications = rows.map(async (sub) => {
       const subscriptionObject = {
         endpoint: sub.endpoint,
         keys: {
@@ -25,21 +29,21 @@ export async function POST(req) {
           auth: sub.auth_key,
         },
       };
+
       try {
-        await webpush.sendNotification(
-          subscriptionObject,
-          JSON.stringify({ title, body, url })
-        );
+        await webpush.sendNotification(subscriptionObject, payload);
       } catch (err) {
-        console.error("Push send failed:", err);
         if (err.statusCode === 410 || err.statusCode === 404) {
           await query(`DELETE FROM web_push_subscriptions WHERE endpoint = ?`, [
             sub.endpoint,
           ]);
-          console.log("Deleted expired subscription:", sub.endpoint);
         }
+        throw err; // Propagate error for Promise.allSettled stats if needed
       }
-    }
+    });
+
+    await Promise.allSettled(notifications);
+
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("Error sending push:", err);
