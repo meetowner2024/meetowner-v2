@@ -12,17 +12,19 @@ export async function GET(req) {
     };
     const { query } = await import("@/lib/server/db");
     const getFirstWord = (name) => name?.split(" ")[0]?.toLowerCase() || "";
+    const selectedColumns =
+      "id, unique_property_id, image, property_name, property_for, location_id, builder_name, bedrooms, bathroom, car_parking, bike_parking, monthly_rent, property_cost, sub_type, user_id";
+
     const eightDaysAgo = moment()
       .subtract(8, "days")
       .format("YYYY-MM-DD HH:mm:ss");
     let newPropertiesQuery = `
-      SELECT unique_property_id, property_name, builder_name, property_in,
-             property_for, sub_type, occupancy, location_id, city_id,google_address,
-             facilities, image, bathroom, bedrooms, property_cost,bike_parking,car_parking,monthly_rent, user_id FROM properties 
+      SELECT ${selectedColumns} FROM properties 
       WHERE property_status = 1 
         AND sub_type != "PLOT" 
         AND updated_date >= ?
     `;
+
     let queryParams = [eightDaysAgo];
     if (property_for) {
       newPropertiesQuery += ` AND property_for = ?`;
@@ -55,12 +57,11 @@ export async function GET(req) {
     }
     const remainingCount = 10 - uniqueNewProperties.length;
     let topPropertiesQuery = `
-      SELECT unique_property_id, property_name, builder_name, property_in,
-             property_for, sub_type, occupancy, location_id, city_id,google_address,
-             facilities, image, bathroom, bedrooms, property_cost,bike_parking,car_parking,monthly_rent, user_id FROM properties 
+      SELECT ${selectedColumns} FROM properties 
       WHERE property_status = 1 
         AND sub_type != "PLOT"
     `;
+
     let topQueryParams = [];
     if (property_for) {
       topPropertiesQuery += ` AND property_for = ?`;
@@ -106,9 +107,7 @@ export async function GET(req) {
     if (combinedProperties.length < 10) {
       const stillNeeded = 10 - combinedProperties.length;
       let fallbackQuery = `
-        SELECT unique_property_id, property_name, builder_name, property_in,
-             property_for, sub_type, occupancy, location_id, city_id,google_address,
-             facilities, image, bathroom, bedrooms, property_cost,bike_parking,car_parking,monthly_rent, user_id FROM properties 
+        SELECT ${selectedColumns} FROM properties 
         WHERE property_status = 1 
           AND sub_type != "PLOT"
       `;
