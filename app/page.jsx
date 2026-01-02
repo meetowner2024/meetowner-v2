@@ -20,116 +20,175 @@ export default async function Home() {
           cache: "force-cache",
         }
       );
+      if (!res.ok) throw new Error("Failed to fetch");
       const data = await res.json();
       return { properties: data.properties || [] };
-    } catch (error) {}
+    } catch (error) {
+      console.error("getLatestProperties Error:", error.message);
+      return { properties: [] };
+    }
   }
   async function getBestDealProperties() {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/getBestDealProperties`,
-      {
-        cache: "force-cache",
-      }
-    );
-    const encrypted = await res.json();
-    return encrypted.results || [];
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/getBestDealProperties`,
+        {
+          cache: "force-cache",
+        }
+      );
+      if (!res.ok) throw new Error("Failed to fetch");
+      const encrypted = await res.json();
+      return encrypted.results || [];
+    } catch (error) {
+      console.error("getBestDealProperties Error:", error.message);
+      return [];
+    }
   }
   async function getBestMeetowner() {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/getBestMeet`,
-      {
-        cache: "force-cache",
-      }
-    );
-    const data = await res.json();
-    return data.results || [];
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/getBestMeet`,
+        {
+          cache: "force-cache",
+        }
+      );
+      if (!res.ok) throw new Error("Failed to fetch");
+      const data = await res.json();
+      return data.results || [];
+    } catch (error) {
+      console.error("getBestMeetowner Error:", error.message);
+      return [];
+    }
   }
   async function getHighDemand() {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/getHighDemand`,
-      {
-        cache: "force-cache",
-      }
-    );
-    const data = await res.json();
-    return data.results || [];
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/getHighDemand`,
+        {
+          cache: "force-cache",
+        }
+      );
+      if (!res.ok) throw new Error("Failed to fetch");
+      const data = await res.json();
+      return data.results || [];
+    } catch (error) {
+      console.error("getHighDemand Error:", error.message);
+      return [];
+    }
   }
   async function getRecommended() {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/getRecommended`,
-      {
-        cache: "force-cache",
-      }
-    );
-    const data = await res.json();
-    return data.sellers || [];
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/getRecommended`,
+        {
+          cache: "force-cache",
+        }
+      );
+      if (!res.ok) throw new Error("Failed to fetch");
+      const data = await res.json();
+      return data.sellers || [];
+    } catch (error) {
+      console.error("getRecommended Error:", error.message);
+      return [];
+    }
   }
   async function getMeetExclusive() {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/getMeetExclusive`,
-      {
-        cache: "force-cache",
-      }
-    );
-    const data = await res.json();
-    return data.results || [];
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/getMeetExclusive`,
+        {
+          cache: "force-cache",
+        }
+      );
+      if (!res.ok) throw new Error("Failed to fetch");
+      const data = await res.json();
+      return data.results || [];
+    } catch (error) {
+      console.error("getMeetExclusive Error:", error.message);
+      return [];
+    }
   }
   async function getAllFavourites(user_id) {
     if (!user_id) {
       return [];
     }
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/getAllFavourites?user_id=${user_id}`
-    );
-    const data = await res.json();
-    return data.favourites || [];
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/getAllFavourites?user_id=${user_id}`
+      );
+      if (!res.ok) throw new Error("Failed to fetch");
+      const data = await res.json();
+      return data.favourites || [];
+    } catch (error) {
+      console.error("getAllFavourites Error:", error.message);
+      return [];
+    }
   }
   async function getAds() {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/getAds?ads_page=main_slider&city=Hyderabad`,
-      {
-        cache: "force-cache",
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/getAds?ads_page=main_slider&city=Hyderabad`,
+        {
+          cache: "force-cache",
+        }
+      );
+      if (!res.ok) throw new Error("Failed to fetch");
+      const data = await res.json();
+      if (data.ads?.length > 0) {
+        const formatted = data.ads
+          .sort((a, b) => a.ads_order - b.ads_order)
+          .map((item) => ({
+            id: item.id,
+            order: item.ads_order,
+            video_url: `https://api.meetowner.in/aws/v1/s3/${item.image}`,
+          }));
+        return formatted || [];
       }
-    );
-    const data = await res.json();
-    if (data.ads?.length > 0) {
-      const formatted = data.ads
+      return [];
+    } catch (error) {
+      console.error("getAds Error:", error.message);
+      return [];
+    }
+  }
+  async function getUserContacted(userId) {
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/getUserContactSellers?user_id=${userId}`
+      );
+      if (!res.ok) throw new Error("Failed to fetch");
+      const response = await res.json();
+      const contacts = response?.results || [];
+      const contactIds = Array.isArray(contacts)
+        ? contacts.map((contact) => contact.unique_property_id)
+        : [];
+      return contactIds;
+    } catch (error) {
+      console.error("getUserContacted Error:", error.message);
+      return [];
+    }
+  }
+  async function getMainSliderAds(city = "Hyderabad") {
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/getAds?ads_page=main_slider&city=${city}`,
+        { cache: "force-cache" }
+      );
+      if (!res.ok) throw new Error("Failed to fetch");
+      const data = await res.json();
+      if (!data.ads?.length) {
+        return [{ id: 1, order: 1, video_url: "/fallback-banner.jpg" }];
+      }
+      return data.ads
         .sort((a, b) => a.ads_order - b.ads_order)
         .map((item) => ({
           id: item.id,
           order: item.ads_order,
           video_url: `https://api.meetowner.in/aws/v1/s3/${item.image}`,
         }));
-      return formatted || [];
-    }
-  }
-  async function getUserContacted(userId) {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/getUserContactSellers?user_id=${userId}`
-    );
-    const response = await res.json();
-    const contacts = response?.results || [];
-    const contactIds = Array.isArray(contacts)
-      ? contacts.map((contact) => contact.unique_property_id)
-      : [];
-    return contactIds;
-  }
-  async function getMainSliderAds(city = "Hyderabad") {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/getAds?ads_page=main_slider&city=${city}`,
-      { cache: "force-cache" }
-    );
-    const data = await res.json();
-    if (!data.ads?.length) {
+    } catch (error) {
+      console.error("getMainSliderAds Error:", error.message);
       return [{ id: 1, order: 1, video_url: "/fallback-banner.jpg" }];
     }
-    return data.ads
-      .sort((a, b) => a.ads_order - b.ads_order)
-      .map((item) => ({
-        id: item.id,
-        order: item.ads_order,
-        video_url: `https://api.meetowner.in/aws/v1/s3/${item.image}`,
-      }));
   }
   const [
     { properties },

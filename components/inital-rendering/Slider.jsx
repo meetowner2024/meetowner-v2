@@ -514,7 +514,7 @@ const PropertyListing = ({
             Loading properties...
           </div>
         ) : property?.length > 0 ? (
-          property?.map((property) => (
+          property?.map((property, index) => (
             <SwiperSlide key={property.unique_property_id}>
               <div className="bg-white rounded-xl shadow-lg overflow-hidden">
                 <div className="relative">
@@ -536,7 +536,7 @@ const PropertyListing = ({
                         property?.property_name || "No Image Found"
                       }`;
                     }}
-                    priority={true}
+                    priority={index < 2}
                   />
                   <div className="absolute top-4 left-4">
                     <span className="bg-[#F0AA00] text-black px-3 py-1 rounded-full text-sm">

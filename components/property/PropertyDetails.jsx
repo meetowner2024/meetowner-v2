@@ -499,6 +499,7 @@ const PropertyDeatils = ({ propertyDataDetails, contacted }) => {
                   src={whatsappIcon?.src}
                   alt="WhatsApp"
                   className="w-4 h-4"
+                  sizes="16px"
                 />
                 <span className="cursor-pointer text-[#25D366]">Chat</span>
               </button>

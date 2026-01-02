@@ -189,18 +189,7 @@ export default async function RootLayout({ children, params }) {
 
         <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
 
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          rel="preconnect"
-          fetchPriority="high"
-          href="https://www.googletagmanager.com"
-        />
-        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+
 
         {structuredData.map((schema, idx) => (
           <script
@@ -233,12 +222,11 @@ export default async function RootLayout({ children, params }) {
 
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-PQ3F0L8PGL"
-          strategy="afterInteractive"
-          fetchPriority="low"
+          strategy="lazyOnload"
         />
         <Script
           id="gtag-init"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
           dangerouslySetInnerHTML={{
             __html: `
               window.dataLayer = window.dataLayer || [];
@@ -251,7 +239,7 @@ export default async function RootLayout({ children, params }) {
 
         <Script
           id="gtm"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
           dangerouslySetInnerHTML={{
             __html: `
               (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':

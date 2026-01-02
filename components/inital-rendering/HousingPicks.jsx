@@ -274,6 +274,7 @@ const HousingPicks = ({ bestMeetownerProperties }) => {
                 alt={property?.property_name}
                 crossOrigin="anonymous"
                 className="w-full h-full object-cover"
+                sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
                 onError={(e) => {
                   e.target.onerror = null;
                   e.target.src = `https://placehold.co/600x400?text=${
@@ -351,6 +352,7 @@ const HousingPicks = ({ bestMeetownerProperties }) => {
                       alt={property?.property_name}
                       crossOrigin="anonymous"
                       className="w-full h-[250px] md:h-full object-cover"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 70vw, 50vw"
                       onError={(e) => {
                         e.target.onerror = null;
                         e.target.src = `https://placehold.co/600x400?text=${

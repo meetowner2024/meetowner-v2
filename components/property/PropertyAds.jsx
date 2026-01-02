@@ -300,6 +300,8 @@ const PropertyAds = ({ handleRender, propertyDataDetails }) => {
                   muted={muted}
                   loop
                   playsInline
+                  controls
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   preload="metadata"
                 />
                 <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-black/20"></div>

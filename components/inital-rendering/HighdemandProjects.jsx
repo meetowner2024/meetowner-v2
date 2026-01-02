@@ -159,6 +159,7 @@ const HighDemandProjects = ({ highDemandProperties }) => {
                 alt={project?.property_name}
                 crossOrigin="anonymous"
                 className="w-full h-40 object-cover"
+                sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                 onError={(e) => {
                   e.target.onerror = null;
                   e.target.src = `https://placehold.co/600x400?text=${

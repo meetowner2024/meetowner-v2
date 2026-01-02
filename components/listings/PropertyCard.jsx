@@ -173,31 +173,32 @@ const PropertyCard = memo(
                     </span>
                   </div>
                 )}
-                <Image
-                  src={
-                    !imageFailed && property?.image
-                      ? property.image
-                      : "placeholder_image"
-                  }
-                  loader={propertyImageLoader}
-                  width={600}
-                  height={400}
-                  alt={property?.property_name || "Property Image"}
-                  priority={true}
-                  fetchPriority={"high"}
-                  crossOrigin="anonymous"
-                  className={`w-full h-[250px] cursor-pointer object-cover rounded-md transition-opacity duration-500 ${
-                    isLoading && !imageFailed ? "opacity-0" : "opacity-100"
-                  }`}
-                  onLoadingComplete={() => setIsLoading(false)}
-                  onError={() => {
-                    if (!imageFailed) {
-                      setImageFailed(true);
-                      setIsLoading(false);
+                  <Image
+                    src={
+                      !imageFailed && property?.image
+                        ? property.image
+                        : "placeholder_image"
                     }
-                  }}
-                  quality={50}
-                />
+                    loader={propertyImageLoader}
+                    width={600}
+                    height={400}
+                    alt={property?.property_name || "Property Image"}
+                    priority={index < 2}
+                    fetchPriority={index < 2 ? "high" : "auto"}
+                    crossOrigin="anonymous"
+                    className={`w-full h-[250px] cursor-pointer object-cover rounded-md transition-opacity duration-500 ${
+                      isLoading && !imageFailed ? "opacity-0" : "opacity-100"
+                    }`}
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 400px, 300px" // Optimized sizes
+                    onLoadingComplete={() => setIsLoading(false)}
+                    onError={() => {
+                      if (!imageFailed) {
+                        setImageFailed(true);
+                        setIsLoading(false);
+                      }
+                    }}
+                    quality={50}
+                  />
               </div>
             </div>
             <div className="flex-1 max-w-full md:max-w-full flex flex-col">
